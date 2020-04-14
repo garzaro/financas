@@ -3,11 +3,13 @@ package com.cleber.financa.model.repository;
 
 
 import org.assertj.core.api.Assertions;
+import org.hibernate.annotations.Tables;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 
@@ -16,6 +18,8 @@ import com.cleber.financa.model.entity.Lancamento;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
+@ActiveProfiles("test")
+@Tables(value = {  })
 public class LancamentoRepositoryTest {
 	
 	@Autowired
