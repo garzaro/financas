@@ -8,6 +8,9 @@ import com.cleber.financa.model.entity.Usuario;
 import com.cleber.financa.model.repository.UsuarioRepository;
 import com.cleber.financa.service.UsuarioService;
 
+import lombok.Builder;
+
+@Builder
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 	

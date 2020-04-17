@@ -17,7 +17,7 @@ import com.cleber.financa.model.entity.Usuario;
 public class UsuarioRepositoryTest {
 
 	@Autowired
-	UsuarioRepository userRepository;
+	UsuarioRepository userRepository; //testar o usuarioRepository
 
 	/* Para iniciar o teste são necessario tres elemento */
 	@Test
