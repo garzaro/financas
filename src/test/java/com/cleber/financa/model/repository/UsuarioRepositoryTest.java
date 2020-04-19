@@ -15,6 +15,13 @@ import com.cleber.financa.model.entity.Usuario;
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public class UsuarioRepositoryTest {
+	
+	/* Aqui estamos criando o cenario de teste com a propria
+	 * classe que estamos testando o que é certo mas nao e totalmente
+	 * recomendado
+	 * Por favor, classe de teste otimizada
+	 * 
+	 * */
 
 	@Autowired
 	UsuarioRepository userRepository; //testar o usuarioRepository
@@ -39,6 +46,7 @@ public class UsuarioRepositoryTest {
 	}
 	@Test
 	public void deveRetornarFalsoQuandoNaoHouverUsuarioCadastradoComEmail() {
+		
 		//cenario
 		userRepository.deleteAll(); //garante a base limpa
 		

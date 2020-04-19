@@ -1,8 +1,12 @@
 package com.cleber.financa.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cleber.financa.exceptions.ErroAutenticacao;
 import com.cleber.financa.exceptions.RegraNegocioException;
 import com.cleber.financa.model.entity.Usuario;
 import com.cleber.financa.model.repository.UsuarioRepository;
@@ -16,7 +20,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 	
 	/*UsuarioService nao pode acessar direto a base então usa o repository*/
 	
-	private UsuarioRepository userRepository;
+	private UsuarioRepository usuarioRepository;
 	
 	/*Metodo construtor para receber essa implementação REPOSITORY como parametro
 	 * 
@@ -24,26 +28,39 @@ public class UsuarioServiceImpl implements UsuarioService {
 	 * 
 	 * */
 	@Autowired
-	public UsuarioServiceImpl(UsuarioRepository repository) {
+	public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
 		super();
-		this.userRepository = repository;
+		this.usuarioRepository = usuarioRepository;
 	}	
 
 	@Override
 	public Usuario autenticar(String email, String senha) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
+		
+		if(!usuario.isPresent()) {
+			throw new ErroAutenticacao("Hun, não existe usuário com o email informado.");
+			
+		}
+		
+		if(!usuario.get().getSenha().equals(senha)) {
+			throw new ErroAutenticacao("Hun, essa senha parece não ser a correta.");
+			
+		}
+				
+		return usuario.get();		
 	}
 
 	@Override
+	@Transactional
 	public Usuario salvarUsuario(Usuario usuario) {
-		// TODO Auto-generated method stub
-		return null;
+		validarEmail(usuario.getEmail());
+		return usuarioRepository.save(usuario);
 	}
 
 	@Override
 	public void validarEmail(String email) {
-		boolean existe = userRepository.existsByEmail(email);
+		boolean existe = usuarioRepository.existsByEmail(email);
 		if (existe) {
 			throw new RegraNegocioException("Já existe usuário cadastrado com esse email");
 			

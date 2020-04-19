@@ -20,13 +20,13 @@ public class UsuarioServiceTest {
 	
 	@Autowired
 	UsuarioService usuarioService;
-	
+	@Autowired
 	UsuarioRepository usuarioRepository;
 	
 	@Test(expected = Test.None.class) //não lança exception **
 	public void deveValidarEmail() {
 		//cenario
-		//usuarioRepository.deleteAll();
+		usuarioRepository.deleteAll();
 		
 		//ação / execuçao
 		usuarioService.validarEmail("cleber@gmail.com");
@@ -42,7 +42,7 @@ public class UsuarioServiceTest {
 		usuarioRepository.save(usuario);
 		
 		//ação / execução
-		usuarioService.validarEmail("email@email.com");
+		usuarioService.validarEmail("email@gmail.com");
 	}
 
 }
