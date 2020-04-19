@@ -24,20 +24,20 @@ public class UsuarioRepositoryTest {
 	 * */
 
 	@Autowired
-	UsuarioRepository userRepository; //testar o usuarioRepository
+	UsuarioRepository usuarioRepository; //testar o usuarioRepository
 
 	/* Para iniciar o teste são necessario tres elemento */
 	@Test
 	public void deveVerificarAExistenciaDeUmEmail() {
 
 		/* cenario */
-		userRepository.deleteAll();
+		usuarioRepository.deleteAll();
 		Usuario usuario = Usuario.builder().nome("usuario").email("usuario@gmail.com").build();
-		userRepository.save(usuario);
+		usuarioRepository.save(usuario);
 
 		/* ação / a excução do teste */
-		boolean result = userRepository.existsByEmail("usuario@gmail.com");
-		boolean results = userRepository.existsByNome("usuario");
+		boolean result = usuarioRepository.existsByEmail("usuario@gmail.com");
+		boolean results = usuarioRepository.existsByNome("usuario");
 
 		/* verificação */
 		Assertions.assertThat(result).isTrue();
@@ -48,10 +48,10 @@ public class UsuarioRepositoryTest {
 	public void deveRetornarFalsoQuandoNaoHouverUsuarioCadastradoComEmail() {
 		
 		//cenario
-		userRepository.deleteAll(); //garante a base limpa
+		usuarioRepository.deleteAll(); //garante a base limpa
 		
 		//ação / execução
-		boolean result = userRepository.existsByEmail("usuario@gmail.com");
+		boolean result = usuarioRepository.existsByEmail("usuario@gmail.com");
 		
 		//verificação
 		Assertions.assertThat(result).isFalse();

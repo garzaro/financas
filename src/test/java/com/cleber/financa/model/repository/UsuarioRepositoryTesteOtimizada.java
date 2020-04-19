@@ -1,5 +1,7 @@
 package com.cleber.financa.model.repository;
 
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,22 +28,72 @@ public class UsuarioRepositoryTesteOtimizada {
 
 	@Test
 	public void deveVerificarAExistenciaDeUmEmailNaBaseDeDados() {
-		
-		Usuario usuario = Usuario.builder().nome("usuario").email("usuario@gmail.com").build();
+		//cenario
+		Usuario usuario = criarUmUsuario();
 		entityManager.persist(usuario);
-
-		boolean result = usuarioRepository.existsByEmail("usuario@gmail.com");
-
-		Assertions.assertThat(result).isTrue();
-
+		
+		//ação / execução
+		boolean result = usuarioRepository.existsByEmail("cleber@email.com");
+		
+		//verificação
+		Assertions.assertThat(result).isTrue();	
+		
 	} //in this case, rollback
 
 	@Test
 	public void deveRetornarFalsoQuandoNaoHouverUsuarioCadastradoComEmailNabaseDeDados() {
 
-		boolean result = usuarioRepository.existsByEmail("carai@gmail.com");
+		boolean result = usuarioRepository.existsByEmail("eaiMerrmao@email.com");
 
 		Assertions.assertThat(result).isFalse();
+	}
+	
+	@Test
+	public void devePersistirUmUsuarioNaBaseDeDados() {
+		
+		//cenario
+		Usuario usuario = criarUmUsuario();
+						
+		//ação / execução
+		//Usuario usuarioSalvo = entityManager.persist(usuario);
+		Usuario usuarioSalvo = usuarioRepository.save(usuario);
+		
+		//verificação
+		Assertions.assertThat(usuarioSalvo.getId()).isNotNull();
+	}
+	
+	@Test
+	public void deveBuscarnaBaseDeDadosUmUsuarioPorEmail() {
+		//cenario
+		Usuario usuario = criarUmUsuario();
+		entityManager.persist(usuario);
+		
+		//ação
+		Optional<Usuario> result = usuarioRepository.findByEmail("cleber@email.com");
+		
+		//verificação
+		Assertions.assertThat(result.isPresent()).isTrue();
+	}
+	
+	@Test
+	public void deveRetonarVazioAoBuscarUsuarioPorEmailQuandoNaoExisteNaBaseDeDados() {
+		//nao retona nenhum usuario			
+		//ação
+		Optional<Usuario> result = usuarioRepository.findByEmail("cleber@email.com");
+		
+		//verificação
+		Assertions.assertThat(result.isPresent()).isFalse();
+	}
+	
+	//metodo para cria usuario
+	public static Usuario criarUmUsuario() {
+		return Usuario
+				.builder()
+				.nome("usuario")
+				.email("cleber@email.com")
+				.senha("senha")
+				.build();
+		
 	}
 
 }
