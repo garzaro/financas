@@ -85,7 +85,7 @@ public class UsuarioRepositoryTesteOtimizada {
 		Assertions.assertThat(result.isPresent()).isFalse();
 	}
 	
-	//metodo para cria usuario
+	//metodo para criar usuario
 	public static Usuario criarUmUsuario() {
 		return Usuario
 				.builder()
