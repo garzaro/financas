@@ -44,7 +44,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 		}
 		
 		if(!usuario.get().getSenha().equals(senha)) {
-			throw new ErroAutenticacao("Hun, essa senha parece não ser a correta.");
+			throw new ErroAutenticacao("Hun, essa senha parece não ser a atual.");
 			
 		}
 				
