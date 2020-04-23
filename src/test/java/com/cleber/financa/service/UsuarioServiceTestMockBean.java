@@ -3,7 +3,6 @@ package com.cleber.financa.service;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +35,11 @@ public class UsuarioServiceTestMockBean {
 		usuarioService = new UsuarioServiceImpl(usuarioRepository); 
 	}
 	
+	@Test
+	public void deveSalvarUmUsuarioNaBaseDeDados() {
+		//cenario
+	}
+	
 	@Test(expected = Test.None.class)
 	public void deveAutenticarUmUsuarioComSucesso() {
 		//cenario		
@@ -58,7 +62,9 @@ public class UsuarioServiceTestMockBean {
 		Throwable exception = Assertions.catchThrowable( () -> usuarioService.autenticar(email, senha));
 		
 		//verificação
-		Assertions.assertThat(exception).isInstanceOf(ErroAutenticacao.class).hasMessage("Hun, não existe usuário com o email informado.");
+		Assertions.assertThat(exception)
+		.isInstanceOf(ErroAutenticacao.class)
+		.hasMessage("Hun, não existe usuário com o email informado.");
 		
 	}
 	
@@ -73,7 +79,8 @@ public class UsuarioServiceTestMockBean {
 		Throwable exception = Assertions.catchThrowable( () -> usuarioService.autenticar(email, "123456") );
 		
 		//verficação
-		Assertions.assertThat(exception).isInstanceOf(ErroAutenticacao.class).hasMessage("Hun, essa senha parece não ser a atual.");
+		Assertions.assertThat(exception)
+		.isInstanceOf(ErroAutenticacao.class).hasMessage("Hun, essa senha parece não ser a atual.");
 	}
 	
 	
