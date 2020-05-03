@@ -36,14 +36,14 @@ public class UsuarioServiceTestMockBean {
 	}
 	
 	@Test
-	public void deveSalvarUmUsuarioNaBaseDeDados() {
+	public void deveSalvarUmUsuarioNaMemoria() {
 		//cenario
 	}
 	
 	@Test(expected = Test.None.class)
 	public void deveAutenticarUmUsuarioComSucesso() {
 		//cenario		
-		Usuario usuario = criarUsuarioNaBase();
+		Usuario usuario = criarUsuarioNaMemoria();
 		Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(usuario));
 		
 		//ação / execução
@@ -71,7 +71,7 @@ public class UsuarioServiceTestMockBean {
 	@Test
 	public void deveLancarErroQuandoASenhaNaoForIgualAAtual() {
 		//cenario
-		Usuario usuario = criarUsuarioNaBase();
+		Usuario usuario = criarUsuarioNaMemoria();
 		Mockito.when(usuarioRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(usuario));
 		
 		//ação / execução
@@ -105,7 +105,7 @@ public class UsuarioServiceTestMockBean {
 		usuarioService.validarEmail("email@email.com");
 	}
 	
-	public static Usuario criarUsuarioNaBase() {
+	public static Usuario criarUsuarioNaMemoria() {
 		return Usuario
 				.builder()
 				.email(email)
