@@ -17,7 +17,7 @@ import com.cleber.financa.model.entity.Usuario;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
-@DataJpaTest //entity on base,  rollback.
+@DataJpaTest //entity on base,  rollback. repository test
 @AutoConfigureTestDatabase(replace = Replace.NONE)  //nao sobrepoe configuração do "test"
 public class UsuarioRepositoryTesteOtimizada {
 	

@@ -76,7 +76,7 @@ public class UsuarioServiceTestMockBean {
 		
 		//ação / execução
 		//...usuarioService.autenticar("cleber@email", "123456") );
-		Throwable exception = Assertions.catchThrowable( () -> usuarioService.autenticar(email, "123456") );
+		Throwable exception = Assertions.catchThrowable( () -> usuarioService.autenticar(email, "123456") ); //expressão lambida ()->
 		
 		//verficação
 		Assertions.assertThat(exception)

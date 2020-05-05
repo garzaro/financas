@@ -26,15 +26,15 @@ public class UsuarioServiceTestSpy {
 	
 	//Validar email e salvar usuario
 	
-	@Test(expected = Test.None.class) 
+	@Test 
 	public void deveSalvarUmUsuarioNaMemoria() {
 		//cenario
 		Mockito.doNothing().when(usuarioServiceImpl).validarEmail(Mockito.anyString());
 		Usuario usuario = criarUsuarioNaMemoria();
 		Mockito.when(usuarioRepository.save(Mockito.any(Usuario.class))).thenReturn(usuario);
 		
-		//ação / execução
-		Usuario usuarioSalvo = usuarioServiceImpl.salvarUsuario(new Usuario());		
+		//ação / execução - usuarioSalvo para verificar props em criarUsuarioNaMemoria();
+		Usuario usuarioSalvo = usuarioServiceImpl.salvarUsuario(new Usuario());	//não é necessario preencher usuario pois nao vai na base salvar. Obs.criarUsuarioNaMemoria(); 	
 		
 		//veridicação
 		Assertions.assertThat(usuarioSalvo).isNotNull();
@@ -46,14 +46,15 @@ public class UsuarioServiceTestSpy {
 			
 	}
 	
-	@Test(expected = RegraNegocioException.class)
+	@Test																																																																																																								
 	public void naoDeveSalvarUmUsuarioComEmailJaCadastrado() {
 		//cenario
 		Usuario usuario = criarEmail();
 		Mockito.doThrow(RegraNegocioException.class).when(usuarioServiceImpl).validarEmail(criarEmail().getEmail());
 		
 		//ação / execução
-		usuarioServiceImpl.salvarUsuario(usuario);
+		org.junit.jupiter.api.Assertions.
+		assertThrows(RegraNegocioException.class, () -> usuarioServiceImpl.salvarUsuario(usuario)); //Lambida () -> é o executable
 		
 		//verificação
 		Mockito.verify(usuarioRepository, Mockito.never()).save(usuario); //nunca chama o metodo save.
@@ -61,8 +62,8 @@ public class UsuarioServiceTestSpy {
 	}
 	
 	public static Usuario criarEmail() {
-		return Usuario
-				.builder()
+		return Usuario																																																																																																
+				.builder()																																																										
 				.email("cleber@email.com")
 				.build();
 	}
