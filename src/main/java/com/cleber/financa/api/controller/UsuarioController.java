@@ -1,9 +1,9 @@
 package com.cleber.financa.api.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cleber.financa.api.dto.UsuarioDTO;
@@ -19,15 +19,16 @@ public class UsuarioController {
 	public UsuarioController(UsuarioService usuarioService) {
 		this.usuarioService = usuarioService;
 	}
-	
-	public ResponseEntity salvar(@ResponseBody UsuarioDTO dto) {
+	@PostMapping
+	public ResponseEntity salvar(@RequestBody UsuarioDTO dto) { //dto transformado em entidade usuario
 		
-		Usuario usuario = criarEntidadeUsuario();
+		Usuario usuario = Usuario.builder()
+				.nome(dto.getNome())
+				.email(dto.getEmail())
+				.senha(dto.getSenha())
+				.build();
 		
 	}
-		public static Usuario criarEntidadeUsuario(){
-		return null; //será criado
 		
-	}
 }
 
