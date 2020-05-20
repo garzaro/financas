@@ -39,12 +39,12 @@ public class UsuarioServiceImpl implements UsuarioService {
 		Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
 		
 		if(!usuario.isPresent()) {
-			throw new ErroAutenticacao("Hun, não existe usuário com o email informado.");
+			throw new ErroAutenticacao("What a hell, que email é esse?.");
 			
 		}
 		
 		if(!usuario.get().getSenha().equals(senha)) {
-			throw new ErroAutenticacao("Hun, essa senha parece não ser a atual.");
+			throw new ErroAutenticacao("Ouh fuc#$@%, errou a senha?");
 			
 		}
 				
@@ -62,7 +62,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 	public void validarEmail(String email) {
 		boolean existe = usuarioRepository.existsByEmail(email);
 		if (existe) {
-			throw new RegraNegocioException("Já existe usuário cadastrado com esse email");
+			throw new RegraNegocioException("Ouh man, esse email eu já tenho!");
 			
 			
 		}
