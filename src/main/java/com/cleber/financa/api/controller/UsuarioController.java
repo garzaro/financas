@@ -27,7 +27,7 @@ public class UsuarioController {
 	
 	//Autenticação de usuario
 	
-	@PostMapping("/auth")
+	@PostMapping("/autenticar")
 	public ResponseEntity autenticar(@RequestBody UsuarioDTO dto) {
 
 		try {
@@ -39,7 +39,7 @@ public class UsuarioController {
 		}
 
 	}
-
+/**/
 //	ResponseEntity - Objeto que irá representar o corpo da resposta.
 //	dto transformado em entidade Usuario
 
