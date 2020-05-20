@@ -19,13 +19,17 @@ public class UsuarioController {
 
 	UsuarioService usuarioSerice;
 
-	// Contrutor para injeção de dependencia
+	/*
+	 * Contrutor para injeção de dependencia
+	 * */
 	
 	public UsuarioController(UsuarioService usuarioService) {
 		this.usuarioSerice = usuarioService;
 	}
 	
-	//Autenticação de usuario
+	/*
+	 * Autenticação de usuario
+	 * */
 	
 	@PostMapping("/autenticar")
 	public ResponseEntity autenticar(@RequestBody UsuarioDTO dto) {
@@ -39,9 +43,12 @@ public class UsuarioController {
 		}
 
 	}
-/**/
-//	ResponseEntity - Objeto que irá representar o corpo da resposta.
-//	dto transformado em entidade Usuario
+	
+/*
+ * ResponseEntity - Objeto que irá representar o corpo da resposta.
+ * dto transformado em entidade Usuario
+ * 
+ * */
 
 	@PostMapping
 	public ResponseEntity salvar(@RequestBody UsuarioDTO dto) {

@@ -18,16 +18,17 @@ public class UsuarioDTO {
 	private String senha;
 	
 	
-//	Para visualização do @Allargs... e @Noargs...
-//	public UsuarioDTO() {
-//		
-//	}
-//	public UsuarioDTO(String nome, String email, String senha) {
-//		super();
-//		this.nome = nome;
-//		this.email = email;
-//		this.senha = senha;
-//	}
+	
+	/*
+	 * Para visualização do @Allargs... e @Noargs...
+	 * 
+	 * public UsuarioDTO() {
+	 * 
+	 * }
+	 * 
+	 * public UsuarioDTO(String nome, String email, String senha) { super();
+	 * this.nome = nome; this.email = email; this.senha = senha; }
+	 */
 	
 	
 
