@@ -1,6 +1,7 @@
 package com.cleber.financa.service.impl;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 	}
 	
 	/*
-	 * Usando a Anottation @Transactional. 
+	 * Usando a annotation @Transactional. 
 	 * abre conexao faz commit e um rollback em caso de
 	 * algum erro na transação.
 	 */
@@ -32,17 +33,24 @@ public class LancamentoServiceImpl implements LancamentoService {
 		
 		return lancamentoRepository.save(lancamento);
 	}
+	
+	/*
+	 * O metodo atualizar irá salvar os registro atualizados
+	 * desde que exista id ja cadastrado na base de dados. (derrr)
+	 */
 
 	@Override
+	@Transactional
 	public Lancamento atualizarLancamento(Lancamento lancamento) {
-		// TODO Auto-generated method stub
-		return null;
+		Objects.requireNonNull(lancamento);
+		return lancamentoRepository.save(lancamento);
 	}
-
+	
 	@Override
+	@Transactional
 	public void deletarLancamento(Lancamento lancamento) {
-		// TODO Auto-generated method stub
-		
+		Objects.requireNonNull(lancamento.getId());
+		lancamentoRepository.delete(lancamento);
 	}
 
 	@Override
@@ -53,8 +61,8 @@ public class LancamentoServiceImpl implements LancamentoService {
 
 	@Override
 	public void atualizarStatusLancamento(Lancamento lancamento, StatusLancamento statusLancamento) {
-		// TODO Auto-generated method stub
-		
+		lancamento.setStatus(statusLancamento);
+		atualizarLancamento(lancamento);
 	}
 
 }
