@@ -1,1 +1,1 @@
-# Sitema de finança pessoal
+# Sistema de finança pessoal
