@@ -23,7 +23,7 @@ public class UsuarioServiceTest {
     public void deveValidarEmail(){
         /*cenario*/
         usuarioRepository.deleteAll();
-        /*ação*/
+        /*ação, sem verificação, só olha se existe o email*/
         usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
     }
 }
