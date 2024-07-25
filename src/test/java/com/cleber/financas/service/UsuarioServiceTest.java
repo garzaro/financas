@@ -12,10 +12,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 public class UsuarioServiceTest {
-    @Autowired
-    UsuarioRepository usuarioRepository;
+
     @Autowired
     UsuarioService usuarioService;
+
+    @Autowired
+    UsuarioRepository usuarioRepository;
 
     @Test(expected = Test.None.class)
     public void deveValidarEmail(){
@@ -24,8 +26,4 @@ public class UsuarioServiceTest {
         /*ação*/
         usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
     }
-
-
-
-
 }
