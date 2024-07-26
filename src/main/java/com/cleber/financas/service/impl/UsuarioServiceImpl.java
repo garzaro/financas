@@ -1,6 +1,6 @@
 package com.cleber.financas.service.impl;
 
-import com.cleber.financas.exception.ErroDeValidacao;
+import com.cleber.financas.exception.ErroDeAutenticacao;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
@@ -21,13 +21,16 @@ public class UsuarioServiceImpl implements UsuarioService {
     
     @Override
     public Usuario autenticarUsuario(String email, String senha) {
-        /*login*/
-        Optional<Usuario> validandoLogin = usuarioRepository.findByEmail(email);
+        /*login, validando login*/
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
         /*verificar a existencia de usuario na base de dados*/
-        if (!validandoLogin.isPresent()){
-            throw new ErroDeValidacao("Usuario não encontrado pelo email informado");
+        if (!usuario.isPresent()){
+            throw new ErroDeAutenticacao("Usuario não encontrado pelo email informado");
         }
-        return validandoLogin.get();
+        if (!usuario.get().getSenha().equals(senha)){
+            throw new ErroDeAutenticacao("Senha inválida");
+        }
+        return usuario.get();
     }
     
     @Override
