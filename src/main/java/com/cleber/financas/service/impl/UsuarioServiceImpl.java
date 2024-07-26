@@ -5,6 +5,7 @@ import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.UsuarioService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
     
     @Override
+    @Transactional
     public Usuario persistirUsuarioNabaseDeDados(Usuario usuario) {
         /*deve validar o email, verificar se existe. (metodo do Service)*/
         validarEmailNaBaseDedados(usuario.getEmail());
