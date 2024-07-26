@@ -41,4 +41,8 @@ public class Usuario {
     private LocalDate dataCadastro;
 
     /*getters and setters*/
+
+    public String getSenha() {
+        return senha;
+    }
 }
