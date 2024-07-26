@@ -37,8 +37,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public Usuario persistirUsuarioNabaseDeDados(Usuario usuario) {
+
         /*deve validar o email, verificar se existe. (metodo do Service)*/
         validarEmailNaBaseDedados(usuario.getEmail());
+
         /*se nao existir email, salva a instancia*/
         return usuarioRepository.save(usuario);
     }
