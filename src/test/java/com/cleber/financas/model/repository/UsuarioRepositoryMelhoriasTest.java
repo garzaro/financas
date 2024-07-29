@@ -17,6 +17,7 @@ import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
+
 /*@DataJpaTest - Sobrescreve qualquer configuração
  no banco de teste, cria uma instancia no bd h2, ao
   finalizar ela deleta da memoria, rollback*/
@@ -25,6 +26,7 @@ import java.util.Optional;
 /*@AutoConfigureTestDatabase - mantem as configurações do banco de teste h2
  (DataJpaTest, desconfiguratudo)*/
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+
 public class UsuarioRepositoryMelhoriasTest {
     
     /*Inicio teste com Dougllas Sousa (Udemy)*/
@@ -42,7 +44,7 @@ public class UsuarioRepositoryMelhoriasTest {
         /*cenario*/
         Usuario usuarioDeTeste = criarUsuario();
         entityManager.persist(usuarioDeTeste);
-        
+
         /*execução/ação*/
         boolean verficarSeExisteEmail = usuarioRepository
                 .existsByEmail("cricri@gmail.com");
@@ -55,8 +57,10 @@ public class UsuarioRepositoryMelhoriasTest {
     public void deveRetornarFalsoQuandoNaoHouverUsuarioCadastradoComOEmail() {
         /*cenario, não deve existir email na base*/
         usuarioRepository.deleteAll();
+
         boolean verificarSeExisteUsuarioCadastradoComEmail = usuarioRepository
                 .existsByEmail("cricri@gmail.com");
+        
         /*verificação*/
         Assertions.assertThat(verificarSeExisteUsuarioCadastradoComEmail).isFalse();
     }
