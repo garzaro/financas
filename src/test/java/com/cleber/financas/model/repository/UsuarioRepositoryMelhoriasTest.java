@@ -26,7 +26,6 @@ import java.util.Optional;
 /*@AutoConfigureTestDatabase - mantem as configurações do banco de teste h2
  (DataJpaTest, desconfiguratudo)*/
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-
 public class UsuarioRepositoryMelhoriasTest {
     
     /*Inicio teste com Dougllas Sousa (Udemy)*/
