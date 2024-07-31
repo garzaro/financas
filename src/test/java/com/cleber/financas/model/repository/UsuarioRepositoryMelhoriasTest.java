@@ -20,7 +20,8 @@ import java.util.Optional;
 
 /*@DataJpaTest - Sobrescreve qualquer configuração
  no banco de teste, cria uma instancia no bd h2, ao
-  finalizar ela deleta da memoria, rollback*/
+  finalizar ela deleta da memoria, rollback após
+  a execução de cada metodo*/
 @DataJpaTest
 
 /*@AutoConfigureTestDatabase - mantem as configurações do banco de teste h2
@@ -47,15 +48,14 @@ public class UsuarioRepositoryMelhoriasTest {
         /*execução/ação*/
         boolean verficarSeExisteEmail = usuarioRepository
                 .existsByEmail("cricri@gmail.com");
-        
         /*verficação*/
         Assertions.assertThat(verficarSeExisteEmail).isTrue();
         
     }
     @Test
     public void deveRetornarFalsoQuandoNaoHouverUsuarioCadastradoComOEmail() {
-        /*cenario, não deve existir email na base*/
-        usuarioRepository.deleteAll();
+        /*cenario, - com o @DataJpaTest nao é necessario delete por causa do rollback*/
+        /*usuarioRepository.deleteAll();*/
 
         boolean verificarSeExisteUsuarioCadastradoComEmail = usuarioRepository
                 .existsByEmail("cricri@gmail.com");
@@ -86,8 +86,8 @@ public class UsuarioRepositoryMelhoriasTest {
     }
     @Test
     public void deveRetornarVazioAoBuscarUsuarioPorEmailQueNaoExisteNaBase() {
-        /*cenario - nao presença de email*/
-        usuarioRepository.deleteAll();
+        /*cenario, - com o @DataJpaTest nao é necessario delete por causa do rollback*/
+        /*usuarioRepository.deleteAll();*/
         /*ação*/
         Optional<Usuario> usuarioInexistente =usuarioRepository
                 .findByEmail("cricri@gmail.com");
