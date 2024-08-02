@@ -4,15 +4,16 @@ import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.impl.UsuarioServiceImpl;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Optional;
 
 /*Não é necessario @DataJpaTest, lembrando que é possivel
  mockar bean gerenciado pelo spring framework, adiconar dentro
@@ -52,5 +53,27 @@ public class UsuarioServiceMockTest {
 
         /*ação*/
         usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
+    }
+
+    @Test(expected = Test.None.class)
+    public void deveAutenticarUmUsuarioComSucesso(){
+        /*cenario*/
+        String email = "";
+        String senha = "";
+
+        Usuario criarUmUsuario = Usuario.builder()
+                .email("cleber@gmail.com")
+                .senha("senha")
+                .build();
+        Usuario criarUsuario = Usuario.builder().email(senha).senha(senha).build();
+        Mockito.when(usuarioRepository.findByEmail(senha)).thenReturn(Optional.of(criarUsuario));
+
+        /*ação*/
+        Usuario resultadoAutenticacao = usuarioService.autenticarUsuario(email, senha);
+
+        /*verificacao*/
+        Assertions.assertThat(resultadoAutenticacao).isNotNull();
+
+
     }
 }
