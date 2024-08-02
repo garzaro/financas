@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  mockar bean gerenciado pelo spring framework, adiconar dentro
   do contexto do spring framework*/
 
-@RunWith(SpringRunner.class) /*@MockBean, */
+@RunWith(SpringRunner.class) /*@MockBean, mockar o contexto do spring framework*/
 @ActiveProfiles("test")
 public class UsuarioServiceMockTest {
     /*com o uso de mock nao é necessario injetar*/
