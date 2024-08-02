@@ -3,6 +3,8 @@ package com.cleber.financas.service;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
+import org.assertj.core.api.Assertions;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +41,32 @@ public class UsuarioServiceMelhoriasTest {
         /*ação*/
         usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
     }
+    @Test(expected = Test.None.class)
+    public void deveAutenticarUmUsuarioComSucesso(){
+        /*cenario*/
+        Usuario persistirUsuario = criarUsuario();
+
+        /*ação*/
+        Usuario usuarioSalvo = usuarioRepository.save(persistirUsuario);
+
+        /*verificar se o metodo autenticarUsuario funciona corretamente*/
+        Usuario usuarioAutenticado = usuarioService.autenticarUsuario(usuarioSalvo.getEmail(), usuarioSalvo.getSenha());
+
+        /*verificação*/
+        Assertions.assertThat(usuarioAutenticado).isNotNull();
+        Assertions.assertThat(usuarioAutenticado.getEmail()).isEqualTo("cleber@gmail.com");
+        Assertions.assertThat(usuarioAutenticado.getSenha()).isEqualTo("senha");
+    }
+
     /*para criar instancias*/
     public static Usuario criarUsuario(){
         return Usuario.builder()
+                .id(1l)
                 .nomeCompleto("Cleber")
                 .nomeUsuario("garzaro")
                 .cadastroPessoaFisica("123.456.789-00")
                 .email("cleber@gmail.com")
-                .senha("123456")
+                .senha("senha")
                 .dataCadastro(LocalDate.now())
                 .build();
     
