@@ -58,22 +58,26 @@ public class UsuarioServiceMockTest {
     @Test(expected = Test.None.class)
     public void deveAutenticarUmUsuarioComSucesso(){
         /*cenario*/
-        String email = "";
-        String senha = "";
+        String email = "cleber@gmail.com";
+        String senha = "senha";
 
+        /*Somente para o visualizar
         Usuario criarUmUsuario = Usuario.builder()
                 .email("cleber@gmail.com")
                 .senha("senha")
                 .build();
-        Usuario criarUsuario = Usuario.builder().email(senha).senha(senha).build();
-        Mockito.when(usuarioRepository.findByEmail(senha)).thenReturn(Optional.of(criarUsuario));
+       */
+        Usuario criarUsuario = Usuario.builder()
+                .email(email)
+                .senha(senha)
+                .build();
+        Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(criarUsuario));
 
-        /*ação*/
-        Usuario resultadoAutenticacao = usuarioService.autenticarUsuario(email, senha);
+        /*ação*/ /*deve retornar uma instancia de usuario autenticado*/
+        Usuario resultadoAutenticacao = usuarioService.autenticarUsuario(email,senha);
 
         /*verificacao*/
         Assertions.assertThat(resultadoAutenticacao).isNotNull();
-
 
     }
 }
