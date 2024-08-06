@@ -80,4 +80,9 @@ public class UsuarioServiceMockTest {
         Assertions.assertThat(resultadoAutenticacao).isNotNull();
 
     }
+
+    public void DeveLancarErroQuandoNaoEncontrarUsuarioCadastradoComOEmailInformado(){
+
+    }
+
 }
