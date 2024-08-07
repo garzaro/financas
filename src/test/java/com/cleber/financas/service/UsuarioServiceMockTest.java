@@ -1,5 +1,6 @@
 package com.cleber.financas.service;
 
+import com.cleber.financas.exception.ErroDeAutenticacao;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
@@ -80,9 +81,16 @@ public class UsuarioServiceMockTest {
         Assertions.assertThat(resultadoAutenticacao).isNotNull();
 
     }
-
+    @Test(expected = ErroDeAutenticacao.class)
     public void DeveLancarErroQuandoNaoEncontrarUsuarioCadastradoComOEmailInformado(){
+        /*cenario*/
+        Mockito.when(usuarioRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
 
+        String email = "cleber@gmail.com";
+        String senha = "senha123";
+
+       /*ação*/
+        usuarioService.autenticarUsuario(email, senha);
     }
 
 }
