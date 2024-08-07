@@ -31,7 +31,7 @@ public class UsuarioServiceMockTest {
 
     /*metodo configurado*/
     @Before
-    public void setUp(){
+    public void setUp() {
         /*instancia de usuario repository*/
         /*Usando o @MockBean*/
         usuarioRepository = Mockito.mock(UsuarioRepository.class);
@@ -40,15 +40,16 @@ public class UsuarioServiceMockTest {
     }
 
     @Test(expected = Test.None.class)
-    public void deveValidarEmail(){
+    public void deveValidarEmail() {
         /*cenario*/
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(false);
 
         /*ação, sem verificação, só olha se existe o email*/
         usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
     }
+
     @Test(expected = RegraDeNegocioException.class)
-    public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){
+    public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado() {
         /*cenario*/
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(true);
 
@@ -57,7 +58,7 @@ public class UsuarioServiceMockTest {
     }
 
     @Test(expected = Test.None.class)
-    public void deveAutenticarUmUsuarioComSucesso(){
+    public void deveAutenticarUmUsuarioComSucesso() {
         /*cenario*/
         String email = "cleber@gmail.com";
         String senha = "senha";
@@ -75,25 +76,27 @@ public class UsuarioServiceMockTest {
         Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(criarUsuario));
 
         /*ação*/ /*deve retornar uma instancia de usuario autenticado*/
-        Usuario resultadoAutenticacao = usuarioService.autenticarUsuario(email,senha);
+        Usuario resultadoAutenticacao = usuarioService.autenticarUsuario(email, senha);
 
         /*verificacao*/
         Assertions.assertThat(resultadoAutenticacao).isNotNull();
 
     }
+
     @Test(expected = ErroDeAutenticacao.class)
-    public void DeveLancarErroQuandoNaoEncontrarUsuarioCadastradoComOEmailInformado(){
+    public void DeveLancarErroQuandoNaoEncontrarUsuarioCadastradoComOEmailInformado() {
         /*cenario*/
         Mockito.when(usuarioRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
 
         String email = "cleber@gmail.com";
         String senha = "senha123";
 
-       /*ação*/
+        /*ação*/
         usuarioService.autenticarUsuario(email, senha);
     }
+
     @Test(expected = ErroDeAutenticacao.class)
-    public void deveLancarErroQuandoSenhaNaoBater(){
+    public void deveLancarErroQuandoSenhaNaoBater() {
         /*cenario*/
         String senha = "senha";
         Usuario usuario = Usuario.builder()
@@ -104,9 +107,5 @@ public class UsuarioServiceMockTest {
 
         /*ação*/
         usuarioService.autenticarUsuario("cleber@gmail.com", "123");
-
-
-
     }
-
 }
