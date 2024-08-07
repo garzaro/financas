@@ -92,5 +92,21 @@ public class UsuarioServiceMockTest {
        /*ação*/
         usuarioService.autenticarUsuario(email, senha);
     }
+    @Test(expected = ErroDeAutenticacao.class)
+    public void deveLancarErroQuandoSenhaNaoBater(){
+        /*cenario*/
+        String senha = "senha";
+        Usuario usuario = Usuario.builder()
+                .email("cleber@gmail.com")
+                .senha(senha)
+                .build();
+        Mockito.when(usuarioRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(usuario));
+
+        /*ação*/
+        usuarioService.autenticarUsuario("cleber@gmail.com", "123");
+
+
+
+    }
 
 }
