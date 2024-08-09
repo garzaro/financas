@@ -88,6 +88,7 @@ public class UsuarioServiceMockTest {
      * Vou fazer ajustes, retirando o expected e usando
      * o metodo Throwable.catchThrowable*/
 
+    /*com expected*/
     @Test(expected = ErroDeAutenticacao.class)
     public void DeveLancarErroQuandoNaoEncontrarUsuarioCadastradoComOEmailInformado() {
         /*cenario*/
@@ -109,7 +110,6 @@ public class UsuarioServiceMockTest {
                 .senha(senha)
                 .build();
         Mockito.when(usuarioRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(usuario));
-
         /*ação*/
         Throwable exception = Assertions.catchThrowable(() -> usuarioService
                 .autenticarUsuario("cleber@gmail.com", "123"));
