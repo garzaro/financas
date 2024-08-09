@@ -83,6 +83,11 @@ public class UsuarioServiceMockTest {
 
     }
 
+    /*Alteração nos metdos de verificação de emailme senha
+     * Para se certificar o que está sendo validado
+     * Vou fazer ajustes, retirando o expected e usando
+     * o metodo Throwable.catchThrowable*/
+
     @Test(expected = ErroDeAutenticacao.class)
     public void DeveLancarErroQuandoNaoEncontrarUsuarioCadastradoComOEmailInformado() {
         /*cenario*/
@@ -94,8 +99,8 @@ public class UsuarioServiceMockTest {
         /*ação*/
         usuarioService.autenticarUsuario(email, senha);
     }
-
-    @Test(expected = ErroDeAutenticacao.class)
+    /*sem o expected*/
+    @Test
     public void deveLancarErroQuandoSenhaNaoBater() {
         /*cenario*/
         String senha = "senha";
@@ -106,6 +111,8 @@ public class UsuarioServiceMockTest {
         Mockito.when(usuarioRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(usuario));
 
         /*ação*/
-        usuarioService.autenticarUsuario("cleber@gmail.com", "123");
+        Throwable exception = Assertions.catchThrowable(() -> usuarioService
+                .autenticarUsuario("cleber@gmail.com", "123"));
+        Assertions.assertThat(exception).isInstanceOf(ErroDeAutenticacao.class).hasMessage("Senha inválida");
     }
 }
