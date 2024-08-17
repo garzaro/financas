@@ -6,10 +6,12 @@ import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.UsuarioService;
 import jakarta.transaction.Transactional;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+@NoArgsConstructor
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
     @Autowired

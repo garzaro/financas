@@ -26,6 +26,7 @@ public class UsuarioServiceSpyTest {
         /*cenario*/
         Mockito.doNothing().when(usuarioServiceImpl)
                 .validarEmailNaBaseDedados(Mockito.anyString());
+        
         Usuario usuario = criarUsuario();
         
         Mockito.when(usuarioRepository.save(Mockito.any(Usuario.class)))
@@ -45,22 +46,23 @@ public class UsuarioServiceSpyTest {
         Assertions.assertThat(usuarioSalvo.getEmail())
                 .isEqualTo("email@gmail.com");
         Assertions.assertThat(usuarioSalvo.getSenha())
-                .isEqualTo("Senha@123");
+                .isEqualTo("senha");
         
     }
     @Test(expected = RegraDeNegocioException.class)
     public void naoDeveSalvarUmUsuarioComEmailJaCadastrado(){
         
-        Usuario persisteUsuario = criarUsuario();
+        Usuario persistirUsuario = criarUsuario();
+        
         Mockito.doThrow(RegraDeNegocioException.class)
                 .when(usuarioServiceImpl)
                 .validarEmailNaBaseDedados("email@gmail.com");
         /*ação*/
-        Usuario usuarioPersistido = usuarioServiceImpl
-                .persistirUsuarioNabaseDeDados(persisteUsuario);
+        usuarioServiceImpl.persistirUsuarioNabaseDeDados(persistirUsuario);
+        
         /*verificação*/
         Mockito.verify(usuarioRepository, Mockito.never())
-                .save(persisteUsuario);
+                .save(persistirUsuario);
     }
     /*criar instacias*/
     public static Usuario criarUsuario() {
