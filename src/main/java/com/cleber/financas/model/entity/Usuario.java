@@ -40,16 +40,5 @@ public class Usuario {
     @Column(name = "data_cadastro")
     private LocalDate dataCadastro;
     
-    
-
-    
     /*getters and setters*/
-    
-    
-    
-    
-    
-
-    
-	
-}
+ }
