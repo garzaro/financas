@@ -39,6 +39,7 @@ public class Usuario {
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     @Column(name = "data_cadastro")
     private LocalDate dataCadastro;
-    
-    /*getters and setters*/
- }
+
+    /*GETTERS AND SETTERS*/
+}
+
