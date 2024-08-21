@@ -7,12 +7,10 @@ import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/usuarios")
+@RequestMapping(path = "/api/usuarios") /*para mapeamento de todas as requisições*/
 public class UsuarioController {
 
     public UsuarioService usuarioService;
@@ -20,7 +18,8 @@ public class UsuarioController {
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
-
+    /*Salvar - Este método é um endpoint que recebe uma requisição HTTP POST*/
+    /*ResponseEntity representa o corpo da resposta*/
     public ResponseEntity salvar(@RequestBody UsuarioDTO usuarioDTO){
         Usuario usuario = Usuario.builder()
                 .nomeCompleto(usuarioDTO.getNomeCompleto())
