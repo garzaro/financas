@@ -70,7 +70,7 @@ public class UsuarioServiceSpyTest {
                 .id(1l)
                 .nomeUsuario("garzaro74")
                 .email("email@gmail.com")
-                .senha("Senha@123")
+                .senha("senha")
                 .build();
         
     }
