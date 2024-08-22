@@ -4,18 +4,21 @@ import java.time.LocalDate;
 
 /*Não usei @Builder, @Getter, @Setter
 * resolvi criar na mão o codigo*/
-public class UsuarioDTO {
-    private Long id;
+//@Getter
+//@Setter
+//@Builder
+public class UsuarioCadastroDTO {
+    
     private String nomeCompleto;
     private String cadastroPessoaFisica;
     private String nomeUsuario;
     private String email;
     private String senha;
     private LocalDate dataCadastro;
-
+    
     /*BUILDER*/
-    private UsuarioDTO(UsuarioBuilder builder) {
-        this.id = builder.id;
+    private UsuarioCadastroDTO(UsuarioBuilder builder) {
+        
         this.nomeCompleto = builder.nomeCompleto;
         this.cadastroPessoaFisica = builder.cadastroPessoaFisica;
         this.nomeUsuario = builder.nomeUsuario;
@@ -24,19 +27,15 @@ public class UsuarioDTO {
         this.dataCadastro = builder.dataCadastro;
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public String getNomeCompleto() {
         return nomeCompleto;
     }
 
-    public String getCadastroPessoaFisica() {
+    public String getCadastroPessoaFisica(){
         return cadastroPessoaFisica;
     }
 
-    public String getNomeUsuario() {
+    public String getNomeUsuario(){
         return nomeUsuario;
     }
 
@@ -53,27 +52,21 @@ public class UsuarioDTO {
     }
 
     public static class UsuarioBuilder{
-        private Long id;
         private String nomeCompleto;
         private String cadastroPessoaFisica;
         private String nomeUsuario;
         private String email;
         private String senha;
         private LocalDate dataCadastro;
-
-        public Long setId() {
-            this.id = id;
-            return id;
-        }
-
+        
         public UsuarioBuilder setNomeCompleto(String nomeCompleto) {
         this.nomeCompleto = nomeCompleto;
         return this;
         }
 
         public UsuarioBuilder setCadastroPessoaFisica(String cadastroPessoaFisica) {
-        this.cadastroPessoaFisica = cadastroPessoaFisica;
-        return this;
+            this.cadastroPessoaFisica = cadastroPessoaFisica;
+            return this;
         }
 
         public UsuarioBuilder setNomeUsuario(String nomeUsuario) {
@@ -91,13 +84,13 @@ public class UsuarioDTO {
             return this;
         }
 
-        public UsuarioBuilder setDataCadastro(LocalDate dataCadastro){
+        public UsuarioBuilder setDataCadastro(LocalDate dataCadastro) {
             this.dataCadastro = dataCadastro;
             return this;
         }
 
-        public UsuarioDTO build() {
-            return new UsuarioDTO(this);
+        public UsuarioCadastroDTO build() {
+            return new UsuarioCadastroDTO(this);
         }
     }
 }
