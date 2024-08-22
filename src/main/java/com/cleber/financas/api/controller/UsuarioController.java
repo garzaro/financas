@@ -7,9 +7,7 @@ import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -20,8 +18,14 @@ public class UsuarioController {
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
-
+   /* @GetMapping("/teste")
+    public String hello(){
+        return "hello Doido";
+    }*/
+    
+    @PostMapping
     public ResponseEntity salvar(@RequestBody UsuarioDTO usuarioDTO){
+        /*dto transformado em entidade usuario*/
         Usuario usuario = Usuario.builder()
                 .nomeCompleto(usuarioDTO.getNomeCompleto())
                 .cadastroPessoaFisica(usuarioDTO.getCadastroPessoaFisica())
@@ -31,6 +35,7 @@ public class UsuarioController {
                 .build();
 
         try {
+            /*Salvar*/
             Usuario usuarioSalvo = usuarioService.persistirUsuarioNabaseDeDados(usuario);
             return new ResponseEntity(usuarioSalvo, HttpStatus.CREATED);
         }catch (RegraDeNegocioException mensagemDeErro){
