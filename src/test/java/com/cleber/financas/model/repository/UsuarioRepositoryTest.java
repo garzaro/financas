@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@ActiveProfiles("test")
+//@ActiveProfiles("test")
 public class UsuarioRepositoryTest {
     /*Inicio teste com Dougllas Sousa (Udemy)*/
     @Autowired
@@ -50,9 +50,9 @@ public class UsuarioRepositoryTest {
        /*cenario*/
         Usuario persistindoUsuario = Usuario.builder()
                 .nomeCompleto("Cleber")
-                .nomeUsuario("garzaro")
+                .nomeUsuario("garzaro74")
                 .email("clebergarzaro74@gmail.com")
-                .senha("123456")
+                .senha("senha")
                 .dataCadastro(LocalDate.now())
                 .build();
         /*ação*/
@@ -65,7 +65,7 @@ public class UsuarioRepositoryTest {
     public void deveBuscarUmUsuarioPeloEmail(){
         /*cenario*/
         Usuario salvandoUsuario = Usuario.builder()
-                .nomeUsuario("garzaro")
+                .nomeUsuario("garzaro74")
                 .email("clebergarzaro74@gmail.com")
                 .build();
         usuarioRepository.save(salvandoUsuario);
