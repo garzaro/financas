@@ -31,9 +31,7 @@ public class UsuarioController {
             return ResponseEntity.ok(usuarioAutenticado);
         } catch (ErroDeAutenticacao e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-
         }
-
     }
 
     /*Salvar - Este método é um endpoint que recebe uma requisição HTTP POST*/
@@ -57,8 +55,6 @@ public class UsuarioController {
         } catch (RegraDeNegocioException mensagemDeErro) {
             return ResponseEntity.badRequest().body(mensagemDeErro.getMessage());
         }
-
     }
-
     /*@GetMapping("/")public String helloWorld() {return "Fala dev";}*/
 }
