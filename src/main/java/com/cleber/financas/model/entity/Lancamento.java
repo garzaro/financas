@@ -1,0 +1,49 @@
+package com.cleber.financas.model.entity;
+
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "lancamento", schema = "financeiro")
+@Data
+@Builder
+public class Lancamento {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+    
+    @Column(name = "descricao")
+    private String descricao;
+    
+    @Column(name = "mes")
+    private String mes;
+    
+    @Column(name = "ano")
+    private String ano;
+    
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
+    
+    @JoinColumn(name = "valor")
+    private BigDecimal valor;
+    
+    @Column(name = "data_cadastro")
+    @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
+    private LocalDate dataCadastro;
+    
+    @Column(name = "tipo_lancamento")
+    @Enumerated(value = EnumType.STRING)
+    private TipoLancamento tipoLancamento;
+    
+    @Column(name = "status_lancamento")
+    @Enumerated(value = EnumType.STRING)
+    private StatusLancamento statusLancamento;
+    
+}
