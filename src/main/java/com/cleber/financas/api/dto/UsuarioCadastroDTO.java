@@ -9,9 +9,7 @@ import java.time.LocalDate;
 
 /*Não usei @Builder, @Getter, @Setter
 * resolvi criar na mão o codigo*/
-@Getter
-@Setter
-@Builder
+
 public class UsuarioCadastroDTO {
     
     private String nomeCompleto;
@@ -21,7 +19,11 @@ public class UsuarioCadastroDTO {
     private String senha;
     private LocalDate dataCadastro;
     
-    /*BUILDER
+    public UsuarioCadastroDTO() {
+		
+	}
+    
+    /*BUILDER*/
     private UsuarioCadastroDTO(UsuarioBuilder builder) {
         
         this.nomeCompleto = builder.nomeCompleto;
@@ -97,5 +99,5 @@ public class UsuarioCadastroDTO {
         public UsuarioCadastroDTO build() {
             return new UsuarioCadastroDTO(this);
         }
-    }*/
+    }
 }
