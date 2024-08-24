@@ -7,8 +7,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-/*Não usei @Builder, @Getter, @Setter
-* resolvi criar na mão o codigo*/
 @Getter
 @Setter
 @Builder
