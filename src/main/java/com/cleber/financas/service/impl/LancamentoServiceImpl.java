@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class LancamentoServiceImpl implements LancamentoService {
@@ -28,11 +29,16 @@ public class LancamentoServiceImpl implements LancamentoService {
     
     @Override
     public Lancamento atualizarLancamento(Lancamento lancamento) {
-        return null;
+        /*Checagem: se não existir um id de lancamento salvo ele persiste e lanca um novo id...*/
+        Objects.requireNonNull(lancamento.getId()); /*...garantindo que será passado o lancamento com um novo id*/
+        return lancamentoRepository.save(lancamento); /*...se nao passar da nullPointerException*/
     }
     
     @Override
     public void deletarLancamento(Lancamento lancamento) {
+        /*so deletar se existir um lancamento salvo*/
+        Objects.requireNonNull(lancamento.getId()); /*Checagem: para garantir que esteja passando o lancamento salvo*/
+        lancamentoRepository.save(lancamento);
     
     }
     
