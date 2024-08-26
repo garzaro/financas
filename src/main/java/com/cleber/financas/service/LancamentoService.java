@@ -6,9 +6,9 @@ import com.cleber.financas.model.entity.StatusLancamento;
 import java.util.List;
 
 public interface LancamentoService {
-    
+    /*vai receber um lancamento e vai salvar*/
     Lancamento salvarLancamento(Lancamento lancamento);
-    
+
     Lancamento atualizarLancamento(Lancamento lancamento);
     
     void deletarLancamento(Lancamento lancamento);
