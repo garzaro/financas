@@ -5,6 +5,7 @@ import com.cleber.financas.model.entity.StatusLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,8 +21,9 @@ public class LancamentoServiceImpl implements LancamentoService {
     }
     
     @Override
+    @Transactional /*spring abre transação com a base, roda o metodo, faz commit e, se error, then rollback*/
     public Lancamento salvarLancamento(Lancamento lancamento) {
-        return null;
+        return lancamentoRepository.save(lancamento);
     }
     
     @Override
