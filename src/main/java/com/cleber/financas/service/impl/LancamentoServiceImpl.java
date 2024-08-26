@@ -29,7 +29,7 @@ public class LancamentoServiceImpl implements LancamentoService {
     
     @Override
     public Lancamento atualizarLancamento(Lancamento lancamento) {
-        /*Checagem: se não existir um id de lancamento salvo ele persiste e lanca um novo id...*/
+        /*Checagem: se não existir um id de lancamento salvo ele persiste e lança um novo id...*/
         Objects.requireNonNull(lancamento.getId()); /*...garantindo que será passado o lancamento com um novo id*/
         return lancamentoRepository.save(lancamento); /*...se nao passar da nullPointerException*/
     }
