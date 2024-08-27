@@ -38,6 +38,7 @@ public class LancamentoServiceImpl implements LancamentoService {
     }
     
     @Override
+    @Transactional
     public void deletarLancamento(Lancamento lancamento) {
         /*so deleta se existir um lancamento salvo*/
         Objects.requireNonNull(lancamento.getId()); /*Checagem: para garantir que esteja passando o lancamento salvo*/
