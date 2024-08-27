@@ -36,7 +36,7 @@ public class LancamentoServiceImpl implements LancamentoService {
     
     @Override
     public void deletarLancamento(Lancamento lancamento) {
-        /*so deletar se existir um lancamento salvo*/
+        /*so deleta se existir um lancamento salvo*/
         Objects.requireNonNull(lancamento.getId()); /*Checagem: para garantir que esteja passando o lancamento salvo*/
         lancamentoRepository.save(lancamento);
     
@@ -52,3 +52,4 @@ public class LancamentoServiceImpl implements LancamentoService {
     
     }
 }
+
