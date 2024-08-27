@@ -4,6 +4,8 @@ import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +45,11 @@ public class LancamentoServiceImpl implements LancamentoService {
     
     @Override
     public List<Lancamento> buscarLancamento(Lancamento lancamentoFiltro) {
-        return List.of();
+        Example example = Example.of(lancamentoFiltro, ExampleMatcher
+                .matching()
+                .withIgnoreCase() /*ignora se o usuario digitou com caixa alta ou baixa*/
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)); /*contendo o que for passado cna busca*/
+        return lancamentoRepository.findAll(example);
     }
     
     @Override
