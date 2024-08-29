@@ -6,14 +6,14 @@ import com.cleber.financas.model.entity.StatusLancamento;
 import java.util.List;
 
 public interface LancamentoService {
-    
+    /*vai receber um lancamento e vai salvar*/
     Lancamento salvarLancamento(Lancamento lancamento);
-    /*se vai atualizar é porque ja existe na base*/
+
     Lancamento atualizarLancamento(Lancamento lancamento);
     
     void deletarLancamento(Lancamento lancamento);
     
-    /*as propriedades que vierem preenchidas no objeto lancamento recebido sera usado como filtro*/
+    /*as propriedades que vierem preenchidas no lancamento recebido sera usado como filtro*/
     List<Lancamento> buscarLancamento(Lancamento lancamentoFiltro);
     
     /*recebe o status e o lancamento*/
