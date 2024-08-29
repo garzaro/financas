@@ -36,6 +36,7 @@ public class UsuarioRepositoryTest {
        Assertions.assertThat(verficarSeExisteEmail).isTrue();
        
     }
+    
     @Test
     public void deveRetornarFalsoQuandoNaoHouverUsuarioCadastradoComOEmail() {
        /*cenario, não deve existir email na base*/
@@ -45,6 +46,7 @@ public class UsuarioRepositoryTest {
         /*verificação*/
         Assertions.assertThat(verificarSeExisteUsuarioCadastradoComEmail).isFalse();
     }
+    
     @Test
     public void devePersistirUsuarioNaBaseDeDados(){
        /*cenario*/
@@ -61,6 +63,7 @@ public class UsuarioRepositoryTest {
         /*verificação*/
         Assertions.assertThat(usuarioPersistido.getId()).isNotNull();
     }
+    
     @Test
     public void deveBuscarUmUsuarioPeloEmail(){
         /*cenario*/
@@ -75,6 +78,7 @@ public class UsuarioRepositoryTest {
         /*verificação*/
         Assertions.assertThat(pesquisarUsuarioPeloEmail.isPresent()).isTrue();
     }
+    
     @Test
     public void deveRetornarVazioAoBuscarUsuarioPorEmailQueNaoExisteNaBase() {
         /*cenario - nao presença de email*/
