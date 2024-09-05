@@ -1,5 +1,6 @@
 package com.cleber.financas.service.impl;
 
+import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
