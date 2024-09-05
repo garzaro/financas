@@ -51,8 +51,10 @@ public class LancamentoServiceImpl implements LancamentoService {
     public List<Lancamento> buscarLancamento(Lancamento lancamentoFiltro) {
         Example example = Example.of(lancamentoFiltro, ExampleMatcher
                 .matching()
-                .withIgnoreCase() /*ignora se o usuario digitou com caixa alta ou baixa*/
-                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)); /*contendo o que for passado cna busca*/
+                /*ignora se o usuario digitou com caixa alta ou baixa*/
+                .withIgnoreCase()
+                /*contendo o que for passado na busca - CONTAINING*/
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
         return lancamentoRepository.findAll(example);
     }
     
