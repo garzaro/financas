@@ -63,5 +63,14 @@ public class LancamentoServiceImpl implements LancamentoService {
         lancamento.setStatusLancamento(status); /*seta o estatus do lancamento*/
         atualizarLancamento(lancamento); /*usa a implemetnacao de salvar lancamento para efetivar*/
     }
+    
+    @Override
+    public void validarLancamento(Lancamento lancamento) {
+        /*informar ium descrição válida, trim remove espaço vazio no inicio e no fim tornando um string vazia*/
+        if (lancamento.getDescricao() == null || lancamento.getDescricao().trim().equals("")){
+        }
+        
+    }
+    
 }
 
