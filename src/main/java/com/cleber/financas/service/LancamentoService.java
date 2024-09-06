@@ -18,4 +18,6 @@ public interface LancamentoService {
     
     /*recebe o status e o lancamento*/
     void atualizarStatus(Lancamento lancamento, StatusLancamento status);
+    
+    void validarLancamento(Lancamento lancamento);
 }
