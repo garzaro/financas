@@ -10,6 +10,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,6 +28,10 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Override
     @Transactional /*spring abre transação com a base, roda o metodo, faz commit e, se error, then rollback*/
     public Lancamento salvarLancamento(Lancamento lancamento) {
+        /*chamando*/
+        validarLancamento(lancamento);
+        /*lancamento salva automaticamente tem status de pendente*/
+        lancamento.setStatusLancamento(StatusLancamento.PENTENDE);
         return lancamentoRepository.save(lancamento);
     }
     
@@ -35,6 +40,7 @@ public class LancamentoServiceImpl implements LancamentoService {
     public Lancamento atualizarLancamento(Lancamento lancamento) {
         /*Checagem: se não existir um id de lancamento salvo ele persiste e lança um novo id...*/
         Objects.requireNonNull(lancamento.getId()); /*...garantindo que será passado o lancamento com um novo id*/
+        validarLancamento(lancamento);
         return lancamentoRepository.save(lancamento); /*...se nao passar da nullPointerException*/
     }
     
@@ -66,10 +72,26 @@ public class LancamentoServiceImpl implements LancamentoService {
     
     @Override
     public void validarLancamento(Lancamento lancamento) {
-        /*informar ium descrição válida, trim remove espaço vazio no inicio e no fim tornando um string vazia*/
+        /*informar uma descrição válida, trim remove espaço vazio no inicio e no fim tornando um string vazia*/
         if (lancamento.getDescricao() == null || lancamento.getDescricao().trim().equals("")){
+            throw new RegraDeNegocioException("Informar uma descrição válida.");
         }
-        
+        if (lancamento.getMes() == null || lancamento.getMes() < 1 || lancamento.getMes() >  12){
+            throw new RegraDeNegocioException("Informar um mês válido.");
+        }
+        if (lancamento.getAno() == null || lancamento.getAno().toString().length() != 4 ){
+            throw new RegraDeNegocioException("Informar um ano válido");
+        }
+        if (lancamento.getUsuario() == null || lancamento.getUsuario().getId() == null){
+            throw new RegraDeNegocioException("Informar um Usuário.");
+        }
+        /*compareTo para compara valor como BigDecimal*/
+        if (lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1){
+            throw new RegraDeNegocioException("Informe um valor válido.");
+        }
+        if (lancamento.getTipoLancamento() == null){
+            throw new RegraDeNegocioException("Informar um tipo de lancamento");
+        }
     }
     
 }
