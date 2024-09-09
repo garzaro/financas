@@ -1,8 +1,10 @@
 package com.cleber.financas.model.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.math.BigDecimal;
@@ -12,6 +14,8 @@ import java.time.LocalDate;
 @Table(name = "lancamento", schema = "financeiro")
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Lancamento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +29,13 @@ public class Lancamento {
     private Integer mes;
     
     @Column(name = "ano")
-    private String ano;
+    private Integer ano;
     
     @ManyToOne
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
     
-    @JoinColumn(name = "valor")
+    @Column(name = "valor")
     private BigDecimal valor;
     
     @Column(name = "data_cadastro")
