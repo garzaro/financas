@@ -1,6 +1,9 @@
 package com.cleber.financas.service;
 
 import com.cleber.financas.model.entity.Usuario;
+
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,4 +16,6 @@ public interface UsuarioService {
     
     /*verifica o email na base de dados, unique */
     void validarEmailNaBaseDedados(String email);
+    
+    Optional<Usuario> obterUsuarioPorId(Long id);
 }
