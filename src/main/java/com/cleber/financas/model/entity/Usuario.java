@@ -1,5 +1,6 @@
 package com.cleber.financas.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,7 +36,8 @@ public class Usuario {
     
     @Column(name = "senha")
     private String senha;
-    
+
+    @JsonFormat(pattern = "dd/mm/yyyy")
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     @Column(name = "data_cadastro")
     private LocalDate dataCadastro;
