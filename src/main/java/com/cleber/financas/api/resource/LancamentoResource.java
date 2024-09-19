@@ -24,12 +24,12 @@ public class LancamentoResource {
         this.lancamentoService = lancamentoService;
     }
     
-    @PostMapping
+    @PostMapping /*criar*/
     public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto){
         try {
-            Lancamento converterEntidade = converterDtoParaEntidade(dto);
-            lancamentoService.salvarLancamento(converterEntidade);
-            return new ResponseEntity(converterEntidade, HttpStatus.CREATED);
+            Lancamento converteEntidade = converterDtoParaEntidade(dto);
+            converteEntidade = lancamentoService.salvarLancamento(converteEntidade);
+            return new ResponseEntity(converteEntidade, HttpStatus.CREATED);
             
         }catch (RegraDeNegocioException e){
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -60,6 +60,7 @@ public class LancamentoResource {
         /*inicio usuario*/
         /*receber o id do usuario, conforme dto*/
         Usuario buscarUsuario = usuarioService.obterUsuarioPorId(dto.getUsuario())
+                /*buscar o usuario por id, ou lancar uma exception caso ele nao exista*/
         .orElseThrow(() -> new RegraDeNegocioException("Usuario não encontrado com o id informado"));
         lancamento.setUsuario(buscarUsuario);
         /*fim usuario*/
