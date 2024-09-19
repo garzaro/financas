@@ -24,7 +24,7 @@ public class LancamentoResource {
         this.lancamentoService = lancamentoService;
     }
     
-    @PostMapping /*criar*/
+    @PostMapping /*criar recurso no servidor*/
     public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto){
         try {
             Lancamento converteEntidade = converterDtoParaEntidade(dto);
