@@ -35,7 +35,7 @@ public class Usuario {
     
     @Column(name = "senha")
     private String senha;
-    
+
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     @Column(name = "data_cadastro")
     private LocalDate dataCadastro;
