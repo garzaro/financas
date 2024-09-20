@@ -45,11 +45,21 @@ public class LancamentoResource {
                 Lancamento lancamento = converterDtoParaEntidade(dto);
                 lancamento.setId(entity.getId());
                 lancamentoService.atualizarLancamento(lancamento);
+                /*return new ResponseEntity(lancamento, HttpStatus.CREATED)*/
                 return ResponseEntity.ok(lancamento);
             }catch (RegraDeNegocioException e){
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
         }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado", HttpStatus.BAD_REQUEST));
+    }
+    
+    @DeleteMapping("{id}")
+    public ResponseEntity deletar(@PathVariable ("id") Long id){
+        return lancamentoService.obterLancamentoPorId(id).map(entity ->{
+            lancamentoService.deletarLancamento(entity);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }).orElseGet( ()->
+                new ResponseEntity("Lançamento não encontrado na base de dados", HttpStatus.BAD_REQUEST) );
     }
     
     /*Um metodo para converter o dto em uma entidade de lancamento*/
