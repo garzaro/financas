@@ -24,7 +24,7 @@ public class LancamentoResource {
         this.lancamentoService = lancamentoService;
     }
     
-    @PostMapping /*criar recurso no servidor*/
+    @PostMapping /*MAPEAR REQUISICAO HTTP, criar recurso no servidor*/
     public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto){
         try {
             Lancamento converteEntidade = converterDtoParaEntidade(dto);
@@ -37,15 +37,18 @@ public class LancamentoResource {
     }
     
     /*entity é o retorno do service quando é obtido por id*/
-    
-    @PutMapping("{id}")
+    @PutMapping("{id}") /*mapear requisicao HTTP*/
     public ResponseEntity atualizarLancamento(@PathVariable("id") Long id,  @RequestBody LancamentoDTO dto){
         /*entity é resultado da busca pelo id*/
         return lancamentoService.obterLancamentoPorId(id).map(entity ->{
-            Lancamento lancamento = converterDtoParaEntidade(dto);
-            lancamento.setId(entity.getId());
-            lancamentoService.atualizarLancamento(lancamento);
-            return ResponseEntity.ok(lancamento);
+            try {
+                Lancamento lancamento = converterDtoParaEntidade(dto);
+                lancamento.setId(entity.getId());
+                lancamentoService.atualizarLancamento(lancamento);
+                return ResponseEntity.ok(lancamento);
+            }catch (RegraDeNegocioException e){
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
         }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado", HttpStatus.BAD_REQUEST));
     }
     
