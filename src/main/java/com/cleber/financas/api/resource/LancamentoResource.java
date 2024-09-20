@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/lancamentos")
 public class LancamentoResource {
@@ -51,6 +54,32 @@ public class LancamentoResource {
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
         }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado", HttpStatus.BAD_REQUEST));
+    }
+    
+    /*substitui todos os parametros abaixo, campos da pequisa sao todos opcionais*/
+	/*@RequestParam java.util.Map<String, String> params*/
+    /*opcional na busca, required = false*/
+    
+    @GetMapping
+    public ResponseEntity buscar(
+    		@RequestParam(value = "descricao", required = false) String descricao,
+    		@RequestParam(value= "mes", required = false) Integer mes,
+    		@RequestParam(value= "ano", required = false) Integer ano,
+    		@RequestParam("usuario") Long idusuario
+    		) {
+    	Lancamento lancamentoFiltro = new Lancamento();
+    	lancamentoFiltro.setDescricao(descricao);
+        lancamentoFiltro.setMes(mes);
+        lancamentoFiltro.setAno(ano);
+        /*Para qual usuario?*/
+        Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(idusuario);
+        if (usuario.isPresent()) {
+            return ResponseEntity.badRequest().body("Consulta não realizada, o usuario não existe");
+        }else {
+            lancamentoFiltro.setUsuario(usuario.get());
+        }
+        List<Lancamento> lancamentos = lancamentoService.buscarLancamento(lancamentoFiltro);
+        return ResponseEntity.ok(lancamentos);
     }
     
     @DeleteMapping("{id}")
