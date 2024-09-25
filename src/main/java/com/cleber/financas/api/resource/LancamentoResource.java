@@ -61,7 +61,7 @@ public class LancamentoResource {
     /*opcional na busca, required = false*/
     
     @GetMapping
-    public ResponseEntity buscar(
+    public ResponseEntity buscarLancamento(
     		@RequestParam(value = "descricao", required = false) String descricao,
     		@RequestParam(value= "mes", required = false) Integer mes,
     		@RequestParam(value= "ano", required = false) Integer ano,
@@ -84,7 +84,7 @@ public class LancamentoResource {
     
     @DeleteMapping("{id}")
     public ResponseEntity deletar(@PathVariable ("id") Long id){
-        return lancamentoService.obterLancamentoPorId(id).map(entity ->{
+        return lancamentoService.obterLancamentoPorId(id)/*se tiver o id, invoca o map*/.map(entity ->{
             lancamentoService.deletarLancamento(entity);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }).orElseGet( ()->
@@ -102,7 +102,7 @@ public class LancamentoResource {
         /*inicio usuario*/
         /*receber o id do usuario, conforme dto*/
         Usuario buscarUsuario = usuarioService.obterUsuarioPorId(dto.getUsuario())
-                /*buscar o usuario por id, ou lancar uma exception caso ele nao exista*/
+                /*buscarLancamento o usuario por id, ou lancar uma exception caso ele nao exista*/
         .orElseThrow(() -> new RegraDeNegocioException("Usuario não encontrado com o id informado"));
         lancamento.setUsuario(buscarUsuario);
         /*fim usuario*/
