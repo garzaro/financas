@@ -1,23 +1,30 @@
 package com.cleber.financas.service.impl;
 
+/*@Slf4j faz parte do projeto lombok, substitui o Logger*/
+
+import com.cleber.financas.exception.ErroAcessoBancoDadosException;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
+/*@Slf4j*/
 @Service
 public class LancamentoServiceImpl implements LancamentoService {
-    
+
+    private static Logger log = LoggerFactory.getLogger(LancamentoServiceImpl.class);
+
     /*para injetar uma instancia de repositoy, precisa de um contrutor*/
     private LancamentoRepository lancamentoRepository;
     
@@ -30,10 +37,14 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Transactional /*spring abre transação com a base, roda o metodo, faz commit e, se error, then rollback*/
     public Lancamento salvarLancamento(Lancamento lancamento) {
         /*chamando*/
-        validarLancamento(lancamento);
-        /*lancamento salva automaticamente tem status de pendente*/
-        lancamento.setStatusLancamento(StatusLancamento.PENTENDE);
-        return lancamentoRepository.save(lancamento);
+        try{
+            validarLancamento(lancamento);
+            /*lancamento salva automaticamente tem status de pendente*/
+            lancamento.setStatusLancamento(StatusLancamento.PENTENDE);
+            return lancamentoRepository.save(lancamento);
+        }catch (DataAccessException db){
+            throw new ErroAcessoBancoDadosException("Falha ao conectar com o banco dados.");
+        }
     }
     
     @Override
@@ -56,15 +67,18 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Override
     @Transactional(readOnly = true)
     public List<Lancamento> buscarLancamento(Lancamento lancamentoFiltro) {
-        Example example = Example.of(lancamentoFiltro, ExampleMatcher
-                .matching()
-                /*ignora se o usuario digitou com caixa alta ou baixa*/
-                .withIgnoreCase()
-                /*contendo o que for passado na busca - CONTAINING*/
-                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
-        return lancamentoRepository.findAll(example);
+
+            Example example = Example.of(lancamentoFiltro, ExampleMatcher
+                    .matching()
+                    /*ignora se o usuario digitou com caixa alta ou baixa*/
+                    .withIgnoreCase()
+                    /*contendo o que for passado na busca - CONTAINING*/
+                    .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
+            return lancamentoRepository.findAll(example);
+
+
     }
-    
+
     @Override
     public void atualizarStatus(Lancamento lancamento, StatusLancamento status) {
         lancamento.setStatusLancamento(status); /*seta o estatus do lancamento*/

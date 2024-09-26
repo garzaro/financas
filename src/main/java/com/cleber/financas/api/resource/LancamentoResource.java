@@ -1,6 +1,7 @@
 package com.cleber.financas.api.resource;
 
 import com.cleber.financas.api.dto.LancamentoDTO;
+import com.cleber.financas.exception.ErroAcessoBancoDadosException;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
@@ -8,10 +9,13 @@ import com.cleber.financas.model.entity.TipoLancamento;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,21 +69,46 @@ public class LancamentoResource {
     		@RequestParam(value = "descricao", required = false) String descricao,
     		@RequestParam(value= "mes", required = false) Integer mes,
     		@RequestParam(value= "ano", required = false) Integer ano,
+            /*tratar excessoes de nulo ou invalido*/
     		@RequestParam("usuario") Long idusuario
-    		) {
-    	Lancamento lancamentoFiltro = new Lancamento();
-    	lancamentoFiltro.setDescricao(descricao);
-        lancamentoFiltro.setMes(mes);
-        lancamentoFiltro.setAno(ano);
-        /*Para qual usuario?*/
-        Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(idusuario);
-        if (usuario.isPresent()) {
-            return ResponseEntity.badRequest().body("Consulta não realizada, o usuario não existe");
-        }else {
-            lancamentoFiltro.setUsuario(usuario.get());
+    ){
+        try{
+            /*validar o id do usuario, evitar excessao antes de chegar no banco*/
+            if (idusuario == null){
+                return ResponseEntity.badRequest().body("O ID do usuário é obrigatório");
+            }
+
+            Lancamento lancamentoFiltro = new Lancamento();
+            lancamentoFiltro.setDescricao(descricao);
+            lancamentoFiltro.setMes(mes);
+            lancamentoFiltro.setAno(ano);
+
+            /*verifica se o usuario existe e define o filtro do lancamento*/
+            Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(idusuario);
+            if (!usuario.isPresent()) {
+                return ResponseEntity.badRequest()
+                        .body("Consulta não realizada, usuario não encontrado com o ID: " + idusuario);
+            }else {
+                lancamentoFiltro.setUsuario(usuario.get());
+            }
+
+            /*busca os lancamentos com base no filtro*/
+            List<Lancamento> lancamentos = lancamentoService.buscarLancamento(lancamentoFiltro);
+            return ResponseEntity.ok(lancamentos);
+
+        }catch (IllegalArgumentException argumento) {
+            /*Tratamento de excessão para argumentos inválidos*/
+            return ResponseEntity.badRequest().body(argumento.getMessage());
+
+        } catch (DataAccessException bd) {
+            /*Tratamento de erro ao acessar o banco de dados*/
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(bd.getMessage()); PARAD AQUI
+
+        } catch (Exception e) {
+            /* Tratamento de outras exceções*/
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro inesperado: " + e.getMessage());
         }
-        List<Lancamento> lancamentos = lancamentoService.buscarLancamento(lancamentoFiltro);
-        return ResponseEntity.ok(lancamentos);
     }
     
     @DeleteMapping("{id}")
