@@ -96,18 +96,14 @@ public class LancamentoResource {
             List<Lancamento> lancamentos = lancamentoService.buscarLancamento(lancamentoFiltro);
             return ResponseEntity.ok(lancamentos);
 
-        }catch (IllegalArgumentException argumento) {
-            /*Tratamento de excessão para argumentos inválidos*/
+        }/*catch (IllegalArgumentException argumento) {
+            /*Tratamento de excessão para argumentos inválidos
             return ResponseEntity.badRequest().body(argumento.getMessage());
 
-        } catch (DataAccessException bd) {
+        }*/ catch (DataAccessException bd) {
             /*Tratamento de erro ao acessar o banco de dados*/
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(bd.getMessage()); PARAD AQUI
-
-        } catch (Exception e) {
-            /* Tratamento de outras exceções*/
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro inesperado: " + e.getMessage());
+                    .body("Erro ao acessar o banco de dados. Tente novamente mais tarde.");
         }
     }
     
