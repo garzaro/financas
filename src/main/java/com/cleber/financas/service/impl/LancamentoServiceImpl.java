@@ -1,11 +1,13 @@
 package com.cleber.financas.service.impl;
 
 /*@Slf4j faz parte do projeto lombok, substitui o Logger*/
+/*@Slf4j - private static Logger log = LoggerFactory.getLogger(LancamentoServiceImpl.class);*/
 
 import com.cleber.financas.exception.ErroAcessoBancoDadosException;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
+import com.cleber.financas.model.entity.TipoLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
 import org.springframework.dao.DataAccessException;
@@ -19,13 +21,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-/*@Slf4j*/
+
 @Service
 public class LancamentoServiceImpl implements LancamentoService {
 
-    private static Logger log = LoggerFactory.getLogger(LancamentoServiceImpl.class);
-
-    /*para injetar uma instancia de repositoy, precisa de um contrutor*/
+    /*para injetar uma instancia de repositoy, precisa de um construtor*/
     private LancamentoRepository lancamentoRepository;
     
     /*construtor contendo um instancia para injetar*/
@@ -37,16 +37,12 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Transactional /*spring abre transação com a base, roda o metodo, faz commit e, se error, then rollback*/
     public Lancamento salvarLancamento(Lancamento lancamento) {
         /*chamando*/
-        try{
-            validarLancamento(lancamento);
-            /*lancamento salva automaticamente tem status de pendente*/
-            lancamento.setStatusLancamento(StatusLancamento.PENTENDE);
-            return lancamentoRepository.save(lancamento);
-        }catch (DataAccessException db){
-            throw new ErroAcessoBancoDadosException("Falha ao conectar com o banco dados.");
+        validarLancamento(lancamento);
+        /*lancamento salva automaticamente tem status de pendente*/
+        lancamento.setStatusLancamento(StatusLancamento.PENTENDE);
+        return lancamentoRepository.save(lancamento);
         }
-    }
-    
+        
     @Override
     @Transactional
     public Lancamento atualizarLancamento(Lancamento lancamento) {
@@ -75,8 +71,6 @@ public class LancamentoServiceImpl implements LancamentoService {
                     /*contendo o que for passado na busca - CONTAINING*/
                     .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
             return lancamentoRepository.findAll(example);
-
-
     }
 
     @Override
@@ -95,7 +89,7 @@ public class LancamentoServiceImpl implements LancamentoService {
             throw new RegraDeNegocioException("Informar um mês válido.");
         }
         if (lancamento.getAno() == null || lancamento.getAno().toString().length() != 4 ){
-            throw new RegraDeNegocioException("Informar um ano válido");
+            throw new RegraDeNegocioException("Informar um ano válido.");
         }
         if (lancamento.getUsuario() == null || lancamento.getUsuario().getId() == null){
             throw new RegraDeNegocioException("Informar um Usuário.");
@@ -105,7 +99,7 @@ public class LancamentoServiceImpl implements LancamentoService {
             throw new RegraDeNegocioException("Informe um valor válido.");
         }
         if (lancamento.getTipoLancamento() == null){
-            throw new RegraDeNegocioException("Informar um tipo de lancamento");
+            throw new RegraDeNegocioException("Informar um tipo de lancamento.");
         }
     }
     
@@ -113,6 +107,19 @@ public class LancamentoServiceImpl implements LancamentoService {
     public Optional<Lancamento> obterLancamentoPorId(Long id) {
         return lancamentoRepository.findById(id);
     }
-   
+    
+   /* @Override
+    public BigDecimal obterSaldoPorUsuario(Long id) {
+        BigDecimal receita = lancamentoRepository.obterSaldoPorUsuarioETipo(id, TipoLancamento.RECEITA);
+        BigDecimal despesa = lancamentoRepository.obterSaldoPorUsuarioETipo(id, TipoLancamento.DESPESA);
+        if (receita == null){
+            receita = BigDecimal.ZERO;
+        }
+        if (despesa == null){
+            despesa = BigDecimal.ZERO;
+        }
+        return receita.subtract(despesa);
+    }*/
+    
 }
 

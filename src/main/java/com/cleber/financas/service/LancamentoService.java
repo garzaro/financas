@@ -3,6 +3,7 @@ package com.cleber.financas.service;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,4 +26,6 @@ public interface LancamentoService {
     void validarLancamento(Lancamento lancamento);
     
     Optional<Lancamento> obterLancamentoPorId(Long id);
+    
+   /*BigDecimal obterSaldoPorUsuario(Long id);*/
 }

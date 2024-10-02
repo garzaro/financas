@@ -1,7 +1,13 @@
 package com.cleber.financas.api.resource;
 
+/*@RequiredArgsConstructor, substitui o construtor na injeção de deps, declara deps com final */
+/*@PostMapping, mapear requisição Http, criar recurso no servidor*/
+/*@RequestParams, java.util.Map<String, String> params substitui os parametros, metodo buscar */
+/*return new ResponseEntity.ok(converteEntidade*/
+/*return new ResponseEntity(lancamento, HttpStatus.CREATED)*/
+
+import org.springframework.web.bind.annotation.PostMapping;
 import com.cleber.financas.api.dto.LancamentoDTO;
-import com.cleber.financas.exception.ErroAcessoBancoDadosException;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
@@ -14,8 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
-import java.sql.SQLTimeoutException;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,14 +28,14 @@ import java.util.Optional;
 public class LancamentoResource {
     
     private LancamentoService lancamentoService;
-    
     private UsuarioService usuarioService;
     
-    public LancamentoResource(LancamentoService lancamentoService){
+    public LancamentoResource(LancamentoService lancamentoService, UsuarioService usuarioService){
         this.lancamentoService = lancamentoService;
+        this.usuarioService = usuarioService;
     }
     
-    @PostMapping /*MAPEAR REQUISICAO HTTP, criar recurso no servidor*/
+    @PostMapping
     public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto){
         try {
             Lancamento converteEntidade = converterDtoParaEntidade(dto);
@@ -44,25 +48,25 @@ public class LancamentoResource {
     }
     
     /*entity é o retorno do service quando é obtido por id*/
-    @PutMapping("{id}") /*mapear requisicao HTTP*/
+    @PutMapping("{id}")
     public ResponseEntity atualizarLancamento(@PathVariable("id") Long id,  @RequestBody LancamentoDTO dto){
         /*entity é resultado da busca pelo id*/
         return lancamentoService.obterLancamentoPorId(id).map(entity ->{
             try {
                 Lancamento lancamento = converterDtoParaEntidade(dto);
-                lancamento.setId(entity.getId());
+                lancamento.setId(id);
                 lancamentoService.atualizarLancamento(lancamento);
-                /*return new ResponseEntity(lancamento, HttpStatus.CREATED)*/
                 return ResponseEntity.ok(lancamento);
+                
             }catch (RegraDeNegocioException e){
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
-        }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado", HttpStatus.BAD_REQUEST));
+        }).orElseGet(() ->
+                new ResponseEntity(
+                        "O lancamento com o ID " + "(" + id + ")" + " não foi encontrado",
+                        HttpStatus.BAD_REQUEST
+                ));
     }
-    
-    /*substitui todos os parametros abaixo, campos da pequisa sao todos opcionais*/
-	/*@RequestParam java.util.Map<String, String> params*/
-    /*opcional na busca, required = false*/
     
     @GetMapping
     public ResponseEntity buscarLancamento(
@@ -73,10 +77,6 @@ public class LancamentoResource {
     		@RequestParam("usuario") Long idusuario
     ){
         try{
-            /*validar o id do usuario, evitar excessao antes de chegar no banco*/
-            if (idusuario == null){
-                return ResponseEntity.badRequest().body("O ID do usuário é obrigatório");
-            }
             /*filtrando*/
             Lancamento lancamentoFiltro = new Lancamento();
             lancamentoFiltro.setDescricao(descricao);
@@ -127,15 +127,21 @@ public class LancamentoResource {
         lancamento.setAno(dto.getAno());
         lancamento.setMes(dto.getMes());
         lancamento.setValor(dto.getValor());
+        /*lancamento.setDataCadastro(dto.getDataCadastro());*/
         /*inicio usuario*/
         /*receber o id do usuario, conforme dto*/
-        Usuario buscarUsuario = usuarioService.obterUsuarioPorId(dto.getUsuario())
-                /*buscarLancamento o usuario por id, ou lancar uma exception caso ele nao exista*/
-        .orElseThrow(() -> new RegraDeNegocioException("Usuario não encontrado com o id informado"));
-        lancamento.setUsuario(buscarUsuario);
+        Usuario receberUsuario = usuarioService.obterUsuarioPorId(dto.getUsuario())
+         /*buscarLancamento do usuario por id, ou lancar uma exception caso ele nao exista*/
+        .orElseThrow(() ->
+                new RegraDeNegocioException("Usuario não encontrado com o id " + "("+dto.getUsuario()+")"));
+        lancamento.setUsuario(receberUsuario);
         /*fim usuario*/
-        lancamento.setTipoLancamento(TipoLancamento.valueOf(dto.getTipo()));
-        lancamento.setStatusLancamento(StatusLancamento.valueOf(dto.getStatus()));
+        if (dto.getTipo() != null){
+            lancamento.setTipoLancamento(TipoLancamento.valueOf(dto.getTipo()));
+        }
+        if (dto.getStatus() != null){
+            lancamento.setStatusLancamento(StatusLancamento.valueOf(dto.getStatus()));
+        }
         return lancamento;
     }
 }
