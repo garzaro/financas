@@ -101,10 +101,7 @@ public class LancamentoResource {
 
         }*/ catch (DataAccessException bd) {
             /*Tratamento de erro ao acessar o banco de dados*/
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-<<<<<<< HEAD
-        
-
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(bd.getMessage());
         }
     }
     
