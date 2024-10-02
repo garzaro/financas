@@ -103,14 +103,8 @@ public class LancamentoResource {
             /*Tratamento de erro ao acessar o banco de dados*/
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 <<<<<<< HEAD
-                    .body("Erro ao acessar o banco de dados. Tente novamente mais tarde.");
-=======
-                    .body(bd.getMessage());
+        
 
-        } catch (Exception e) {
-            /* Tratamento de outras exceções*/
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro inesperado: " + e.getMessage());
->>>>>>> a6994f7f2f35db83a5063d462770e0efbb3ff061
         }
     }
     
