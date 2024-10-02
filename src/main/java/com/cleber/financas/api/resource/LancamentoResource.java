@@ -69,7 +69,7 @@ public class LancamentoResource {
     		@RequestParam(value = "descricao", required = false) String descricao,
     		@RequestParam(value= "mes", required = false) Integer mes,
     		@RequestParam(value= "ano", required = false) Integer ano,
-            /*tratar excessoes de nulo ou invalido*/
+            /*Parametro obrigatorio para fazer o filtro*/
     		@RequestParam("usuario") Long idusuario
     ){
         try{
@@ -77,7 +77,7 @@ public class LancamentoResource {
             if (idusuario == null){
                 return ResponseEntity.badRequest().body("O ID do usuário é obrigatório");
             }
-
+            /*filtrando*/
             Lancamento lancamentoFiltro = new Lancamento();
             lancamentoFiltro.setDescricao(descricao);
             lancamentoFiltro.setMes(mes);
@@ -91,7 +91,6 @@ public class LancamentoResource {
             }else {
                 lancamentoFiltro.setUsuario(usuario.get());
             }
-
             /*busca os lancamentos com base no filtro*/
             List<Lancamento> lancamentos = lancamentoService.buscarLancamento(lancamentoFiltro);
             return ResponseEntity.ok(lancamentos);
@@ -103,7 +102,15 @@ public class LancamentoResource {
         }*/ catch (DataAccessException bd) {
             /*Tratamento de erro ao acessar o banco de dados*/
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+<<<<<<< HEAD
                     .body("Erro ao acessar o banco de dados. Tente novamente mais tarde.");
+=======
+                    .body(bd.getMessage());
+
+        } catch (Exception e) {
+            /* Tratamento de outras exceções*/
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro inesperado: " + e.getMessage());
+>>>>>>> a6994f7f2f35db83a5063d462770e0efbb3ff061
         }
     }
     
