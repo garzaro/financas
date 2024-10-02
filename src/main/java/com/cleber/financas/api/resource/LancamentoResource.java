@@ -5,6 +5,7 @@ package com.cleber.financas.api.resource;
 /*@RequestParams, java.util.Map<String, String> params substitui os parametros, metodo buscar */
 /*return new ResponseEntity.ok(converteEntidade*/
 /*return new ResponseEntity(lancamento, HttpStatus.CREATED)*/
+/*Spring Boot não permite null em parâmetros obrigatórios de métodos REST, como em @RequestParam - value required*/
 
 import org.springframework.web.bind.annotation.PostMapping;
 import com.cleber.financas.api.dto.LancamentoDTO;
@@ -71,23 +72,28 @@ public class LancamentoResource {
     @GetMapping
     public ResponseEntity buscarLancamento(
     		@RequestParam(value = "descricao", required = false) String descricao,
-    		@RequestParam(value= "mes", required = false) Integer mes,
-    		@RequestParam(value= "ano", required = false) Integer ano,
+            @RequestParam(value = "tipoLancamento", required = false) String tipoLancamento,
+    		@RequestParam(value = "mes", required = false) Integer mes,
+    		@RequestParam(value = "ano", required = false) Integer ano,
             /*Parametro obrigatorio para fazer o filtro*/
-    		@RequestParam("usuario") Long idusuario
+    		@RequestParam(value = "usuario", required = false) Long idusuario
     ){
         try{
+            // Verifica se o ID do usuário foi passado
+            if (idusuario == null) {
+                return ResponseEntity.badRequest()
+                        .body("O ID do usuário é obrigatório, Jão " + "["+idusuario+"].");
+            }
             /*filtrando*/
             Lancamento lancamentoFiltro = new Lancamento();
             lancamentoFiltro.setDescricao(descricao);
             lancamentoFiltro.setMes(mes);
             lancamentoFiltro.setAno(ano);
-
             /*verifica se o usuario existe e define o filtro do lancamento*/
             Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(idusuario);
             if (!usuario.isPresent()) {
                 return ResponseEntity.badRequest()
-                        .body("Consulta não realizada, usuario não encontrado com o ID: " + idusuario);
+                        .body("Consulta não realizada, usuario não encontrado com o ID " + "["+ idusuario +"]" );
             }else {
                 lancamentoFiltro.setUsuario(usuario.get());
             }
