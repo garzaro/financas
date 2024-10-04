@@ -3,20 +3,18 @@ package com.cleber.financas.service.impl;
 /*@Slf4j faz parte do projeto lombok, substitui o Logger*/
 /*@Slf4j - private static Logger log = LoggerFactory.getLogger(LancamentoServiceImpl.class);*/
 
-import com.cleber.financas.exception.ErroAcessoBancoDadosException;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
-import com.cleber.financas.model.entity.TipoLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
-import org.springframework.dao.DataAccessException;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
@@ -74,8 +72,18 @@ public class LancamentoServiceImpl implements LancamentoService {
     }
 
     @Override
-    public void atualizarStatus(Lancamento lancamento, StatusLancamento status) {
-        lancamento.setStatusLancamento(status); /*seta o estatus do lancamento*/
+    public void atualizarStatus(Lancamento lancamento, String status) {
+        /*Verifica se o status passado nao for igual ao enum, NULL ou espaço em branco - retorna mensagem de erro*/
+        if (StringUtils.isBlank(status)) {
+            throw new RegraDeNegocioException("O status não pode ser nulo.");
+        }
+        /*Verifica se o status é válido, se nao, retorna mensagem de erro */
+        if (!EnumUtils.isValidEnum(StatusLancamento.class, status)) {
+            throw new RegraDeNegocioException("O Status " + "[" + status + "]" + " é inválido, forneça um status válido.");
+        }
+        /*Converte a String para o enum*/
+        StatusLancamento statusSelecionado = StatusLancamento.valueOf(status);
+        lancamento.setStatusLancamento(StatusLancamento.valueOf(status)); /*seta o estatus do lancamento*/
         atualizarLancamento(lancamento); /*usa a implemetnacao de atualizar lancamento para efetivar*/
     }
     
