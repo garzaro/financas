@@ -71,27 +71,16 @@ public class LancamentoResource {
     @PutMapping("{id}/atualizar-status")
     public ResponseEntity atualizarStatus(@PathVariable("id") Long id, @RequestBody AtualizarStatusDTO dto) {
         return lancamentoService.obterLancamentoPorId(id).map(entity -> {
-            /*retona o status que for passado dentro do dto, no corpo da requsicao- deve ser igual ao que tem no enum*/
-            StatusLancamento statusSelecionado = StatusLancamento.valueOf(dto.getStatus());
-            /*Verifica se o status passado nao for igual ao enum, NULL - retorna o erro*/
-            if (statusSelecionado == null) {
-                return ResponseEntity.badRequest().body("O status não pode ser nulo " + "[" + dto + "]");
-            }
-            if (!statusSelecionado.equals(dto.getStatus())) {
-                return ResponseEntity.badRequest().body("O status informado não existe, " + "[" + dto + "]" + "informe um status válido");
-            }
             try {
-                /*na entidade sera setado o valor que foi passado no dto, o que foi encontrado - - altera o valor do status*/
-                entity.setStatusLancamento(statusSelecionado);
-                lancamentoService.atualizarLancamento(entity);
+                /*Chama o método de serviço para atualizar o status*/
+                lancamentoService.atualizarStatus(entity, dto.getStatus());
                 return ResponseEntity.ok(entity);
-                
-            } catch (RegraDeNegocioException e) {
-                /*traz a mensagem do metodo de validação*/
-                return ResponseEntity.badRequest().body(e.getMessage());
+            } catch (RegraDeNegocioException status) {
+                /*Retorna a mensagem de erro caso uma exceção seja lançada*/
+                return ResponseEntity.badRequest().body(status.getMessage());
             }
         }).orElseGet(() ->
-                new ResponseEntity("lancamento não encontrado na base de dados ", HttpStatus.BAD_REQUEST));
+                new ResponseEntity("Lançamento " + "[" + id + "]" + "não foi encontrado na base de dados", HttpStatus.BAD_REQUEST));
     }
     
     @GetMapping
