@@ -19,8 +19,10 @@ public interface LancamentoService {
     /*as propriedades que vierem preenchidas no lancamento recebido sera usado como filtro*/
     List<Lancamento> buscarLancamento(Lancamento lancamentoFiltro);
     
-    /*recebe o status e o lancamento*/
-    void atualizarStatus(Lancamento lancamento, StatusLancamento status);
+    /*recebe o status e o lancamento
+    void atualizarStatus(Lancamento lancamento, StatusLancamento status);*/
+    
+    void atualizarStatus(Lancamento lancamento, String status);
     
     /*ver se ja exite o lancamento na base de dados*/
     void validarLancamento(Lancamento lancamento);
