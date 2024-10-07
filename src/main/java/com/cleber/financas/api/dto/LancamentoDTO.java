@@ -17,22 +17,6 @@ public class LancamentoDTO {
     private Long usuario;
     private String tipo;
     private String status;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	public Long getId() {
 		return id;
 	}
