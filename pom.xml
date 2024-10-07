@@ -102,6 +102,11 @@
             <scope>compile</scope>
         </dependency>
 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
 		<!-- SLF4J API -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

@@ -54,7 +54,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (verificarSeOEmailExisteNaBaseDeDados){
             throw new RegraDeNegocioException("Ja existe um usuario com esse email.");
         }
-    
     }
     
     @Override
