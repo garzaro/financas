@@ -29,27 +29,27 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/lancamentos")
 public class LancamentoResource {
-    
+
     private LancamentoService lancamentoService;
     private UsuarioService usuarioService;
-    
+
     public LancamentoResource(LancamentoService lancamentoService, UsuarioService usuarioService) {
         this.lancamentoService = lancamentoService;
         this.usuarioService = usuarioService;
     }
-    
+
     @PostMapping
     public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto) {
         try {
             Lancamento converteEntidade = converterDtoParaEntidade(dto);
             converteEntidade = lancamentoService.salvarLancamento(converteEntidade);
             return new ResponseEntity(converteEntidade, HttpStatus.CREATED);
-            
+
         } catch (RegraDeNegocioException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
+
     /* entity é o retorno do service quando é obtido por id */
     @PutMapping("{id}")
     public ResponseEntity atualizarLancamento(@PathVariable("id") Long id, @RequestBody LancamentoDTO dto) {
@@ -60,14 +60,14 @@ public class LancamentoResource {
                 lancamento.setId(id);
                 lancamentoService.atualizarLancamento(lancamento);
                 return ResponseEntity.ok(lancamento);
-                
+
             } catch (RegraDeNegocioException e) {
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
         }).orElseGet(() -> new ResponseEntity("O lancamento com o ID " + "(" + id + ")" + " não foi encontrado",
                 HttpStatus.BAD_REQUEST));
     }
-    
+
     @PutMapping("{id}/atualizar-status")
     public ResponseEntity atualizarStatus(@PathVariable("id") Long id, @RequestBody AtualizarStatusDTO dto) {
         return lancamentoService.obterLancamentoPorId(id).map(entity -> {
@@ -82,7 +82,7 @@ public class LancamentoResource {
         }).orElseGet(() ->
                 new ResponseEntity("Lançamento " + "[" + id + "]" + "não foi encontrado na base de dados", HttpStatus.BAD_REQUEST));
     }
-    
+
     @GetMapping
     public ResponseEntity buscarLancamento(@RequestParam(value = "descricao", required = false) String descricao,
                                            @RequestParam(value = "tipoLancamento", required = false) String tipoLancamento,
@@ -92,7 +92,7 @@ public class LancamentoResource {
                                            @RequestParam(value = "usuario", required = false) Long idusuario) {
         try {
             /* Verifica se o ID do usuário foi passado */
-            
+
             if (idusuario == null) {
                 return ResponseEntity.badRequest().body("O ID do usuário é obrigatório, Jão " + "[" + idusuario + "].");
             }
@@ -112,13 +112,13 @@ public class LancamentoResource {
             /* busca os lancamentos com base no filtro */
             List<Lancamento> lancamentos = lancamentoService.buscarLancamento(lancamentoFiltro);
             return ResponseEntity.ok(lancamentos);
-            
+
         } catch (DataAccessException bd) {
             /* Tratamento de erro ao acessar o banco de dados */
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(bd.getMessage());
         }
     }
-    
+
     @DeleteMapping("{id}")
     public ResponseEntity deletar(@PathVariable("id") Long id) {
         return lancamentoService.obterLancamentoPorId(id)/* se tiver o id, invoca o map */.map(entity -> {
@@ -127,7 +127,7 @@ public class LancamentoResource {
             return new ResponseEntity(HttpStatus.NO_CONTENT); /* e devolve o resultado */
         }).orElseGet(() -> new ResponseEntity("Lançamento " + "[" + id + "]" + " não encontrado na base de dados.", HttpStatus.BAD_REQUEST));
     }
-    
+
     /* Um metodo para converter o dto em uma entidade de lancamento */
     private Lancamento converterDtoParaEntidade(LancamentoDTO dto) {
         Lancamento lancamento = new Lancamento();
