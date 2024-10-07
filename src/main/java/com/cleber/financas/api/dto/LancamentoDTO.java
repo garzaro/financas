@@ -12,11 +12,14 @@ public class LancamentoDTO {
     private String descricao;
     private Integer mes;
     private Integer ano;
+	//@JsonDeserialize(using = CustomBigDecimalDeserializer.class)
     private BigDecimal valor;
     /*passar só o id do usuario, nao como objeto*/
     private Long usuario;
     private String tipo;
     private String status;
+
+
 	public Long getId() {
 		return id;
 	}

@@ -1,5 +1,7 @@
 package com.cleber.financas.model.entity;
 
+import com.cleber.financas.jackson.DeserializadorBigDecimalCustomizado;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +11,6 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
 @Data
@@ -35,7 +36,8 @@ public class Lancamento {
     @ManyToOne
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
-    
+
+    //@JsonDeserialize(using = DeserializadorBigDecimalCustomizado.class)
     @Column(name = "valor")
     private BigDecimal valor;
     

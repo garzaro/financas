@@ -4,10 +4,13 @@ package com.cleber.financas.service.impl;
 /*@Slf4j - private static Logger log = LoggerFactory.getLogger(LancamentoServiceImpl.class);*/
 
 import com.cleber.financas.exception.RegraDeNegocioException;
+import com.cleber.financas.exception.ValorInvalidoException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Example;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +42,7 @@ public class LancamentoServiceImpl implements LancamentoService {
         validarLancamento(lancamento);
         /*lancamento salva automaticamente tem status de pendente*/
         lancamento.setStatusLancamento(StatusLancamento.PENTENDE);
+
         return lancamentoRepository.save(lancamento);
         }
         
@@ -110,11 +115,24 @@ public class LancamentoServiceImpl implements LancamentoService {
             throw new RegraDeNegocioException("Informar um tipo de lancamento.");
         }
     }
-    
+
     @Override
     public Optional<Lancamento> obterLancamentoPorId(Long id) {
         return lancamentoRepository.findById(id);
     }
+
+    @Override
+    public BigDecimal deserialize(JsonParser jsonParser, DeserializationContext ctxt)
+            throws IOException {
+        try {
+            String value = jsonParser.getText().replace(",", ".");
+            return new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            throw new ValorInvalidoException("O valor [" + jsonParser.getText() + "] não é válido");
+        }
+
+    }
+
     
    /* @Override
     public BigDecimal obterSaldoPorUsuario(Long id) {
@@ -128,6 +146,7 @@ public class LancamentoServiceImpl implements LancamentoService {
         }
         return receita.subtract(despesa);
     }*/
-    
+
 }
+
 
