@@ -80,7 +80,9 @@ public class LancamentoResource {
                 return ResponseEntity.badRequest().body(status.getMessage());
             }
         }).orElseGet(() ->
-                new ResponseEntity("Lançamento " + "[" + id + "]" + "não foi encontrado na base de dados", HttpStatus.BAD_REQUEST));
+                new ResponseEntity(
+                        "Lançamento " + "[" + id + "]" + "não foi encontrado na base de dados",
+                        HttpStatus.BAD_REQUEST));
     }
 
     @GetMapping

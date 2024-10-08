@@ -46,7 +46,6 @@ public class DeserializadorBigDecimalCustomizado extends JsonDeserializer<BigDec
         } catch (NumberFormatException e) {
             throw new ValorInvalidoException("O valor [" + jsonParser.getText() + "] não é válido");
         }
-
     }
 
 
