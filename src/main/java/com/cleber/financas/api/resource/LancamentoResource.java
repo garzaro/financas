@@ -127,7 +127,9 @@ public class LancamentoResource {
             lancamentoService
                     .deletarLancamento(entity); /* o map permite executar uma operação na entidade encontrada */
             return new ResponseEntity(HttpStatus.NO_CONTENT); /* e devolve o resultado */
-        }).orElseGet(() -> new ResponseEntity("Lançamento " + "[" + id + "]" + " não encontrado na base de dados.", HttpStatus.BAD_REQUEST));
+        }).orElseGet(() ->
+        new ResponseEntity("Lançamento " + "[" + id + "]" + " não encontrado na base de dados.",
+        		HttpStatus.BAD_REQUEST));
     }
 
     /* Um metodo para converter o dto em uma entidade de lancamento */
@@ -137,6 +139,7 @@ public class LancamentoResource {
         lancamento.setDescricao(dto.getDescricao());
         lancamento.setAno(dto.getAno());
         lancamento.setMes(dto.getMes());
+        lancamento.setDataCadastro(dto.getData());
         lancamento.setValor(dto.getValor());
         /* lancamento.setDataCadastro(dto.getDataCadastro()); */
         /* inicio usuario */

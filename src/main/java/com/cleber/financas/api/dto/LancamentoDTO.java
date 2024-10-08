@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -12,6 +13,7 @@ public class LancamentoDTO {
     private String descricao;
     private Integer mes;
     private Integer ano;
+	private LocalDate data;
 	//@JsonDeserialize(using = CustomBigDecimalDeserializer.class)
     private BigDecimal valor;
     /*passar só o id do usuario, nao como objeto*/
