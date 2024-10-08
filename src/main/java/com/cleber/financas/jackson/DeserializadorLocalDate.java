@@ -15,8 +15,6 @@ import com.cleber.financas.exception.ErroDataException;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 @Configuration
 public class DeserializadorLocalDate extends JsonDeserializer<LocalDate> {
@@ -42,17 +40,19 @@ public class DeserializadorLocalDate extends JsonDeserializer<LocalDate> {
         String[] parts = dma.split("-");
 
         if (parts.length == 3) {
-            String parteDoAno = parts[2];
+            String parteDoAno = parts[0];
+            String parteDoMes = parts[1];
+            String parteDoDia = parts[2];
 
             try {
-                int ano = Integer.parseInt(parteDoAno.length() == 2 ? "20" + parteDoAno : parteDoAno);
+                int ano = Integer.parseInt(parteDoDia.length() == 2 ? "20" + parteDoDia : parteDoDia);
                 if (ano < 2024 || ano > 2100) {
-                    throw new ErroDataException("O ANO [" + parteDoAno + "] não é valido");
+                    throw new ErroDataException("O ANO [" + parteDoDia + "] não é valido");
                 }
                 /*// Fixar o dia e mês em 1, pois só estamos validando o ano*/
-                return LocalDate.of(ano, 1, 1);
+                return LocalDate.of(ano);
             } catch (NumberFormatException e) {
-                throw new ErroDataException("O ANO [" + parteDoAno + "] nao é valisdo");
+                throw new ErroDataException("O ANO [" + parteDoDia + "] nao é valisdo");
             }
 
         } else {
