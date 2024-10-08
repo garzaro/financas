@@ -22,4 +22,11 @@ public class GlobalExceptionHandler {
         errors.put("Atenção", e.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ErroDataException.class)
+    public ResponseEntity<Map<String,String>> handleInvalidDateException(ErroDataException e, WebRequest request) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Atenção", e.getMessage());
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
 }
