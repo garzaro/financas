@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import com.cleber.financas.exception.ErroDataException;
 
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 
 @Configuration
@@ -40,25 +41,31 @@ public class DeserializadorLocalDate extends JsonDeserializer<LocalDate> {
         String[] parts = dma.split("-");
 
         if (parts.length == 3) {
-            String parteDoAno = parts[0];
-            String parteDoMes = parts[1];
-            String parteDoDia = parts[2];
+            String dayPart = parts[0];
+            String monthPart = parts[1];
+            String yearPart = parts[2];
 
             try {
-                int ano = Integer.parseInt(parteDoDia.length() == 2 ? "20" + parteDoDia : parteDoDia);
-                if (ano < 2024 || ano > 2100) {
-                    throw new ErroDataException("O ANO [" + parteDoDia + "] não é valido");
-                }
-                /*// Fixar o dia e mês em 1, pois só estamos validando o ano*/
-                return LocalDate.of(ano);
-            } catch (NumberFormatException e) {
-                throw new ErroDataException("O ANO [" + parteDoDia + "] nao é valisdo");
-            }
+                int year = Integer.parseInt(yearPart.length() == 2 ? "20" + yearPart : yearPart);
+                int month = Integer.parseInt(monthPart);
+                int day = Integer.parseInt(dayPart);
 
+                if (year < 1900 || year > 2100) {
+                    throw new ErroDataException("O ano [" + yearPart + "] não é válido");
+                }
+
+                // Verifica se o dia e o mês são válidos
+                LocalDate date = LocalDate.of(year, month, day);
+                return date;
+
+            } catch (NumberFormatException | DateTimeException e) {
+                throw new ErroDataException("A data [" + dma + "] não é válida");
+            }
         } else {
-            throw new ErroDataException("A data [" + dma + "] não e valida, o ano deve conter 4 dígitos");
+            throw new ErroDataException("A data [" + dma + "] não é válida");
         }
     }
 }
+
 
 
