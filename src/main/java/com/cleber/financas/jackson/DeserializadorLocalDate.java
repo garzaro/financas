@@ -42,8 +42,3 @@ public class DeserializadorLocalDate extends JsonDeserializer<LocalDate> {
 }
 
 
-/* /*quando passar a string sera verificado se o formato basico da data
-        if (dma.matches("\\d{2}-\\d{2}-\\d{2}")) {
-        throw new IOException(dma + " Formato de data inválido. Esperado dd-MM-yyyy");
-        }*/
-
