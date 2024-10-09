@@ -16,6 +16,9 @@ public interface UsuarioService {
     
     /*verifica o email na base de dados, unique */
     void validarEmailNaBaseDedados(String email);
+
+    /*verficar o cpf na base de dados*/
+    void validarCadastroPessoaFisica(String cadastroPessoaFisica);
     
     Optional<Usuario> obterUsuarioPorId(Long id);
 }
