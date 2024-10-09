@@ -32,8 +32,7 @@ public interface LancamentoService {
     
     Optional<Lancamento> obterLancamentoPorId(Long id);
 
-    BigDecimal deserialize(JsonParser jsonParser, DeserializationContext ctxt)
-            throws IOException;
+   
 
     /*BigDecimal obterSaldoPorUsuario(Long id);*/
 }

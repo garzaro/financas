@@ -4,13 +4,10 @@ package com.cleber.financas.service.impl;
 /*@Slf4j - private static Logger log = LoggerFactory.getLogger(LancamentoServiceImpl.class);*/
 
 import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.exception.ValorInvalidoException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Example;
@@ -18,15 +15,16 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class LancamentoServiceImpl implements LancamentoService {
-
+    
     /*para injetar uma instancia de repositoy, precisa de um construtor*/
     private LancamentoRepository lancamentoRepository;
     
@@ -42,10 +40,10 @@ public class LancamentoServiceImpl implements LancamentoService {
         validarLancamento(lancamento);
         /*lancamento salva automaticamente tem status de pendente*/
         lancamento.setStatusLancamento(StatusLancamento.PENTENDE);
-
-        return lancamentoRepository.save(lancamento);
-        }
         
+        return lancamentoRepository.save(lancamento);
+    }
+    
     @Override
     @Transactional
     public Lancamento atualizarLancamento(Lancamento lancamento) {
@@ -66,16 +64,16 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Override
     @Transactional(readOnly = true)
     public List<Lancamento> buscarLancamento(Lancamento lancamentoFiltro) {
-
-            Example example = Example.of(lancamentoFiltro, ExampleMatcher
-                    .matching()
-                    /*ignora se o usuario digitou com caixa alta ou baixa*/
-                    .withIgnoreCase()
-                    /*contendo o que for passado na busca - CONTAINING*/
-                    .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
-            return lancamentoRepository.findAll(example);
+        
+        Example example = Example.of(lancamentoFiltro, ExampleMatcher
+                .matching()
+                /*ignora se o usuario digitou com caixa alta ou baixa*/
+                .withIgnoreCase()
+                /*contendo o que for passado na busca - CONTAINING*/
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
+        return lancamentoRepository.findAll(example);
     }
-
+    
     @Override
     public void atualizarStatus(Lancamento lancamento, String status) {
         /*Verifica se o status passado nao for igual ao enum, NULL ou espaço em branco - retorna mensagem de erro*/
@@ -95,43 +93,39 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Override
     public void validarLancamento(Lancamento lancamento) {
         /*informar uma descrição válida, trim remove espaço vazio no inicio e no fim tornando um string vazia*/
-        if (lancamento.getDescricao() == null || lancamento.getDescricao().trim().equals("")){
+        if (lancamento.getDescricao() == null || lancamento.getDescricao().trim().equals("")) {
             throw new RegraDeNegocioException("Informar uma descrição válida.");
         }
-        if (lancamento.getMes() == null || lancamento.getMes() < 1 || lancamento.getMes() >  12){
+        if (lancamento.getMes() == null || lancamento.getMes() < 1 || lancamento.getMes() > 12) {
             throw new RegraDeNegocioException("Informar um mês válido.");
         }
-        if (lancamento.getAno() == null || lancamento.getAno().toString().length() != 4 ){
+        if (lancamento.getAno() == null || lancamento.getAno().toString().length() != 4) {
             throw new RegraDeNegocioException("Informar um ano válido.");
         }
-        if (lancamento.getUsuario() == null || lancamento.getUsuario().getId() == null){
+        
+        if (lancamento.getDataCadastro() == null){
+            throw new RegraDeNegocioException("A data de cadastro não pode ser nula, infome uma data válida");
+        }
+        
+        if (lancamento.getUsuario() == null || lancamento.getUsuario().getId() == null) {
             throw new RegraDeNegocioException("Informar um Usuário.");
         }
         /*compareTo para compara valor como BigDecimal*/
-        if (lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1){
-            throw new RegraDeNegocioException("Informe um valor válido.");
+        if (lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1) {
+            throw new RegraDeNegocioException("Informe o valor acima de 1 real.");
         }
-        if (lancamento.getTipoLancamento() == null){
+        if (lancamento.getTipoLancamento() == null) {
             throw new RegraDeNegocioException("Informar um tipo de lancamento.");
         }
     }
-
+    
     @Override
     public Optional<Lancamento> obterLancamentoPorId(Long id) {
         return lancamentoRepository.findById(id);
     }
-
-    @Override
-    public BigDecimal deserialize(JsonParser jsonParser, DeserializationContext ctxt)
-            throws IOException {
-        try {
-            String value = jsonParser.getText().replace(",", ".");
-            return new BigDecimal(value);
-        } catch (NumberFormatException e) {
-            throw new ValorInvalidoException("O valor [" + jsonParser.getText() + "] não é válido");
-        }
-
-    }
+    
+    
+}
 
     
    /* @Override
@@ -146,7 +140,7 @@ public class LancamentoServiceImpl implements LancamentoService {
         }
         return receita.subtract(despesa);
     }*/
+    
 
-}
 
 
