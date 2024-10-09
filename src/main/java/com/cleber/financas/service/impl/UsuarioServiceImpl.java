@@ -17,12 +17,12 @@ import java.util.Optional;
 public class UsuarioServiceImpl implements UsuarioService {
     @Autowired
     UsuarioRepository usuarioRepository;
-
+    
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
         super();
         this.usuarioRepository = usuarioRepository;
     }
-
+    
     @Override
     public Usuario autenticarUsuario(String email, String senha) {
         /*login, validando login*/
@@ -36,32 +36,32 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         return usuario.get();
     }
-
+    
     @Override
     @Transactional
     public Usuario persistirUsuarioNabaseDeDados(Usuario usuario) {
-
+        
         /*deve validar o email, verificar se existe. (metodo do Service)*/
         validarEmailAndCadastroPessoaFisicaNaBaseDedados(
                 usuario.getEmail(), usuario.getCadastroPessoaFisica());
-
+        
         /*se nao existir email, salva a instancia*/
         return usuarioRepository.save(usuario);
     }
-    AINDA NAO ESTA VALIDANDO O CPF
-
+    
     @Override
     public void validarEmailAndCadastroPessoaFisicaNaBaseDedados(String email, String cadastroPessoaFisica) {
         /*ver se o email existe*/
-        boolean verificarSeOEmaiLECadastroPessoaFisicaExistemNaBaseDeDados = usuarioRepository
-                .existsByEmailAndCadastroPessoaFisica(email, cadastroPessoaFisica);
-
-        if (verificarSeOEmaiLECadastroPessoaFisicaExistemNaBaseDeDados) {
+        boolean existeUsuarioComEmail = usuarioRepository.existsByEmail(email);
+        boolean existeUsuarioComCpf = usuarioRepository.existsByCadastroPessoaFisica(cadastroPessoaFisica);
+        
+        if (existeUsuarioComEmail) {
             throw new RegraDeNegocioException("Já existe um usuário com esse email.");
         }
-        if (verificarSeOEmaiLECadastroPessoaFisicaExistemNaBaseDeDados) {
+        if (existeUsuarioComCpf) {
             throw new RegraDeNegocioException("Já existe um usuário com esse CPF");
         }
+        
     }
 
     /*@Override
@@ -73,7 +73,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RegraDeNegocioException("Já existe um usuário com esse CPF");
         }
     }*/
-
+    
     @Override
     public Optional<Usuario> obterUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
