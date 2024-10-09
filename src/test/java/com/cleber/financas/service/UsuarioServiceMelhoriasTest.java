@@ -4,7 +4,6 @@ import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ public class UsuarioServiceMelhoriasTest {
         /*cenario*/
         usuarioRepository.deleteAll();
         /*ação, sem verificação, só olha se existe o email*/
-        usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
+        usuarioService.validarCadastroPessoaFisicaAndEmailNaBaseDedados("cleber@gmail.com");
     }
     @Test(expected = RegraDeNegocioException.class)
     public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){
@@ -39,7 +38,7 @@ public class UsuarioServiceMelhoriasTest {
         /*salvar*/
         usuarioRepository.save(cadastrarEmail);
         /*ação*/
-        usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
+        usuarioService.validarCadastroPessoaFisicaAndEmailNaBaseDedados("cleber@gmail.com");
     }
     @Test(expected = Test.None.class)
     public void deveAutenticarUmUsuarioComSucesso(){
