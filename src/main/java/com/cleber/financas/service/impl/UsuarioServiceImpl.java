@@ -52,7 +52,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         /*ver se o email existe*/
         boolean verificarSeOEmailExisteNaBaseDeDados = usuarioRepository.existsByEmail(email);
         if (verificarSeOEmailExisteNaBaseDeDados){
-            throw new RegraDeNegocioException("Já existe um usuario com esse email.");
+            throw new RegraDeNegocioException("Já existe um usuário com esse email.");
         }
     }
 
@@ -62,7 +62,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         boolean verificarCpf = usuarioRepository.
                 existsByCadastroPessoaFisica(cadastroPessoaFisica);
         if (verificarCpf){
-            throw new RegraDeNegocioException("Já existe um usuario com esse CPF");
+            throw new RegraDeNegocioException("Já existe um usuário com esse CPF");
         }
     }
 
