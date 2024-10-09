@@ -139,7 +139,7 @@ public class LancamentoResource {
         lancamento.setDescricao(dto.getDescricao());
         lancamento.setAno(dto.getAno());
         lancamento.setMes(dto.getMes());
-        lancamento.setDataCadastro(dto.getData());
+        lancamento.setDataCadastro(dto.getDataCadastro());
         lancamento.setValor(dto.getValor());
         /* lancamento.setDataCadastro(dto.getDataCadastro()); */
         /* inicio usuario */

@@ -42,7 +42,7 @@ public class Lancamento {
     @Column(name = "valor")
     private BigDecimal valor;
     
-    @JsonDeserialize(using = DeserializadorLocalDate.class)
+   /* @JsonDeserialize(using = DeserializadorLocalDate.class)*/
     @Column(name = "data_cadastro")
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     private LocalDate dataCadastro;
