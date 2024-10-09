@@ -52,10 +52,20 @@ public class UsuarioServiceImpl implements UsuarioService {
         /*ver se o email existe*/
         boolean verificarSeOEmailExisteNaBaseDeDados = usuarioRepository.existsByEmail(email);
         if (verificarSeOEmailExisteNaBaseDeDados){
-            throw new RegraDeNegocioException("Ja existe um usuario com esse email.");
+            throw new RegraDeNegocioException("Já existe um usuario com esse email.");
         }
     }
-    
+
+    @Override
+    public void validarCadastroPessoaFisica(String cadastroPessoaFisica) {
+        /*ver se existe o cpf*/
+        boolean verificarCpf = usuarioRepository.
+                existsByCadastroPessoaFisica(cadastroPessoaFisica);
+        if (verificarCpf){
+            throw new RegraDeNegocioException("Já existe um usuario com esse CPF");
+        }
+    }
+
     @Override
     public Optional<Usuario> obterUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
