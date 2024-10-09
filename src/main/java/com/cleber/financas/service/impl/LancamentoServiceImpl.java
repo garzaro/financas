@@ -102,7 +102,7 @@ public class LancamentoServiceImpl implements LancamentoService {
         if (lancamento.getAno() == null || lancamento.getAno().toString().length() != 4) {
             throw new RegraDeNegocioException("Informar um ano válido.");
         }
-        
+        MESMO COM A DATA PASSADA NAO ESTÁ PASSANDO, ESTA VALIDANDO NULL
         if (lancamento.getDataCadastro() == null){
             throw new RegraDeNegocioException("A data de cadastro não pode ser nula, infome uma data válida");
         }
