@@ -25,7 +25,7 @@ public class UsuarioServiceSpyTest {
     public void deveSalvarUmUsuario(){
         /*cenario*/
         Mockito.doNothing().when(usuarioServiceImpl)
-                .validarEmailNaBaseDedados(Mockito.anyString());
+                .validarCadastroPessoaFisicaAndEmailNaBaseDedados(Mockito.anyString());
         
         Usuario usuario = criarUsuario();
         
@@ -56,7 +56,7 @@ public class UsuarioServiceSpyTest {
         
         Mockito.doThrow(RegraDeNegocioException.class)
                 .when(usuarioServiceImpl)
-                .validarEmailNaBaseDedados("email@gmail.com");
+                .validarCadastroPessoaFisicaAndEmailNaBaseDedados("email@gmail.com");
         /*ação*/
         usuarioServiceImpl.persistirUsuarioNabaseDeDados(persistirUsuario);
         

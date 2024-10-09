@@ -45,7 +45,7 @@ public class UsuarioServiceMockTest {
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(false);
 
         /*ação, sem verificação, só olha se existe o email*/
-        usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
+        usuarioService.validarCadastroPessoaFisicaAndEmailNaBaseDedados("cleber@gmail.com");
     }
 
     @Test(expected = RegraDeNegocioException.class)
@@ -54,7 +54,7 @@ public class UsuarioServiceMockTest {
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(true);
 
         /*ação*/
-        usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
+        usuarioService.validarCadastroPessoaFisicaAndEmailNaBaseDedados("cleber@gmail.com");
     }
 
     @Test(expected = Test.None.class)
