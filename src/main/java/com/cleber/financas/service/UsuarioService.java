@@ -14,11 +14,8 @@ public interface UsuarioService {
     /*salvar o usuario na base*/
     Usuario persistirUsuarioNabaseDeDados(Usuario usuario);
 
-    /*verifica o email na base de dados, unique */
+    /*verifica o email ou CPF existe na base de dados, unique */
     void validarEmailAndCadastroPessoaFisicaNaBaseDedados(String email, String cadastroPessoaFisica);
-
-    /*verficar o cpf na base de dados
-    void validarCadastroPessoaFisica(String cadastroPessoaFisica);*/
 
     Optional<Usuario> obterUsuarioPorId(Long id);
 }
