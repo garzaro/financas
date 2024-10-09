@@ -82,7 +82,7 @@ public class LancamentoServiceImpl implements LancamentoService {
         }
         /*Verifica se o status é válido, se nao, retorna mensagem de erro */
         if (!EnumUtils.isValidEnum(StatusLancamento.class, status)) {
-            throw new RegraDeNegocioException("O Status " + "[" + status + "]" + " é inválido, forneça um status válido.");
+            throw new RegraDeNegocioException("O Status [" + status + "] é inválido, forneça um status válido.");
         }
         /*Converte a String para o enum*/
         StatusLancamento statusSelecionado = StatusLancamento.valueOf(status);
