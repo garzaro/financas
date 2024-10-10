@@ -38,7 +38,6 @@ public class Lancamento {
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
-    @JsonDeserialize(using = DeserializadorBigDecimalCustomizado.class)
     @Column(name = "valor")
     private BigDecimal valor;
     
