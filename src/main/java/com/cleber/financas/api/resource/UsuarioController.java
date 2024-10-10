@@ -45,7 +45,6 @@ public class UsuarioController {
                 .nomeUsuario(dto.getNomeUsuario())
                 .email(dto.getEmail())
                 .senha(dto.getSenha())
-                .dataCadastro(dto.getDataCadastro())
                 .build();
 
         try {
