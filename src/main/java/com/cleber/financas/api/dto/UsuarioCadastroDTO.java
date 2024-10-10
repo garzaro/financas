@@ -17,8 +17,7 @@ public class UsuarioCadastroDTO {
     private String nomeUsuario;
     private String email;
     private String senha;
-    private LocalDate dataCadastro;
-    
+
     public UsuarioCadastroDTO() {
 		
 	}
@@ -31,7 +30,6 @@ public class UsuarioCadastroDTO {
         this.nomeUsuario = builder.nomeUsuario;
         this.email = builder.email;
         this.senha = builder.senha;
-        this.dataCadastro = builder.dataCadastro;
     }
 
     public String getNomeCompleto() {
@@ -54,18 +52,13 @@ public class UsuarioCadastroDTO {
         return senha;
     }
 
-    public LocalDate getDataCadastro() {
-        return dataCadastro;
-    }
-
     public static class UsuarioBuilder{
         private String nomeCompleto;
         private String cadastroPessoaFisica;
         private String nomeUsuario;
         private String email;
         private String senha;
-        private LocalDate dataCadastro;
-        
+
         public UsuarioBuilder setNomeCompleto(String nomeCompleto) {
         this.nomeCompleto = nomeCompleto;
         return this;
@@ -88,11 +81,6 @@ public class UsuarioCadastroDTO {
 
         public UsuarioBuilder setSenha(String senha){
             this.senha = senha;
-            return this;
-        }
-
-        public UsuarioBuilder setDataCadastro(LocalDate dataCadastro) {
-            this.dataCadastro = dataCadastro;
             return this;
         }
 
