@@ -29,7 +29,7 @@ public class UsuarioServiceMelhoriasTest {
         /*cenario*/
         usuarioRepository.deleteAll();
         /*ação, sem verificação, só olha se existe o email*/
-        usuarioService.validarCadastroPessoaFisicaAndEmailNaBaseDedados("cleber@gmail.com");
+        usuarioService.validarEmailAndCadastroPessoaFisicaNaBaseDedados("cleber@gmail.com");
     }
     @Test(expected = RegraDeNegocioException.class)
     public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){

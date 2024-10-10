@@ -96,15 +96,13 @@ public class LancamentoServiceImpl implements LancamentoService {
         if (lancamento.getDescricao() == null || lancamento.getDescricao().trim().equals("")) {
             throw new RegraDeNegocioException("Informar uma descrição válida.");
         }
+        
         if (lancamento.getMes() == null || lancamento.getMes() < 1 || lancamento.getMes() > 12) {
             throw new RegraDeNegocioException("Informar um mês válido.");
         }
+        
         if (lancamento.getAno() == null || lancamento.getAno().toString().length() != 4) {
             throw new RegraDeNegocioException("Informar um ano válido.");
-        }
-       /* MESMO COM A DATA PASSADA NAO ESTÁ PASSANDO, ESTA VALIDANDO NULL*/
-        if (lancamento.getDataCadastro() == null){
-            throw new RegraDeNegocioException("A data de cadastro não pode ser nula, infome uma data válida");
         }
         
         if (lancamento.getUsuario() == null || lancamento.getUsuario().getId() == null) {
@@ -114,9 +112,16 @@ public class LancamentoServiceImpl implements LancamentoService {
         if (lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1) {
             throw new RegraDeNegocioException("Informe o valor acima de 1 real.");
         }
+
         if (lancamento.getTipoLancamento() == null) {
             throw new RegraDeNegocioException("Informar um tipo de lancamento.");
         }
+
+        /* Verificar se a data é null e não colocar a data de ontem*/
+        if (lancamento.getDataCadastro() == null || lancamento.getDataCadastro().isAfter(LocalDate.now())) {
+            throw new RegraDeNegocioException("Data nula ou vazia. Informe uma data válida.");
+        }
+
     }
     
     @Override
