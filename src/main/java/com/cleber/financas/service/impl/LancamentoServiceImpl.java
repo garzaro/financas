@@ -117,10 +117,10 @@ public class LancamentoServiceImpl implements LancamentoService {
             throw new RegraDeNegocioException("Informar um tipo de lancamento.");
         }
 
-        /* Verificar se a data é null e não colocar a data de ontem*/
+        /* Verificar se a data é null e não colocar a data de ontem
         if (lancamento.getDataCadastro() == null || lancamento.getDataCadastro().isAfter(LocalDate.now())) {
             throw new RegraDeNegocioException("Data nula ou vazia. Informe uma data válida.");
-        }
+        }*/
 
     }
     

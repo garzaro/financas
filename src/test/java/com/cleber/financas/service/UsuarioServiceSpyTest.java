@@ -20,22 +20,22 @@ public class UsuarioServiceSpyTest {
     UsuarioServiceImpl usuarioServiceImpl;
     @MockBean
     UsuarioRepository usuarioRepository;
-    
+
     @Test(expected = Test.None.class)
     public void deveSalvarUmUsuario(){
         /*cenario*/
         Mockito.doNothing().when(usuarioServiceImpl)
-                .validarCadastroPessoaFisicaAndEmailNaBaseDedados(Mockito.anyString());
-        
+                .validarEmailAndCadastroPessoaFisicaNaBaseDedados("email@gmail.com",Mockito.anyString());
+
         Usuario usuario = criarUsuario();
-        
+
         Mockito.when(usuarioRepository.save(Mockito.any(Usuario.class)))
                 .thenReturn(usuario);
-        
+
         /*ação*/
         Usuario usuarioSalvo = usuarioServiceImpl
                 .persistirUsuarioNabaseDeDados(new Usuario());
-        
+
         /*verificação*/
         Assertions.assertThat(usuarioSalvo)
                 .isNotNull();
@@ -47,19 +47,19 @@ public class UsuarioServiceSpyTest {
                 .isEqualTo("email@gmail.com");
         Assertions.assertThat(usuarioSalvo.getSenha())
                 .isEqualTo("senha");
-        
+
     }
     @Test(expected = RegraDeNegocioException.class)
     public void naoDeveSalvarUmUsuarioComEmailJaCadastrado(){
-        
+
         Usuario persistirUsuario = criarUsuario();
-        
+
         Mockito.doThrow(RegraDeNegocioException.class)
                 .when(usuarioServiceImpl)
-                .validarCadastroPessoaFisicaAndEmailNaBaseDedados("email@gmail.com");
+                .validarEmailAndCadastroPessoaFisicaNaBaseDedados("email@gmail.com","123456789-00");
         /*ação*/
         usuarioServiceImpl.persistirUsuarioNabaseDeDados(persistirUsuario);
-        
+
         /*verificação*/
         Mockito.verify(usuarioRepository, Mockito.never())
                 .save(persistirUsuario);
@@ -72,6 +72,6 @@ public class UsuarioServiceSpyTest {
                 .email("email@gmail.com")
                 .senha("senha")
                 .build();
-        
+
     }
 }
