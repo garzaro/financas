@@ -41,7 +41,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public Usuario persistirUsuarioNabaseDeDados(Usuario usuario) {
         
-        /*deve validar o email, verificar se existe. (metodo do Service)*/
+        /*deve validar o email e o cpf, verificar se existe*/
         validarEmailAndCadastroPessoaFisicaNaBaseDedados(
                 usuario.getEmail(), usuario.getCadastroPessoaFisica());
         
