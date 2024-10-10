@@ -1,7 +1,7 @@
 package com.cleber.financas.model.entity;
 
 import com.cleber.financas.jackson.DeserializadorBigDecimalCustomizado;
-import com.cleber.financas.jackson.DeserializadorLocalDate;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,11 +38,10 @@ public class Lancamento {
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
-    //@JsonDeserialize(using = DeserializadorBigDecimalCustomizado.class)
+    @JsonDeserialize(using = DeserializadorBigDecimalCustomizado.class)
     @Column(name = "valor")
     private BigDecimal valor;
     
-   /* @JsonDeserialize(using = DeserializadorLocalDate.class)*/
     @Column(name = "data_cadastro")
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     private LocalDate dataCadastro;

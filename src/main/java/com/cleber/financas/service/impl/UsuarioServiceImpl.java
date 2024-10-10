@@ -63,16 +63,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         
     }
-
-    /*@Override
-    public void validarCadastroPessoaFisica(String cadastroPessoaFisica) {
-        /*ver se existe o cpf
-        boolean verificarCpf = usuarioRepository.
-                existsByCadastroPessoaFisica(cadastroPessoaFisica);
-        if (verificarCpf){
-            throw new RegraDeNegocioException("Já existe um usuário com esse CPF");
-        }
-    }*/
     
     @Override
     public Optional<Usuario> obterUsuarioPorId(Long id) {
