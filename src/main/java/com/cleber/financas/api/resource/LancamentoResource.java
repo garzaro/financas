@@ -1,5 +1,7 @@
 package com.cleber.financas.api.resource;
 
+import com.cleber.financas.api.converter.ConvertDtoToEntity;
+
 /*@RequiredArgsConstructor, substitui o construtor na injeção de deps, declara deps com final */
 /*@PostMapping, mapear requisição Http, criar recurso no servidor*/
 /*@RequestParams, java.util.Map<String, String> params substitui os parametros, metodo buscar */
@@ -32,16 +34,18 @@ public class LancamentoResource {
 
     private LancamentoService lancamentoService;
     private UsuarioService usuarioService;
+    private ConvertDtoToEntity toDomain;
 
-    public LancamentoResource(LancamentoService lancamentoService, UsuarioService usuarioService) {
+    public LancamentoResource(LancamentoService lancamentoService, UsuarioService usuarioService, ConvertDtoToEntity toDomain) {
         this.lancamentoService = lancamentoService;
         this.usuarioService = usuarioService;
+        this.toDomain = toDomain;
     }
 
     @PostMapping
     public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto) {
         try {
-            Lancamento converteEntidade = converterDtoParaEntidade(dto);
+            Lancamento converteEntidade = toDomain.converterDtoParaEntidade(dto);
             converteEntidade = lancamentoService.salvarLancamento(converteEntidade);
             return new ResponseEntity(converteEntidade, HttpStatus.CREATED);
 
@@ -56,7 +60,7 @@ public class LancamentoResource {
         /* entity é resultado da busca pelo id */
         return lancamentoService.obterLancamentoPorId(id).map(entity -> {
             try {
-                Lancamento lancamento = converterDtoParaEntidade(dto);
+                Lancamento lancamento = toDomain.converterDtoParaEntidade(dto);
                 lancamento.setId(id);
                 lancamentoService.atualizarLancamento(lancamento);
                 return ResponseEntity.ok(lancamento);
@@ -131,34 +135,8 @@ public class LancamentoResource {
         new ResponseEntity("Lançamento " + "[" + id + "]" + " não encontrado na base de dados.",
         		HttpStatus.BAD_REQUEST));
     }
+    
+    
 
-    /* Um metodo para converter o dto em uma entidade de lancamento */
-    private Lancamento converterDtoParaEntidade(LancamentoDTO dto) {
-        Lancamento lancamento = new Lancamento();
-        lancamento.setId(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
-        lancamento.setDescricao(dto.getDescricao());
-        lancamento.setAno(dto.getAno());
-        lancamento.setMes(dto.getMes());
-        lancamento.setDataCadastro(dto.getDataCadastro());
-        lancamento.setValor(dto.getValor());
-        /* lancamento.setDataCadastro(dto.getDataCadastro()); */
-        /* inicio usuario */
-        /* receber o id do usuario, conforme dto */
-        Usuario receberUsuario = usuarioService.obterUsuarioPorId(dto.getUsuario())
-                /*
-                 * buscarLancamento do usuario por id, ou lancar uma exception caso ele nao
-                 * exista
-                 */
-                .orElseThrow(() -> new RegraDeNegocioException(
-                        "Usuario não encontrado com o id " + "(" + dto.getUsuario() + ")"));
-        lancamento.setUsuario(receberUsuario);
-        /* fim usuario */
-        if (dto.getTipo() != null) {
-            lancamento.setTipoLancamento(TipoLancamento.valueOf(dto.getTipo()));
-        }
-        if (dto.getStatus() != null) {
-            lancamento.setStatusLancamento(StatusLancamento.valueOf(dto.getStatus()));
-        }
-        return lancamento;
-    }
+   
 }
