@@ -6,6 +6,7 @@ package com.cleber.financas.service.impl;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
+import com.cleber.financas.model.entity.TipoLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
 import org.apache.commons.lang3.EnumUtils;
@@ -16,8 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.DateTimeException;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,7 +38,7 @@ public class LancamentoServiceImpl implements LancamentoService {
         /*chamando*/
         validarLancamento(lancamento);
         /*lancamento salva automaticamente tem status de pendente*/
-        lancamento.setStatusLancamento(StatusLancamento.PENTENDE);
+        lancamento.setStatusLancamento(StatusLancamento.PENDENTE);
         
         return lancamentoRepository.save(lancamento);
     }
@@ -121,30 +120,33 @@ public class LancamentoServiceImpl implements LancamentoService {
         if (lancamento.getDataCadastro() == null || lancamento.getDataCadastro().isAfter(LocalDate.now())) {
             throw new RegraDeNegocioException("Data nula ou vazia. Informe uma data válida.");
         }*/
-
-    }
-    
+        }
+       
     @Override
     public Optional<Lancamento> obterLancamentoPorId(Long id) {
         return lancamentoRepository.findById(id);
     }
     
-    
-}
-
-    
-   /* @Override
+	@Override
     public BigDecimal obterSaldoPorUsuario(Long id) {
         BigDecimal receita = lancamentoRepository.obterSaldoPorUsuarioETipo(id, TipoLancamento.RECEITA);
         BigDecimal despesa = lancamentoRepository.obterSaldoPorUsuarioETipo(id, TipoLancamento.DESPESA);
+        
+        /*se ambas forem nulas, define como zero
         if (receita == null){
             receita = BigDecimal.ZERO;
         }
         if (despesa == null){
             despesa = BigDecimal.ZERO;
+        }*/
+        /*Operador ternario*/
+        receita = receita != null ? receita : BigDecimal.ZERO;
+        despesa = despesa != null ? despesa : BigDecimal.ZERO;
+        
+        /*calcula o saldo*/
+        return receita.subtract(despesa); 
         }
-        return receita.subtract(despesa);
-    }*/
+	}
     
 
 
