@@ -71,8 +71,6 @@ public class LancamentoRepositoryTest {
     	
     	/*verificação*/
     	Assertions.assertThat(buscarLancamento.isPresent()).isTrue();
-    	
-    	
     }
 
     @Test
@@ -87,6 +85,11 @@ public class LancamentoRepositoryTest {
 
         /*verificação*/
         Assertions.assertThat(lancamentoInexistente).isNull();
+    }
+
+    @Test
+    public void buscarSaldo(){
+
     }
 
     private Lancamento criarESalvarLancamento() {
