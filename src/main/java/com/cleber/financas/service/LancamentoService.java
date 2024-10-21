@@ -1,10 +1,12 @@
 package com.cleber.financas.service;
 
 import com.cleber.financas.model.entity.Lancamento;
+import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-
+@Service
 public interface LancamentoService {
     
     /*vai receber um lancamento e vai salvar*/
