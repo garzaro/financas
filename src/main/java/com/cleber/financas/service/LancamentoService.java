@@ -1,6 +1,7 @@
 package com.cleber.financas.service;
 
 import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.entity.StatusLancamento;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public interface LancamentoService {
     /*recebe o status e o lancamento
     void atualizarStatus(Lancamento lancamento, StatusLancamento status);*/
     
-    void atualizarStatus(Lancamento lancamento, String status);
+    void atualizarStatus(Lancamento lancamento, StatusLancamento status);
     
     /*ver se ja exite o lancamento na base de dados*/
     void validarLancamento(Lancamento lancamento);
