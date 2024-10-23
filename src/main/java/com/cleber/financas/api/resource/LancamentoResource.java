@@ -14,6 +14,7 @@ import com.cleber.financas.api.dto.AtualizarStatusDTO;
 import com.cleber.financas.api.dto.LancamentoDTO;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.entity.StatusLancamento;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
@@ -72,18 +73,19 @@ public class LancamentoResource {
     @PutMapping("{id}/atualizar-status")
     public ResponseEntity atualizarStatus(@PathVariable("id") Long id, @RequestBody AtualizarStatusDTO dto) {
         return lancamentoService.obterLancamentoPorId(id).map(entity -> {
+            StatusLancamento selecionarStatus = StatusLancamento.valueOf(dto.getStatus());
+            
+            if (selecionarStatus == null) {
+                return ResponseEntity.badRequest().body("O status informado não existe " + "[" + dto + "]" + " informar um status válido");
+            }
             try {
-                /*Chama o método de serviço para atualizar o status*/
-                lancamentoService.atualizarStatus(entity, dto.getStatus());
+                entity.setStatusLancamento(selecionarStatus);
+                lancamentoService.atualizarLancamento(entity);
                 return ResponseEntity.ok(entity);
             } catch (RegraDeNegocioException status) {
-                /*Retorna a mensagem de erro caso uma exceção seja lançada*/
                 return ResponseEntity.badRequest().body(status.getMessage());
             }
-        }).orElseGet(() ->
-                new ResponseEntity(
-                        "Lançamento " + "[" + id + "]" + "não foi encontrado na base de dados",
-                        HttpStatus.BAD_REQUEST));
+        }).orElseGet(() -> new ResponseEntity("Status não encontrado ", HttpStatus.BAD_REQUEST));
     }
     
     @GetMapping
