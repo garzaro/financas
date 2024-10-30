@@ -9,8 +9,6 @@ import com.cleber.financas.model.entity.StatusLancamento;
 import com.cleber.financas.model.entity.TipoLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
-import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
@@ -56,7 +54,7 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Transactional
     public void deletarLancamento(Lancamento lancamento) {
         /*so deleta se existir um lancamento salvo*/
-        Objects.requireNonNull(lancamento.getId()); /*Checagem: para garantir que esteja passando o lancamento salvo*/
+        Objects.requireNonNull(lancamento.getId()); /*Checagem: para garantir que esteja passando o lancamento salvo, id nao pode ser nulo*/
         lancamentoRepository.delete(lancamento);
     }
     
@@ -74,19 +72,12 @@ public class LancamentoServiceImpl implements LancamentoService {
     }
     
     @Override
-    public void atualizarStatus(Lancamento lancamento, String status) {
-        /*Verifica se o status passado nao for igual ao enum, NULL ou espaço em branco - retorna mensagem de erro*/
-        if (StringUtils.isBlank(status)) {
-            throw new RegraDeNegocioException("O status não pode ser nulo.");
-        }
-        /*Verifica se o status é válido, se nao, retorna mensagem de erro */
-        if (!EnumUtils.isValidEnum(StatusLancamento.class, status)) {
-            throw new RegraDeNegocioException("O Status [" + status + "] é inválido, forneça um status válido.");
-        }
-        /*Converte a String para o enum*/
-        StatusLancamento statusSelecionado = StatusLancamento.valueOf(status);
-        lancamento.setStatusLancamento(StatusLancamento.valueOf(status)); /*seta o estatus do lancamento*/
-        atualizarLancamento(lancamento); /*usa a implemetnacao de atualizar lancamento para efetivar*/
+    public void atualizarStatus(Lancamento lancamento, StatusLancamento status) {
+        /*valida o status - nullo ou invalido*/
+        if (status == null)
+            throw new RegraDeNegocioException("O status [" + status + "] é invalido, forneça um status valido.");
+        lancamento.setStatusLancamento(status);
+        atualizarLancamento(lancamento);
     }
     
     @Override
@@ -111,7 +102,7 @@ public class LancamentoServiceImpl implements LancamentoService {
         if (lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1) {
             throw new RegraDeNegocioException("Informe o valor acima de 1 real.");
         }
-
+        
         if (lancamento.getTipoLancamento() == null) {
             throw new RegraDeNegocioException("Informar um tipo de lancamento.");
         }
@@ -120,14 +111,14 @@ public class LancamentoServiceImpl implements LancamentoService {
         if (lancamento.getDataCadastro() == null || lancamento.getDataCadastro().isAfter(LocalDate.now())) {
             throw new RegraDeNegocioException("Data nula ou vazia. Informe uma data válida.");
         }*/
-        }
-       
+    }
+    
     @Override
     public Optional<Lancamento> obterLancamentoPorId(Long id) {
         return lancamentoRepository.findById(id);
     }
     
-	@Override
+    @Override
     public BigDecimal obterSaldoPorUsuario(Long id) {
         BigDecimal receita = lancamentoRepository.obterSaldoPorUsuarioETipo(id, TipoLancamento.RECEITA);
         BigDecimal despesa = lancamentoRepository.obterSaldoPorUsuarioETipo(id, TipoLancamento.DESPESA);
@@ -144,9 +135,9 @@ public class LancamentoServiceImpl implements LancamentoService {
         despesa = despesa != null ? despesa : BigDecimal.ZERO;
         
         /*calcula o saldo*/
-        return receita.subtract(despesa); 
-        }
-	}
+        return receita.subtract(despesa);
+    }
+}
     
 
 
