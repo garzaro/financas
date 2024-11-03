@@ -6,6 +6,7 @@ import com.cleber.financas.model.entity.StatusLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.model.repository.LancamentoRepositoryTest;
 import com.cleber.financas.service.impl.LancamentoServiceImpl;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -17,9 +18,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -72,7 +75,7 @@ public class LancamentoServiceTest {
     }
     
     @Test
-    public void deveAtualizarOStatusDoLancamento(){
+    public void deveAtualizarOStatusDoLancamento() {
         /*cenario*/
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
         lancamento.setId(1l);
@@ -87,7 +90,6 @@ public class LancamentoServiceTest {
         /*verificação*/
         assertThat(lancamento.getStatusLancamento()).isEqualTo(statusAtualizado);
         Mockito.verify(serviceImpl).atualizarLancamento(lancamento);
-        
         
         
     }
@@ -119,6 +121,62 @@ public class LancamentoServiceTest {
                 .isNotEmpty() /*trata=se de uma coleção*/
                 .hasSize(1)
                 .contains(lancamento);
+    }
+    
+    @Test
+    public void deveObterUmLancamentoPeloId() {
+        /*cenario*/
+        Long id = 1l;
+        Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
+        lancamento.setId(id);
+        
+        Mockito.when(lancamentoRepository.findById(1l)).thenReturn(Optional.of(lancamento));
+        /*ação*/
+        Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(1l);
+        /*verificação*/
+        Assertions.assertThat(resultado.isPresent()).isTrue();
+    }
+    
+    /*IA*/
+    @Test
+    public void deveLancarExceptionQuandoADescricaoForNulaOuVazia(){
+        Lancamento lancamento = new Lancamento();
+        lancamento.setDescricao(null);
+        lancamento.setDescricao(" ");
+        
+        Throwable erro = Assertions.catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
+    }
+    
+    @Test
+    public void deveLancarExceptionAoSalvarUmLancamento(){
+        Lancamento lancamento = new Lancamento(); /*aqui a descrição está nula*/
+        
+        Throwable erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
+        lancamento.setDescricao(" ");
+        
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
+        lancamento.setDescricao("Lancamento de teste");
+        
+        
+        
+        
+    }
+    
+    @Test
+    public void deveRetornarVazioQuandoNaoExistirOLancamento() {
+        /*cenario*/
+        Long id = 1l;
+        Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
+        lancamento.setId(id);
+        
+        Mockito.when(lancamentoRepository.findById(1l)).thenReturn(Optional.empty());
+        /*ação*/
+        Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(1l);
+        /*verificação*/
+        Assertions.assertThat(resultado.isPresent()).isFalse();
     }
     
     @Test
