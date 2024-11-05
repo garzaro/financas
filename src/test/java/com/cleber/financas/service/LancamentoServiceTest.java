@@ -3,6 +3,7 @@ package com.cleber.financas.service;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
+import com.cleber.financas.model.entity.TipoLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.model.repository.LancamentoRepositoryTest;
 import com.cleber.financas.service.impl.LancamentoServiceImpl;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +36,7 @@ public class LancamentoServiceTest {
     /*simulação de comportamento do repository das chamadas dentro service*/
     @MockBean
     LancamentoRepository lancamentoRepository;
-    
+
     @Test
     public void deveSalvarUmLancamento() {
         /*cenario*/
@@ -50,12 +52,12 @@ public class LancamentoServiceTest {
         /*ação*/
         /*chamando o metodo de salvar para retornar o lancamento salvo*/
         Lancamento lancamento = serviceImpl.salvarLancamento(lancamentoASerSalvo);
-        
+
         /*verificação*/
         assertThat(lancamento.getId()).isEqualTo(salvandoLancamento.getId());
         assertThat(lancamento.getStatusLancamento()).isEqualTo(StatusLancamento.PENDENTE);
     }
-    
+
     @Test
     public void deveAtualizarUmLancamento() {
         /*cenario*/
@@ -73,7 +75,7 @@ public class LancamentoServiceTest {
         verify(lancamentoRepository, times(1)).save(lancamentoSalvo);
         /*caso queira checar se os valores estão sendo retornados - id...*/
     }
-    
+
     @Test
     public void deveAtualizarOStatusDoLancamento() {
         /*cenario*/
@@ -86,14 +88,14 @@ public class LancamentoServiceTest {
         Mockito.doReturn(lancamento).when(serviceImpl).atualizarLancamento(lancamento);
         /*ação*/
         serviceImpl.atualizarStatus(lancamento, statusAtualizado);
-        
+
         /*verificação*/
         assertThat(lancamento.getStatusLancamento()).isEqualTo(statusAtualizado);
         Mockito.verify(serviceImpl).atualizarLancamento(lancamento);
-        
-        
+
+
     }
-    
+
     @Test
     public void deveDeletarUmLancamento() {
         /*cenário*/
@@ -105,7 +107,7 @@ public class LancamentoServiceTest {
         /*verificação*/
         verify(lancamentoRepository, times(1)).delete(lancamento);
     }
-    
+
     @Test
     public void deveBuscarUmLancamento() { /*filtro*/
         /*cenario*/
@@ -122,63 +124,79 @@ public class LancamentoServiceTest {
                 .hasSize(1)
                 .contains(lancamento);
     }
-    
+
     @Test
     public void deveObterUmLancamentoPeloId() {
         /*cenario*/
         Long id = 1l;
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
         lancamento.setId(id);
-        
+
         Mockito.when(lancamentoRepository.findById(1l)).thenReturn(Optional.of(lancamento));
         /*ação*/
         Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(1l);
         /*verificação*/
         Assertions.assertThat(resultado.isPresent()).isTrue();
     }
-    
+
     /*IA*/
     @Test
-    public void deveLancarExceptionQuandoADescricaoForNulaOuVazia(){
+    public void deveLancarExceptionQuandoADescricaoForNulaOuVazia() {
         Lancamento lancamento = new Lancamento();
         lancamento.setDescricao(null);
         lancamento.setDescricao(" ");
-        
+
         Throwable erro = Assertions.catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
     }
-    
+
     @Test
-    public void deveLancarExceptionAoSalvarUmLancamento(){
+    public void deveLancarExceptionAoSalvarUmLancamento() {
         Lancamento lancamento = new Lancamento(); /*aqui a descrição está nula*/
-        
+
         Throwable erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
         lancamento.setDescricao(" ");
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
         lancamento.setDescricao("Lancamento de teste");
-        
-        
-        
-        
+
+
     }
-    
+
+    @Test
+    public void deveObterSaldoPorUsuario() {
+        /*cenario*/
+        Long idUsuario = 1l;
+
+        Mockito.when(lancamentoRepository
+                .obterSaldoPorTipoLancamentoEUsuarioEstatus(1l, TipoLancamento.RECEITA, StatusLancamento.EFETIVADO))
+                .thenReturn(BigDecimal.valueOf(1500));
+        Mockito.when(lancamentoRepository
+                .obterSaldoPorTipoLancamentoEUsuarioEstatus(idUsuario, TipoLancamento.DESPESA, StatusLancamento.EFETIVADO))
+                .thenReturn(BigDecimal.valueOf(240));
+        /*ação*/
+        BigDecimal pegarOSaldo = serviceImpl.obterSaldoPorUsuario(idUsuario);
+
+        /*verificação*/
+        assertThat(pegarOSaldo).isEqualTo(BigDecimal.valueOf(1260));
+    }
+
     @Test
     public void deveRetornarVazioQuandoNaoExistirOLancamento() {
         /*cenario*/
         Long id = 1l;
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
         lancamento.setId(id);
-        
+
         Mockito.when(lancamentoRepository.findById(1l)).thenReturn(Optional.empty());
         /*ação*/
         Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(1l);
         /*verificação*/
         Assertions.assertThat(resultado.isPresent()).isFalse();
     }
-    
+
     @Test
     public void deveLancarErroAoTentarDeletarUmLancamentoNaoSalvo() {
         /*cenário*/
@@ -188,9 +206,9 @@ public class LancamentoServiceTest {
         catchThrowableOfType(() -> serviceImpl.atualizarLancamento(lancamento), NullPointerException.class);
         /*verificação*/
         verify(lancamentoRepository, Mockito.never()).delete(lancamento);
-        
+
     }
-    
+
     @Test
     public void deveLancarErroAoTentarAtualizarUmLancamentoNaoSalvo() {
         /*cenario*/
@@ -199,9 +217,9 @@ public class LancamentoServiceTest {
         catchThrowableOfType(() -> serviceImpl.atualizarLancamento(lancamentoASerSalvo), NullPointerException.class);
         /*certificar que nunca foi salvo*/
         verify(lancamentoRepository, Mockito.never()).save(lancamentoASerSalvo);
-        
+
     }
-    
+
     @Test
     public void naoDeveSalvarLancamentoQuandoDerErroDeValidacao() {
         /*cenario*/
