@@ -3,6 +3,8 @@ package com.cleber.financas.service;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
+import com.cleber.financas.model.entity.TipoLancamento;
+import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.model.repository.LancamentoRepositoryTest;
 import com.cleber.financas.service.impl.LancamentoServiceImpl;
@@ -10,12 +12,14 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +30,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
+//@SpringBootTest
 @ActiveProfiles("test")
 public class LancamentoServiceTest {
     /*chamada dos metodo reais para a classe testada - service*/
@@ -139,7 +144,7 @@ public class LancamentoServiceTest {
     
     /*IA*/
     @Test
-    public void deveLancarExceptionQuandoADescricaoForNulaOuVazia(){
+    public void deveLancarExceptionQuandoADescricaoForNulaOuVazia() {
         Lancamento lancamento = new Lancamento();
         lancamento.setDescricao(null);
         lancamento.setDescricao(" ");
@@ -149,20 +154,64 @@ public class LancamentoServiceTest {
     }
     
     @Test
-    public void deveLancarExceptionAoSalvarUmLancamento(){
-        Lancamento lancamento = new Lancamento(); /*aqui a descrição está nula*/
-        
+    public void deveLancarExceptionAoSalvarUmLancamento() {
+        Lancamento lancamento = new Lancamento(); /*aqui pela descrição nula e vai*/
+        /*descricao vazia*/
         Throwable erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
         lancamento.setDescricao(" ");
-        
+        /*descricao valida*/
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
         lancamento.setDescricao("Lancamento de teste");
-        
-        
-        
-        
+        /*mes < 1*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
+        lancamento.setMes(0);
+        /*mes > 12*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
+        lancamento.setMes(13);
+        /*mes valido*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
+        lancamento.setMes(1);
+        /*ano invalido*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido.");
+        lancamento.setAno(0);
+        /*ano invalido*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido.");
+        lancamento.setAno(204);
+        /*ano valido*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido.");
+        lancamento.setAno(2024);
+        /*usuario nulo*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um Usuário.");
+        lancamento.setUsuario(new Usuario());
+        /*usuario invalido*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOfAny(RegraDeNegocioException.class).hasMessage("Informar um Usuário.");
+        lancamento.getUsuario().setId(1l);
+        /*valor valido*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real.");
+        lancamento.setValor(BigDecimal.valueOf(-1));
+        /*valor valido*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real.");
+        lancamento.setValor(BigDecimal.ZERO);
+        /*valor valido*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real.");
+        lancamento.setValor(BigDecimal.valueOf(1));
+        /*tipo de lancamento*/
+        erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um tipo de lancamento.");
+        lancamento.setTipoLancamento(TipoLancamento.RECEITA);
     }
     
     @Test
