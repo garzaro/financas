@@ -1,5 +1,6 @@
 package com.cleber.financas.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,7 +32,8 @@ public class Usuario {
     
     @Column(name = "email")
     private String email;
-    
+	
+    @JsonIgnore
     @Column(name = "senha")
     private String senha;
 
