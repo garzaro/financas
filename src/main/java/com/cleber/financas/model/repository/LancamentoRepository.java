@@ -12,15 +12,15 @@ import java.math.BigDecimal;
 
 @Repository
 public interface LancamentoRepository extends JpaRepository<Lancamento, Long> {
-
+    
     @Query(value = "select sum(l.valor) "
-            + "from Lancamento l join l.usuario u "
-            + "where u.id = :idUsuario and l.tipoLancamento = :tipoLancamento "
-            + "group by u")
+            + " from Lancamento l join l.usuario u "
+            + " where u.id = :idUsuario and l.tipoLancamento = :tipoLancamento and l.statusLancamento = :statusLancamento "
+            + " group by u")
     BigDecimal obterSaldoPorTipoLancamentoEUsuarioEstatus(
             @Param("idUsuario") Long idUsuario,
             @Param("tipoLancamento") TipoLancamento tipoLancamento,
             @Param("statusLancamento") StatusLancamento statusLancamento
-            );
-
+    );
+    
 }
