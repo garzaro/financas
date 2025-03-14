@@ -6,12 +6,14 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/*@EnableWebMvc - para liberar o acesso  -CORS
-* allowedOrigins - (url) - urls permitidas para acessar um site */
+/*@EnableWebMvc - para liberar o acesso - configuração de CORS
+* allowedOrigins - (url) - urls permitidas para acessar um site
+* CorsRegistry registry - permite adicionar configurações de CORS*/
+
 @SpringBootApplication
 @EnableWebMvc
 public class FinancasApplication implements WebMvcConfigurer {
-	/*Adicionando mapeamento de cors*/
+	/*Adicionando mapeamento de cors -*/
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		WebMvcConfigurer.super.addCorsMappings(registry);
@@ -24,3 +26,14 @@ public class FinancasApplication implements WebMvcConfigurer {
 	}
 
 }
+
+/*para permitir somente requisições vindas de um dominio especifico,
+e permitir somente metodos GET e POST, o codigo seria assim:
+
+@Override
+public void addCorsMappings(CorsRegistry registry) {
+	registry.addMapping("/api/**")
+			.allowedOrigins("http://seu-dominio.com")
+			.allowedMethods("GET", "POST");
+}
+*/
