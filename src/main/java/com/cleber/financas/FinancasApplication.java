@@ -2,9 +2,7 @@ package com.cleber.financas;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 
 /*@EnableWebMvc - para liberar o acesso - configuração de CORS
 * allowedOrigins - (url) - urls permitidas para acessar um site
