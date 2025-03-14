@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.*;
 @SpringBootApplication
 @EnableWebMvc
 public class FinancasApplication implements WebMvcConfigurer {
-	/*Adicionando mapeamento de cors -*/
+	/*Habilitando de cors -*/
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		WebMvcConfigurer.super.addCorsMappings(registry);
