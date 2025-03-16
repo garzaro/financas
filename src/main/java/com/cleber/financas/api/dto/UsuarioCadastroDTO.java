@@ -1,10 +1,7 @@
 package com.cleber.financas.api.dto;
 
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.*;
 import java.time.LocalDate;
 
 /*Não usei @Builder, @Getter, @Setter
