@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@NoArgsConstructor
+//@NoArgsConstructor
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
-    @Autowired
+    
     UsuarioRepository usuarioRepository;
     
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
@@ -29,10 +29,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
         /*verificar a existencia de usuario na base de dados*/
         if (!usuario.isPresent()) {
-            throw new ErroDeAutenticacao("Ops, voce não tem acesso ao sistema.");
+            throw new ErroDeAutenticacao("Usuario não encontrado.");
         }
         if (!usuario.get().getSenha().equals(senha)) {
-            throw new ErroDeAutenticacao("Verifique seu email ou senha. Não foi possível fazer login.");
+            throw new ErroDeAutenticacao("Senha incorreta. Tente novamente ou clique em \"Esqueceu a senha?\" para escolher outra.");
         }
         return usuario.get();
     }
