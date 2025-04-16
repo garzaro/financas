@@ -1,5 +1,6 @@
 package com.cleber.financas.model.entity;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Builder
 @AllArgsConstructor
@@ -44,7 +44,6 @@ public class Usuario {
     private LocalDate dataCadastro;
 
     /*GETTERS AND SETTERS*/
-    
     
 }
 

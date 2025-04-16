@@ -29,10 +29,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
         /*verificar a existencia de usuario na base de dados*/
         if (!usuario.isPresent()) {
-            throw new ErroDeAutenticacao("Usuario não encontrado pelo email informado");
+            throw new ErroDeAutenticacao("Ops, voce não tem acesso ao sistema.");
         }
         if (!usuario.get().getSenha().equals(senha)) {
-            throw new ErroDeAutenticacao("Senha inválida");
+            throw new ErroDeAutenticacao("Verifique seu email ou senha. Não foi possível fazer login.");
         }
         return usuario.get();
     }

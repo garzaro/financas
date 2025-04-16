@@ -22,7 +22,6 @@ public class FinancasApplication implements WebMvcConfigurer {
 
 		SpringApplication.run(FinancasApplication.class, args);
 	}
-
 }
 
 /*para permitir somente requisições vindas de um dominio especifico,
