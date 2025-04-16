@@ -1,4 +1,4 @@
-package com.cleber.financas;
+package com.cleber.financas.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -11,7 +11,7 @@ public class CorsConfig  implements WebMvcConfigurer{
 	/*Habilitando de cors -*/
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**")
+		registry.addMapping("/api")
 				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
 	}
 
