@@ -22,7 +22,8 @@ import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
 
 @RestController
-@RequestMapping(path = "/api/usuarios") /*para mapeamento de todas as requisições*/
+@RequestMapping("/api/usuarios") /*para mapeamento de todas as requisições*/
+
 public class UsuarioController {
 	@Autowired
     public UsuarioService usuarioService;
@@ -35,7 +36,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/autenticar")
-    public ResponseEntity autenticarUsuario(@RequestBody UsuarioAutenticacaoDTO dtoAuth) {
+    public ResponseEntity<?> autenticarUsuario(@RequestBody UsuarioAutenticacaoDTO dtoAuth) {
         try {
             Usuario usuarioAutenticado = usuarioService.autenticarUsuario(dtoAuth.getEmail(), dtoAuth.getSenha());
             return ResponseEntity.ok(usuarioAutenticado);

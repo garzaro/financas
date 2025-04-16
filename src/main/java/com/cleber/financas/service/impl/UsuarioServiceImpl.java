@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@NoArgsConstructor
+//@NoArgsConstructor
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
-    @Autowired
+    
     UsuarioRepository usuarioRepository;
     
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
