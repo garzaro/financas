@@ -78,9 +78,7 @@ public class UsuarioController {
     	}
     	BigDecimal saldo = lancamentoService.obterSaldoPorUsuario(id);
     	return ResponseEntity.ok(saldo);
-    	
     }
-    
     
     
     
