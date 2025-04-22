@@ -45,7 +45,7 @@ public class UsuarioController {
         }
     }
 
-    /*Salvar - Este método é um endpoint que recebe uma requisição HTTP POST*/
+    /*Salvar - Este metodo é um endpoint que recebe uma requisição HTTP POST*/
     /*ResponseEntity representa o corpo da resposta*/
     @PostMapping
     public ResponseEntity salvar(@RequestBody UsuarioCadastroDTO dto) {
