@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,7 @@ import com.cleber.financas.service.UsuarioService;
 
 @RestController
 @RequestMapping("/api/usuarios") /*para mapeamento de todas as requisições*/
-
+@CrossOrigin(origins = "http://localhost:3000")
 public class UsuarioController {
 	@Autowired
     public UsuarioService usuarioService;
@@ -77,9 +78,7 @@ public class UsuarioController {
     	}
     	BigDecimal saldo = lancamentoService.obterSaldoPorUsuario(id);
     	return ResponseEntity.ok(saldo);
-    	
     }
-    
     
     
     
