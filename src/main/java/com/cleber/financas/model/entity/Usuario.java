@@ -1,5 +1,6 @@
 package com.cleber.financas.model.entity;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,6 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Builder
 @AllArgsConstructor
@@ -45,7 +45,6 @@ public class Usuario implements Serializable {
     private LocalDate dataCadastro;
 
     /*GETTERS AND SETTERS*/
-    
     
 }
 
