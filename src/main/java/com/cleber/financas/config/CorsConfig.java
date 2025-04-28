@@ -11,8 +11,10 @@ public class CorsConfig  implements WebMvcConfigurer{
 	/*Habilitando o cors -*/
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/api/")
-				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+		registry
+				.addMapping("/api/")
+				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+				.allowedOrigins("http://localhost:3000");
 	}
 
 /*para permitir somente requisições vindas de um dominio especifico,
