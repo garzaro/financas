@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 @Configuration
 public class CorsConfig  implements WebMvcConfigurer{
-	/*Habilitando de cors -*/
+	/*Habilitando o cors -*/
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		registry.addMapping("/api/")
