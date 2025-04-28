@@ -24,7 +24,7 @@ import com.cleber.financas.service.UsuarioService;
 
 @RestController
 @RequestMapping("/api/usuarios") /*para mapeamento de todas as requisições*/
-//@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UsuarioController {
 	@Autowired
     public UsuarioService usuarioService;
