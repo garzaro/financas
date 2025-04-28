@@ -1,4 +1,4 @@
-package com.cleber.financas.security;
+package com.cleber.financas.config;
 
 import com.cleber.financas.model.entity.Usuario;
 import jakarta.persistence.Entity;
