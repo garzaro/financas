@@ -40,7 +40,7 @@ public class UsuarioServiceMelhoriasTest {
         usuarioRepository.save(cadastrarEmail);
         /*ação*/
         usuarioService.
-                validarEmailAndCadastroPessoaFisicaNaBaseDedados("cleber@gmail.com","123456789-00");
+                validarEmailAndCadastroPessoaFisicaNaBaseDedados("cleber@gmail.com", "123456789-00");
     }
     @Test(expected = Test.None.class)
     public void deveAutenticarUmUsuarioComSucesso(){

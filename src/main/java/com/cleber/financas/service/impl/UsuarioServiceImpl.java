@@ -40,11 +40,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public Usuario persistirUsuarioNabaseDeDados(Usuario usuario) {
-        
         /*deve validar o email e o cpf, verificar se existe*/
         validarEmailAndCadastroPessoaFisicaNaBaseDedados(
                 usuario.getEmail(), usuario.getCadastroPessoaFisica());
-        
         /*se nao existir email, salva a instancia*/
         return usuarioRepository.save(usuario);
     }
@@ -63,7 +61,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         
     }
-    
+
     @Override
     public Optional<Usuario> obterUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
