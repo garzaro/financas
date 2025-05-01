@@ -14,9 +14,7 @@ public class CorsConfig  implements WebMvcConfigurer{
 		registry.addMapping("/api/**")
 				.allowedOrigins("http://localhost:3000")
 				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-				.allowedHeaders("Content-Type", "Authorization")
-				.allowCredentials(true); // Se você precisar enviar cookies de autenticação
-
+				.allowedHeaders("Content-Type", "application/json");
 	}
 
 /*para permitir somente requisições vindas de um dominio especifico,
