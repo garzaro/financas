@@ -8,7 +8,6 @@ import org.springframework.web.servlet.config.annotation.*;
 * allowedOrigins - (url) - urls permitidas para acessar um site
 * CorsRegistry registry - permite adicionar configurações de CORS*/
 @SpringBootApplication
-@EnableWebMvc
 public class FinancasApplication implements WebMvcConfigurer {
 
 	public static void main(String[] args) {
