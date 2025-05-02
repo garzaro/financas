@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.beans.Encoder;
 import java.util.Optional;
 
 //@NoArgsConstructor
@@ -47,6 +48,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.save(usuario);
     }
     
+    /*public void senhaCriptografada(Usuario usuario) {
+    	String pegarSenha = usuario.getSenha();
+    	String criptografar = encoder.encode(pegarSenha);
+    	usuario.setSenha(criptografar);
+    }*/
+    
     @Override
     public void validarEmailAndCadastroPessoaFisicaNaBaseDedados(String email, String cadastroPessoaFisica) {
         /*ver se o email existe*/
@@ -61,7 +68,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         
     }
-
+    
     @Override
     public Optional<Usuario> obterUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
