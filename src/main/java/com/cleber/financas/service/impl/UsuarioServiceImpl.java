@@ -25,7 +25,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
     
     @Override
-    public Usuario autenticarUsuario(String email, String senha) {
+    public Usuario autenticar(String email, String senha) {
         /*login, validando login*/
         Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
         /*verificar a existencia de usuario na base de dados*/
@@ -40,10 +40,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     
     @Override
     @Transactional
-    public Usuario persistirUsuarioNabaseDeDados(Usuario usuario) {
+    public Usuario salvar(Usuario usuario) {
         /*deve validar o email e o cpf, verificar se existe*/
-        validarEmailAndCadastroPessoaFisicaNaBaseDedados(
-                usuario.getEmail(), usuario.getCadastroPessoaFisica());
+        validarEmailAndCpf(
+                usuario.getEmail(), usuario.getCpf());
         /*se nao existir email, salva a instancia*/
         return usuarioRepository.save(usuario);
     }
@@ -55,13 +55,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     }*/
     
     @Override
-    public void validarEmailAndCadastroPessoaFisicaNaBaseDedados(String email, String cadastroPessoaFisica) {
+    public void validarEmailAndCpf(String email, String cpf) {
         /*ver se o email existe*/
         boolean existeUsuarioComEmail = usuarioRepository.existsByEmail(email);
-        boolean existeUsuarioComCpf = usuarioRepository.existsByCadastroPessoaFisica(cadastroPessoaFisica);
+        boolean existeUsuarioComCpf = usuarioRepository.existsByCpf(cpf);
         
         if (existeUsuarioComEmail) {
-            throw new RegraDeNegocioException("Já existe um usuário com esse email.");
+            throw new RegraDeNegocioException("Já existe um usuário com esse email");
         }
         if (existeUsuarioComCpf) {
             throw new RegraDeNegocioException("Já existe um usuário com esse CPF");
