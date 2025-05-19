@@ -57,7 +57,7 @@ public class UsuarioResourceRest {
                 .senha(senha)
                 .build();
         /*simulação de autenticação*/
-        Mockito.when(usuarioService.autenticarUsuario("cleber@gmail.com", "senha")).thenReturn(usuario);
+        Mockito.when(usuarioService.autenticar("cleber@gmail.com", "senha")).thenReturn(usuario);
         /*para transformar objeto de qualquer tipo em string json*/
         String json = new ObjectMapper().writeValueAsString(dto);
         
@@ -71,12 +71,12 @@ public class UsuarioResourceRest {
         mvc.perform(requisicao)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(usuario.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNomeCompleto()))
-                .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(usuario.getNomeUsuario()))
+                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNome()))
+                .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(usuario.getUsuario()))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value(usuario.getEmail()))
                 //.andExpect(MockMvcResultMatchers.jsonPath("senha").value(usuario.getSenha()))
                 .andExpect(MockMvcResultMatchers.jsonPath("cadastroPessoaFisica")
-                        .value(usuario.getCadastroPessoaFisica()));
+                        .value(usuario.getCpf()));
     }
     
     @Test
@@ -89,7 +89,7 @@ public class UsuarioResourceRest {
                 .senha(senha)
                 .build();
         /*simulação de autenticação*/
-        Mockito.when(usuarioService.autenticarUsuario(email, senha)).thenThrow(ErroDeAutenticacao.class);
+        Mockito.when(usuarioService.autenticar(email, senha)).thenThrow(ErroDeAutenticacao.class);
         /*para transformar objeto de qualquer tipo em string json*/
         String json = new ObjectMapper().writeValueAsString(dto);
         
@@ -120,7 +120,7 @@ public class UsuarioResourceRest {
                 .senha(senha)
                 .build();
         /*simulação de autenticação*/
-        Mockito.when(usuarioService.persistirUsuarioNabaseDeDados(Mockito.any(Usuario.class))).thenReturn(usuario);
+        Mockito.when(usuarioService.salvar(Mockito.any(Usuario.class))).thenReturn(usuario);
         /*para transformar objeto de qualquer tipo em string json*/
         String json = new ObjectMapper().writeValueAsString(dto);
         
@@ -134,12 +134,12 @@ public class UsuarioResourceRest {
         mvc.perform(requisicao)
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(usuario.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNomeCompleto()))
-                .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(usuario.getNomeUsuario()))
+                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNome()))
+                .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(usuario.getUsuario()))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value(usuario.getEmail()))
                 //.andExpect(MockMvcResultMatchers.jsonPath("senha").value(usuario.getSenha()))
                 .andExpect(MockMvcResultMatchers.jsonPath("cadastroPessoaFisica")
-                        .value(usuario.getCadastroPessoaFisica()));
+                        .value(usuario.getCpf()));
     }
     
     @Test
@@ -152,7 +152,7 @@ public class UsuarioResourceRest {
                 .senha(senha)
                 .build();
         /*simulação de autenticação*/
-        Mockito.when(usuarioService.persistirUsuarioNabaseDeDados(Mockito.any(Usuario.class))).thenThrow(RegraDeNegocioException.class);
+        Mockito.when(usuarioService.salvar(Mockito.any(Usuario.class))).thenThrow(RegraDeNegocioException.class);
         /*para transformar objeto de qualquer tipo em string json*/
         String json = new ObjectMapper().writeValueAsString(dto);
         

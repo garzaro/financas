@@ -39,7 +39,7 @@ public class UsuarioController {
     @PostMapping("/autenticar")
     public ResponseEntity<?> autenticarUsuario(@RequestBody UsuarioAutenticacaoDTO dtoAuth) {
         try {
-            Usuario usuarioAutenticado = usuarioService.autenticarUsuario(dtoAuth.getEmail(), dtoAuth.getSenha());
+            Usuario usuarioAutenticado = usuarioService.autenticar(dtoAuth.getEmail(), dtoAuth.getSenha());
             return ResponseEntity.ok(usuarioAutenticado);
         } catch (ErroDeAutenticacao e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -49,17 +49,17 @@ public class UsuarioController {
     /*Salvar - Este metodo é um endpoint que recebe uma requisição HTTP POST*/
     /*ResponseEntity representa o corpo da resposta*/
     @PostMapping
-    public ResponseEntity salvar(@RequestBody UsuarioCadastroDTO dto) {
+    public ResponseEntity salvarUsuario(@RequestBody UsuarioCadastroDTO dto) {
         Usuario usuario = Usuario.builder()
-                .nomeCompleto(dto.getNomeCompleto())
-                .cadastroPessoaFisica(dto.getCadastroPessoaFisica())
-                .nomeUsuario(dto.getNomeUsuario())
+                .nome(dto.getNomeCompleto())
+                .cpf(dto.getCadastroPessoaFisica())
+                .usuario(dto.getNomeUsuario())
                 .email(dto.getEmail())
                 .senha(dto.getSenha())
                 .build();
 
         try {
-            Usuario usuarioSalvo = usuarioService.persistirUsuarioNabaseDeDados(usuario);
+            Usuario usuarioSalvo = usuarioService.salvar(usuario);
             return new ResponseEntity(usuarioSalvo, HttpStatus.CREATED);
             /*ou usar url*/
             /*return ResponseEntity.created(URI.create("/api/usuarios/" + usuarioSalvo.getId())).build();*/
