@@ -16,9 +16,6 @@ public interface UsuarioService {
 
     /*verifica o email ou CPF existe na base de dados, unique */
     void validarEmailAndCpf(String email, String cpf);
-    
-    /*pegar usuario por cpf*/
-    Optional<Usuario> pegarUsuarioPorCpf(String cpf);
 
     Optional<Usuario> obterUsuarioPorId(Long id);
 }
