@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,11 +49,11 @@ public class UsuarioController {
     /*Salvar - Este metodo é um endpoint que recebe uma requisição HTTP POST*/
     /*ResponseEntity representa o corpo da resposta*/
     @PostMapping
-    public ResponseEntity salvar(@RequestBody UsuarioCadastroDTO dto) {
+    public ResponseEntity salvarUsuario(@RequestBody UsuarioCadastroDTO dto) {
         Usuario usuario = Usuario.builder()
-                .nome(dto.getNome())
-                .cpf(dto.getCpf())
-                .usuario(dto.getUsuario())
+                .nome(dto.getNomeCompleto())
+                .cpf(dto.getCadastroPessoaFisica())
+                .usuario(dto.getNomeUsuario())
                 .email(dto.getEmail())
                 .senha(dto.getSenha())
                 .build();

@@ -134,11 +134,11 @@ public class UsuarioResourceRest {
         mvc.perform(requisicao)
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(usuario.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("nome").value(usuario.getNome()))
-                .andExpect(MockMvcResultMatchers.jsonPath("usuario").value(usuario.getUsuario()))
+                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNome()))
+                .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(usuario.getUsuario()))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value(usuario.getEmail()))
                 //.andExpect(MockMvcResultMatchers.jsonPath("senha").value(usuario.getSenha()))
-                .andExpect(MockMvcResultMatchers.jsonPath("cpf")
+                .andExpect(MockMvcResultMatchers.jsonPath("cadastroPessoaFisica")
                         .value(usuario.getCpf()));
     }
     
