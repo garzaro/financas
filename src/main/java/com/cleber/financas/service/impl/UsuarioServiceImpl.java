@@ -6,24 +6,26 @@ import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.UsuarioService;
 import jakarta.transaction.Transactional;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.beans.Encoder;
+import java.util.List;
 import java.util.Optional;
 
 //@NoArgsConstructor
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
     
-    UsuarioRepository usuarioRepository;
+    private UsuarioRepository usuarioRepository;
     
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
         super();
         this.usuarioRepository = usuarioRepository;
     }
-    
+    /*lista de email permitidos*/
+    private static final List<String> dominiosEmaislPermitidos = List.of(
+            "gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "edu.br", "org", "gov.br"
+    );
+    /*login: validação e autenticação*/
     @Override
     public Usuario autenticar(String email, String senha) {
         /*login, validando login*/
@@ -40,37 +42,49 @@ public class UsuarioServiceImpl implements UsuarioService {
     
     @Override
     @Transactional
-    public Usuario salvar(Usuario usuario) {
+    public Usuario salvarUsuario(Usuario usuario) {
         /*deve validar o email e o cpf, verificar se existe*/
-        validarEmailAndCpf(
-                usuario.getEmail(), usuario.getCpf());
+        validacao(usuario.getEmail(), usuario.getCpf());
         /*se nao existir email, salva a instancia*/
         return usuarioRepository.save(usuario);
+    }  
+
+    @Override
+    public Optional<Usuario> obterUsuarioPorId(Long id) {
+        return usuarioRepository.findById(id);
     }
+
+	@Override
+	public Optional<Usuario> obterUsuarioPorCpf(String cpf) {
+		return usuarioRepository.findByCpf(cpf);
+	}
     
     /*public void senhaCriptografada(Usuario usuario) {
     	String pegarSenha = usuario.getSenha();
     	String criptografar = encoder.encode(pegarSenha);
     	usuario.setSenha(criptografar);
     }*/
+	
+	public void validacao(String email, String cpf) {
+		validarEmail(email);
+		validarCpf(cpf);
+	}	
     
     @Override
-    public void validarEmailAndCpf(String email, String cpf) {
+    public void validarEmail(String email) {
         /*ver se o email existe*/
-        boolean existeUsuarioComEmail = usuarioRepository.existsByEmail(email);
-        boolean existeUsuarioComCpf = usuarioRepository.existsByCpf(cpf);
-        
-        if (existeUsuarioComEmail) {
+        boolean existeUsuarioComEsseEmail = usuarioRepository.existsByEmail(email);       
+        if (existeUsuarioComEsseEmail) {
             throw new RegraDeNegocioException("Já existe um usuário com esse email");
-        }
-        if (existeUsuarioComCpf) {
+        }  
+    }
+	
+	@Override
+	public void validarCpf(String cpf) {
+		/*ver se existe o cpf*/
+		boolean existeUsuarioComEsseCpf = usuarioRepository.existsByCpf(cpf);
+		if (existeUsuarioComEsseCpf) {
             throw new RegraDeNegocioException("Já existe um usuário com esse CPF");
-        }
-        
-    }
-    
-    @Override
-    public Optional<Usuario> obterUsuarioPorId(Long id) {
-        return usuarioRepository.findById(id);
-    }
+        }		
+	}   
 }

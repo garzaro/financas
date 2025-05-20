@@ -25,7 +25,7 @@ public class UsuarioServiceSpyTest {
     public void deveSalvarUmUsuario(){
         /*cenario*/
         Mockito.doNothing().when(usuarioServiceImpl)
-                .validarEmailAndCadastroPessoaFisicaNaBaseDedados("email@gmail.com",Mockito.anyString());
+                .validacao("email@gmail.com",Mockito.anyString());
 
         Usuario usuario = criarUsuario();
 
@@ -34,14 +34,14 @@ public class UsuarioServiceSpyTest {
 
         /*ação*/
         Usuario usuarioSalvo = usuarioServiceImpl
-                .persistirUsuarioNabaseDeDados(new Usuario());
+                .salvarUsuario(new Usuario());
 
         /*verificação*/
         Assertions.assertThat(usuarioSalvo)
                 .isNotNull();
         Assertions.assertThat(usuarioSalvo.getId())
                 .isEqualTo(1l);
-        Assertions.assertThat(usuarioSalvo.getNomeUsuario())
+        Assertions.assertThat(usuarioSalvo.getUsuario())
                 .isEqualTo("garzaro74");
         Assertions.assertThat(usuarioSalvo.getEmail())
                 .isEqualTo("email@gmail.com");
@@ -56,9 +56,9 @@ public class UsuarioServiceSpyTest {
 
         Mockito.doThrow(RegraDeNegocioException.class)
                 .when(usuarioServiceImpl)
-                .validarEmailAndCadastroPessoaFisicaNaBaseDedados("email@gmail.com","123456789-00");
+                .validacao("email@gmail.com","123456789-00");
         /*ação*/
-        usuarioServiceImpl.persistirUsuarioNabaseDeDados(persistirUsuario);
+        usuarioServiceImpl.salvarUsuario(persistirUsuario);
 
         /*verificação*/
         Mockito.verify(usuarioRepository, Mockito.never())
@@ -68,7 +68,7 @@ public class UsuarioServiceSpyTest {
     public static Usuario criarUsuario() {
         return Usuario.builder()
                 .id(1l)
-                .nomeUsuario("garzaro74")
+                .usuario("garzaro74")
                 .email("email@gmail.com")
                 .senha("senha")
                 .build();

@@ -97,9 +97,9 @@ public class UsuarioRepositoryMelhoriasTest {
 
     private static Usuario criarUsuario(){
         return Usuario.builder()
-                .nomeCompleto("Madonna da Silva")
-                .nomeUsuario("cricri")
-                .cadastroPessoaFisica("123.456.789.00")
+                .nome("Madonna da Silva")
+                .usuario("cricri")
+                .cpf("123.456.789.00")
                 .email("cricri@gmail.com")
                 .senha("123456")
                 .dataCadastro(LocalDate.now())
