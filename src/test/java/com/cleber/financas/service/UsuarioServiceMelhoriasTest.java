@@ -30,7 +30,7 @@ public class UsuarioServiceMelhoriasTest {
         usuarioRepository.deleteAll();
         /*ação, sem verificação, só olha se existe o email*/
         usuarioService.
-                validarEmailAndCpf("cleber@gmail.com","123456789-00");
+                validarEmail("cleber@gmail.com");
     }
     @Test(expected = RegraDeNegocioException.class)
     public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){
@@ -40,7 +40,7 @@ public class UsuarioServiceMelhoriasTest {
         usuarioRepository.save(cadastrarEmail);
         /*ação*/
         usuarioService.
-                validarEmailAndCpf("cleber@gmail.com", "123456789-00");
+                validarCpf("123456789-00");
     }
     @Test(expected = Test.None.class)
     public void deveAutenticarUmUsuarioComSucesso(){

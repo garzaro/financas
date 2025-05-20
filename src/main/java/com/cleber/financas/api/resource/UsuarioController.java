@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,9 +36,9 @@ public class UsuarioController {
     }
 
     @PostMapping("/autenticar")
-    public ResponseEntity<?> autenticarUsuario(@RequestBody UsuarioAutenticacaoDTO dtoAuth) {
+    public ResponseEntity<?> autenticar(@RequestBody UsuarioAutenticacaoDTO dto) {
         try {
-            Usuario usuarioAutenticado = usuarioService.autenticar(dtoAuth.getEmail(), dtoAuth.getSenha());
+            Usuario usuarioAutenticado = usuarioService.autenticar(dto.getEmail(), dto.getSenha());
             return ResponseEntity.ok(usuarioAutenticado);
         } catch (ErroDeAutenticacao e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -51,15 +50,15 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity salvarUsuario(@RequestBody UsuarioCadastroDTO dto) {
         Usuario usuario = Usuario.builder()
-                .nome(dto.getNomeCompleto())
-                .cpf(dto.getCadastroPessoaFisica())
-                .usuario(dto.getNomeUsuario())
+                .nome(dto.getNome())
+                .cpf(dto.getCpf())
+                .usuario(dto.getUsuario())
                 .email(dto.getEmail())
                 .senha(dto.getSenha())
                 .build();
 
         try {
-            Usuario usuarioSalvo = usuarioService.salvar(usuario);
+            Usuario usuarioSalvo = usuarioService.salvarUsuario(usuario);
             return new ResponseEntity(usuarioSalvo, HttpStatus.CREATED);
             /*ou usar url*/
             /*return ResponseEntity.created(URI.create("/api/usuarios/" + usuarioSalvo.getId())).build();*/
