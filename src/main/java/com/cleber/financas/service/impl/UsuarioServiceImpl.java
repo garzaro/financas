@@ -1,76 +1,75 @@
 package com.cleber.financas.service.impl;
 
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import com.cleber.financas.exception.ErroDeAutenticacao;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.UsuarioService;
-import jakarta.transaction.Transactional;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.beans.Encoder;
-import java.util.Optional;
 
 //@NoArgsConstructor
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
-    
-    UsuarioRepository usuarioRepository;
-    
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
-        super();
-        this.usuarioRepository = usuarioRepository;
-    }
-    
-    @Override
-    public Usuario autenticarUsuario(String email, String senha) {
-        /*login, validando login*/
-        Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
-        /*verificar a existencia de usuario na base de dados*/
-        if (!usuario.isPresent()) {
-            throw new ErroDeAutenticacao("Verifique seu usuário e tente novamente.");
-        }
-        if (!usuario.get().getSenha().equals(senha)) {
-            throw new ErroDeAutenticacao("Senha incorreta. Tente novamente ou clique em \"Esqueceu a senha?\" para escolher outra.");
-        }
-        return usuario.get();
-    }
-    
-    @Override
-    @Transactional
-    public Usuario persistirUsuarioNabaseDeDados(Usuario usuario) {
-        /*deve validar o email e o cpf, verificar se existe*/
-        validarEmailAndCadastroPessoaFisicaNaBaseDedados(
-                usuario.getEmail(), usuario.getCadastroPessoaFisica());
-        /*se nao existir email, salva a instancia*/
-        return usuarioRepository.save(usuario);
-    }
-    
-    /*public void senhaCriptografada(Usuario usuario) {
-    	String pegarSenha = usuario.getSenha();
-    	String criptografar = encoder.encode(pegarSenha);
-    	usuario.setSenha(criptografar);
-    }*/
-    
-    @Override
-    public void validarEmailAndCadastroPessoaFisicaNaBaseDedados(String email, String cadastroPessoaFisica) {
-        /*ver se o email existe*/
-        boolean existeUsuarioComEmail = usuarioRepository.existsByEmail(email);
-        boolean existeUsuarioComCpf = usuarioRepository.existsByCadastroPessoaFisica(cadastroPessoaFisica);
-        
-        if (existeUsuarioComEmail) {
-            throw new RegraDeNegocioException("Já existe um usuário com esse email.");
-        }
-        if (existeUsuarioComCpf) {
-            throw new RegraDeNegocioException("Já existe um usuário com esse CPF");
-        }
-        
-    }
-    
-    @Override
-    public Optional<Usuario> obterUsuarioPorId(Long id) {
-        return usuarioRepository.findById(id);
-    }
+	
+	UsuarioRepository usuarioRepository;
+	
+	public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
+		super();
+		this.usuarioRepository = usuarioRepository;
+	}
+
+	@Override
+	public Usuario autenticar(String email, String senha) {
+		/*validar o login*/
+		Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
+		/*verificar se o usuario já existe*/
+		if (!usuario.isPresent()) {
+			throw new ErroDeAutenticacao("Verifique seu usuário e tente novamente");			
+		}
+		if (!usuario.get().getSenha().equals(senha)) {
+			throw new ErroDeAutenticacao("Senha incorreta. tente novamente ou clique em \"Esqueceu a senha?\" para escolher outra");						
+		}
+		return usuario.get();
+	}
+
+	@Override
+	public Usuario salvar(Usuario usuario) {
+		/*verificar se ja existe email e cpf antes de salvar*/
+		validarEmailAndCpf(usuario.getEmail(), usuario.getCpf());
+		/*se nao existir nada, salva a instancia*/
+		return usuarioRepository.save(usuario);
+	}
+	
+	@Override
+	public void validarEmailAndCpf(String email, String cpf) {
+		/*ver se email e cpof existe*/
+		boolean existeUsuarioComEsseEmail = usuarioRepository.existsByEmail(email);
+		boolean existeUsuarioComEsseCpf = usuarioRepository.existsByCpf(cpf);
+		
+		if (existeUsuarioComEsseEmail) {
+			throw new RegraDeNegocioException("Ja existe um usuário com esse email");
+		}
+		if (existeUsuarioComEsseCpf) {
+			throw new RegraDeNegocioException("Ja existe um usuário com esse cpf");
+		}		
+	}
+	
+	/*public void senhaCriptografada(Usuario usuario) {
+	String pegarSenha = usuario.getSenha();
+	String criptografar = encoder.encode(pegarSenha);
+	usuario.setSenha(criptografar);
+}*/
+
+	@Override
+	public Optional<Usuario> pegarUsuarioPorCpf(String cpf) {
+		return usuarioRepository.findByCpf(cpf);
+	}
+
+	@Override
+	public Optional<Usuario> obterUsuarioPorId(Long id) {
+		return usuarioRepository.findById(id);
+	}	
 }

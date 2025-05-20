@@ -30,7 +30,7 @@ public class UsuarioServiceMelhoriasTest {
         usuarioRepository.deleteAll();
         /*ação, sem verificação, só olha se existe o email*/
         usuarioService.
-                validarEmailAndCadastroPessoaFisicaNaBaseDedados("cleber@gmail.com","123456789-00");
+                validarEmailAndCpf("cleber@gmail.com","123456789-00");
     }
     @Test(expected = RegraDeNegocioException.class)
     public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){
@@ -40,7 +40,7 @@ public class UsuarioServiceMelhoriasTest {
         usuarioRepository.save(cadastrarEmail);
         /*ação*/
         usuarioService.
-                validarEmailAndCadastroPessoaFisicaNaBaseDedados("cleber@gmail.com", "123456789-00");
+                validarEmailAndCpf("cleber@gmail.com", "123456789-00");
     }
     @Test(expected = Test.None.class)
     public void deveAutenticarUmUsuarioComSucesso(){
@@ -51,7 +51,7 @@ public class UsuarioServiceMelhoriasTest {
         Usuario usuarioSalvo = usuarioRepository.save(persistirUsuario);
 
         /*verificar se o metodo autenticarUsuario funciona corretamente*/
-        Usuario usuarioAutenticado = usuarioService.autenticarUsuario(usuarioSalvo.getEmail(), usuarioSalvo.getSenha());
+        Usuario usuarioAutenticado = usuarioService.autenticar(usuarioSalvo.getEmail(), usuarioSalvo.getSenha());
 
         /*verificação*/
         Assertions.assertThat(usuarioAutenticado).isNotNull();
@@ -63,9 +63,9 @@ public class UsuarioServiceMelhoriasTest {
     public static Usuario criarUsuario(){
         return Usuario.builder()
                 .id(1l)
-                .nomeCompleto("Cleber")
-                .nomeUsuario("garzaro")
-                .cadastroPessoaFisica("123.456.789-00")
+                .nome("Cleber")
+                .usuario("garzaro")
+                .cpf("123.456.789-00")
                 .email("cleber@gmail.com")
                 .senha("senha")
                 .dataCadastro(LocalDate.now())

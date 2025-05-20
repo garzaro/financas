@@ -24,14 +24,14 @@ public class Usuario implements Serializable {
     @Column(name = "id")
     private Long id;
     
-    @Column(name = "nome_completo")
-    private String nomeCompleto;
+    @Column(name = "nome")
+    private String nome;
     
     @Column(name = "cpf")
-    private String cadastroPessoaFisica;
+    private String cpf;
     
-    @Column(name = "nome_usuario")
-    private String nomeUsuario;
+    @Column(name = "usuario")
+    private String usuario;
     
     @Column(name = "email")
     private String email;
