@@ -24,7 +24,7 @@ public class UsuarioRepositoryTest {
     public void deveVerificarAExistenciaDeUmEmailNaBaseDeDados() {
         /*cenario*/
         Usuario usuarioDeTeste = Usuario.builder()
-                .nomeCompleto("Madonna da Silva")
+                .nome("Madonna da Silva")
                 .email("clebergarzaro74@gmail.com")
                 .build();
         usuarioRepository.save(usuarioDeTeste);
@@ -51,8 +51,8 @@ public class UsuarioRepositoryTest {
     public void devePersistirUsuarioNaBaseDeDados(){
        /*cenario*/
         Usuario persistindoUsuario = Usuario.builder()
-                .nomeCompleto("Cleber")
-                .nomeUsuario("garzaro74")
+                .nome("Cleber")
+                .usuario("garzaro74")
                 .email("clebergarzaro74@gmail.com")
                 .senha("senha")
                 .dataCadastro(LocalDate.now())
@@ -68,7 +68,7 @@ public class UsuarioRepositoryTest {
     public void deveBuscarUmUsuarioPeloEmail(){
         /*cenario*/
         Usuario salvandoUsuario = Usuario.builder()
-                .nomeUsuario("garzaro74")
+                .usuario("garzaro74")
                 .email("clebergarzaro74@gmail.com")
                 .build();
         usuarioRepository.save(salvandoUsuario);
