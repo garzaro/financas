@@ -1,8 +1,8 @@
 package com.cleber.financas.model.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,10 +26,12 @@ public class Usuario implements Serializable {
     
     @Column(name = "nome")
     private String nome;
-    
+
+    @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}$")
     @Column(name = "cpf")
     private String cpf;
-    
+
+    @Pattern(regexp = "^[\\w-\\.]+@[\\w-\\.]+\\.[a-z]{2,}$")
     @Column(name = "usuario")
     private String usuario;
     
@@ -45,6 +47,5 @@ public class Usuario implements Serializable {
     private LocalDate dataCadastro;
 
     /*GETTERS AND SETTERS*/
-    
 }
 

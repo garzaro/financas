@@ -12,10 +12,15 @@ public interface UsuarioService {
     Usuario autenticar(String email, String senha);
 
     /*salvar o usuario na base*/
-    Usuario salvar(Usuario usuario);
-
-    /*verifica o email ou CPF existe na base de dados, unique */
-    void validarEmailAndCpf(String email, String cpf);
-
+    Usuario salvarUsuario(Usuario usuario);
+    
+    /*unique*/
+    void validarEmail(String email);
+    
+    /*unique */
+    void validarCpf(String cpf);
+    
     Optional<Usuario> obterUsuarioPorId(Long id);
+    
+    Optional<Usuario> obterUsuarioPorCpf(String cpf);   
 }
