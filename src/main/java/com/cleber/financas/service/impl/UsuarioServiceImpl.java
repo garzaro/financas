@@ -5,6 +5,8 @@ import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.UsuarioService;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
 import jakarta.transaction.Transactional;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,8 @@ import java.util.Optional;
 public class UsuarioServiceImpl implements UsuarioService {
     
     UsuarioRepository usuarioRepository;
-    
+    private final Argon2 argon2 = Argon2Factory.create();
+
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
         super();
         this.usuarioRepository = usuarioRepository;
