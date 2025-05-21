@@ -46,7 +46,7 @@ public class UsuarioServiceMockTest {
 
         /*ação, sem verificação, só olha se existe o email*/
         usuarioService.
-                validarEmailAndCpf("cleber@gmail.com", "123456789-00");
+                validarEmail("cleber@gmail.com");
     }
 
     @Test(expected = RegraDeNegocioException.class)
@@ -55,7 +55,7 @@ public class UsuarioServiceMockTest {
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(true);
 
         /*ação*/
-        usuarioService.validarEmailAndCpf("cleber@gmail.com","123456789-00");
+        usuarioService.validarEmail("cleber@gmail.com");
     }
 
     @Test(expected = Test.None.class)

@@ -120,7 +120,7 @@ public class UsuarioResourceRest {
                 .senha(senha)
                 .build();
         /*simulação de autenticação*/
-        Mockito.when(usuarioService.salvar(Mockito.any(Usuario.class))).thenReturn(usuario);
+        Mockito.when(usuarioService.salvarUsuario(Mockito.any(Usuario.class))).thenReturn(usuario);
         /*para transformar objeto de qualquer tipo em string json*/
         String json = new ObjectMapper().writeValueAsString(dto);
         
@@ -152,7 +152,7 @@ public class UsuarioResourceRest {
                 .senha(senha)
                 .build();
         /*simulação de autenticação*/
-        Mockito.when(usuarioService.salvar(Mockito.any(Usuario.class))).thenThrow(RegraDeNegocioException.class);
+        Mockito.when(usuarioService.salvarUsuario(Mockito.any(Usuario.class))).thenThrow(RegraDeNegocioException.class);
         /*para transformar objeto de qualquer tipo em string json*/
         String json = new ObjectMapper().writeValueAsString(dto);
         
