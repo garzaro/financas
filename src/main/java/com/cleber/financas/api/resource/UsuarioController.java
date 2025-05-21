@@ -51,9 +51,9 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity salvarUsuario(@RequestBody UsuarioCadastroDTO dto) {
         Usuario usuario = Usuario.builder()
-                .nome(dto.getNomeCompleto())
-                .cpf(dto.getCadastroPessoaFisica())
-                .usuario(dto.getNomeUsuario())
+                .nome(dto.getNome())
+                .cpf(dto.getCpf())
+                .usuario(dto.getUsuario())
                 .email(dto.getEmail())
                 .senha(dto.getSenha())
                 .build();
