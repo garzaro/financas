@@ -123,7 +123,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuario.getSenha() == null || usuario.getSenha().trim().equals("")) {
             throw new RegraDeNegocioException("informe a senha.");
         }
-        /*garante a nao duplicidade ao criar ou atualizar*/
         validarDuplicidadeEmailCpf(usuario.getEmail(), usuario.getCpf());
     }
 
