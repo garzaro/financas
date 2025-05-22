@@ -94,7 +94,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RegraDeNegocioException("O nome completo é obrigatório");
         }
         if (usuario.getCpf() == null || usuario.getCpf().trim().equals("")) {
-            throw new RegraDeNegocioException("O cpf é obrigatório");
+            throw new RegraDeNegocioException("O CPF é obrigatório");
         }
         /*validação manual*/
         if (!Pattern.matches("^\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}$", usuario.getCpf())) {
