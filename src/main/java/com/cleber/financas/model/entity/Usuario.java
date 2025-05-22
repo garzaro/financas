@@ -2,7 +2,6 @@ package com.cleber.financas.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,28 +17,26 @@ import java.time.LocalDate;
 @Data
 @Entity
 @Table(name= "usuario", schema = "financeiro")
-public class Usuario implements Serializable {
-    @Id
+public class Usuario implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     @Column(name = "id")
     private Long id;
     
     @Column(name = "nome")
     private String nome;
 
-    @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}$")
     @Column(name = "cpf")
     private String cpf;
 
-    @Pattern(regexp = "^[\\w-\\.]+@[\\w-\\.]+\\.[a-z]{2,}$")
     @Column(name = "usuario")
     private String usuario;
     
     @Column(name = "email")
     private String email;
 	
-    @JsonIgnore
     @Column(name = "senha")
+    @JsonIgnore
     private String senha;
 
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
@@ -47,5 +44,7 @@ public class Usuario implements Serializable {
     private LocalDate dataCadastro;
 
     /*GETTERS AND SETTERS*/
+    /*HASHCODE AND EQUALS*/
+    /*TO STRING*/
 }
 
