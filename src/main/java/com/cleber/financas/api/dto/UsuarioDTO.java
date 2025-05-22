@@ -3,27 +3,32 @@ package com.cleber.financas.api.dto;
 /*Não usei @Builder, @Getter, @Setter
 * resolvi criar na mão o codigo*/
 
-public class UsuarioCadastroDTO {
-    
+import java.time.LocalDate;
+
+public class UsuarioDTO {
+    private Long id;
     private String nome;
     private String cpf;
     private String usuario;
     private String email;
     private String senha;
+    private LocalDate dataCadastro;
 
-    public UsuarioCadastroDTO() {
+    public UsuarioDTO() {
 		
 	}
     
     /*BUILDER*/
-    private UsuarioCadastroDTO(UsuarioBuilder builder) {
-        
+    private UsuarioDTO(UsuarioBuilder builder) {
+        this.id = builder.id;
         this.nome = builder.nome;
         this.cpf = builder.cpf;
         this.usuario = builder.usuario;
         this.email = builder.email;
         this.senha = builder.senha;
+        this.dataCadastro = builder.build().dataCadastro;
     }
+    public Long getId(){return id;}
 
     public String getNome() {
         return nome;
@@ -45,12 +50,23 @@ public class UsuarioCadastroDTO {
         return senha;
     }
 
+    public LocalDate getDataCadastro(){
+        return dataCadastro;
+    }
+
     public static class UsuarioBuilder{
+        private Long id;
         private String nome;
         private String cpf;
         private String usuario;
         private String email;
         private String senha;
+        private LocalDate dataCadastro;
+
+        public UsuarioBuilder setId(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public UsuarioBuilder setNome(String nome) {
         this.nome = nome;
@@ -77,8 +93,13 @@ public class UsuarioCadastroDTO {
             return this;
         }
 
-        public UsuarioCadastroDTO build() {
-            return new UsuarioCadastroDTO(this);
+        public UsuarioBuilder setDataCadastro(LocalDate dataCadastro){
+            this.dataCadastro = dataCadastro;
+            return this;
+        }
+
+        public UsuarioDTO build() {
+            return new UsuarioDTO(this);
         }
     }
 }
