@@ -13,7 +13,13 @@ public interface UsuarioService {
 
     /*salvar o usuario na base*/
     Usuario salvarUsuario(Usuario usuario);
-    
+
+    /*atualizar o usuario*/
+    Usuario atualizarUsuario(Usuario usuario);
+
+    /**validar usuario*/
+    void validarUsuario(Usuario usuario);
+
     /*unique*/
     void validarEmail(String email);
     

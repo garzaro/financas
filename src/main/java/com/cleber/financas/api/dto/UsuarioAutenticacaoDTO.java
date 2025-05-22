@@ -1,11 +1,12 @@
 package com.cleber.financas.api.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+@Builder
 @Getter
 @Setter
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UsuarioAutenticacaoDTO {
     private String email;
     private String senha;
