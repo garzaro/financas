@@ -17,9 +17,9 @@ import java.time.LocalDate;
 @Data
 @Entity
 @Table(name= "usuario", schema = "financeiro")
-public class Usuario implements Serializable {
-    @Id
+public class Usuario implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     @Column(name = "id")
     private Long id;
     
@@ -35,8 +35,8 @@ public class Usuario implements Serializable {
     @Column(name = "email")
     private String email;
 	
-    @JsonIgnore
     @Column(name = "senha")
+    @JsonIgnore
     private String senha;
 
     @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
@@ -44,5 +44,7 @@ public class Usuario implements Serializable {
     private LocalDate dataCadastro;
 
     /*GETTERS AND SETTERS*/
+    /*HASHCODE AND EQUALS*/
+    /*TO STRING*/
 }
 
