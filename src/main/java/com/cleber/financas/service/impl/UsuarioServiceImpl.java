@@ -91,39 +91,36 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void validarUsuario(Usuario usuario) {
         /* preencher campos */
         if (usuario.getNome() == null || usuario.getNome().trim().equals("")) {
-            throw new RegraDeNegocioException("O nome completo é obrigatório.");
+            throw new RegraDeNegocioException("O nome completo é obrigatório");
         }
-        if (usuario.getUsuario() == null || usuario.getUsuario().trim().equals("")) {
-            throw new RegraDeNegocioException("O nome de usuário é obrigatório.");
-        }
-        if (usuario.getEmail() == null || usuario.getEmail().trim().equals("")) {
-            throw new RegraDeNegocioException("O email é obrigatório.");
-        }
-        /*validação manual
-        if (!Pattern.matches("^[\\w-\\.]+@[\\w-\\.]+\\.[a-z]{2,}$", usuario.getEmail())) {
-            throw new ErroValidacaoException("O email deve seguir o padrao email@seudominio.com (br).");
-        }*/
-        if (usuario.getEmail() == null || usuario.getEmail().trim().equals("")) {
-            throw new RegraDeNegocioException("O email deve seguir o padrao email@seudominio.com (br).");
-        }
-
-        String emailPermitido = usuario.getEmail().substring(usuario.getEmail().lastIndexOf("@") + 1);
-        if (!dominiosEmailPermitidos.contains(emailPermitido)) { /*garante que o dominio extraido esteja na lista*/
-            throw new RegraDeNegocioException("O email para cadastro deve constar da lista a seguir: " + dominiosEmailPermitidos);
-        }
-
         if (usuario.getCpf() == null || usuario.getCpf().trim().equals("")) {
-            throw new RegraDeNegocioException("O cpf é obrigatório.");
+            throw new RegraDeNegocioException("O cpf é obrigatório");
         }
         /*validação manual*/
         if (!Pattern.matches("^\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2}$", usuario.getCpf())) {
             throw new RegraDeNegocioException("O CPF deve seguir o padrao 000.000.000-00");
         }
-
+        if (usuario.getUsuario() == null || usuario.getUsuario().trim().equals("")) {
+            throw new RegraDeNegocioException("O nome de usuário é obrigatório");
+        }
+        if (usuario.getEmail() == null || usuario.getEmail().trim().equals("")) {
+            throw new RegraDeNegocioException("O email é obrigatório");
+        }
+        if (usuario.getEmail() == null || usuario.getEmail().trim().equals("")) {
+            throw new RegraDeNegocioException("O email deve seguir o padrao email@seudominio.com");
+        }
+        String emailPermitido = usuario.getEmail().substring(usuario.getEmail().lastIndexOf("@") + 1);
+        if (!dominiosEmailPermitidos.contains(emailPermitido)) { /*garante que o dominio extraido esteja na lista*/
+            throw new RegraDeNegocioException("O email para cadastro deve constar da lista a seguir: " + dominiosEmailPermitidos);
+        }
         if (usuario.getSenha() == null || usuario.getSenha().trim().equals("")) {
             throw new RegraDeNegocioException("informe a senha.");
         }
-        /*garante a nao duplicidade ao criar ou atualizar*/
+        /*validação manual
+        if (!Pattern.matches("^[\\w-\\.]+@[\\w-\\.]+\\.[a-z]{2,}$", usuario.getEmail())) {
+            throw new ErroValidacaoException("O email deve seguir o padrao email@seudominio.com (br).");
+        }*/
+        /*garante a nao duplicidade ao criar usuario*/
         validarDuplicidadeEmailCpf(usuario.getEmail(), usuario.getCpf());
     }
 
