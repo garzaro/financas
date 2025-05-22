@@ -25,7 +25,7 @@ public class UsuarioServiceSpyTest {
     public void deveSalvarUmUsuario(){
         /*cenario*/
         Mockito.doNothing().when(usuarioServiceImpl)
-                .validacao("email@gmail.com",Mockito.anyString());
+                .validarDuplicidadeEmailCpf("email@gmail.com",Mockito.anyString());
 
         Usuario usuario = criarUsuario();
 
@@ -41,7 +41,7 @@ public class UsuarioServiceSpyTest {
                 .isNotNull();
         Assertions.assertThat(usuarioSalvo.getId())
                 .isEqualTo(1l);
-        Assertions.assertThat(usuarioSalvo.getUsuario())
+        Assertions.assertThat(usuarioSalvo.getNome())
                 .isEqualTo("garzaro74");
         Assertions.assertThat(usuarioSalvo.getEmail())
                 .isEqualTo("email@gmail.com");
@@ -56,7 +56,7 @@ public class UsuarioServiceSpyTest {
 
         Mockito.doThrow(RegraDeNegocioException.class)
                 .when(usuarioServiceImpl)
-                .validacao("email@gmail.com","123456789-00");
+                .validarDuplicidadeEmailCpf("email@gmail.com","123456789-00");
         /*ação*/
         usuarioServiceImpl.salvarUsuario(persistirUsuario);
 
