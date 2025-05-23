@@ -11,7 +11,6 @@ import de.mkammerer.argon2.Argon2Factory;
 import jakarta.transaction.Transactional;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.beans.Encoder;
@@ -59,14 +58,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Usuario salvarUsuario(Usuario usuario) {
         /*deve validar o email e o cpf, verificar se existe*/
         validarUsuario(usuario);
-        /*hash da senha antes de salvar a instancia*/
-        String hashSenha = passwordEncoder.encode(usuario.getSenha());
-        usuario.setSenha(hashSenha);
         /*se nao existir email e nem cpf, salva a instancia com o hash da senha*/
-        Usuario usuarioSalvo = usuarioRepository.save(usuario);
-        /*remover a senha do objeto retornado para evitar vazamento*/
-        usuarioSalvo.setSenha(null);
-        return usuarioSalvo;
+        return usuarioRepository.save(usuario);
     }
 
     @Override

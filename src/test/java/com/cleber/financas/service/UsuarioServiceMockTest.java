@@ -1,5 +1,6 @@
 package com.cleber.financas.service;
 
+import com.cleber.financas.config.PasswordEncoderConfig;
 import com.cleber.financas.exception.ErroDeAutenticacao;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
@@ -36,7 +37,8 @@ public class UsuarioServiceMockTest {
         /*Usando o @MockBean*/
         usuarioRepository = Mockito.mock(UsuarioRepository.class);
         /*criando instancia real do usuario service*/
-        usuarioService = new UsuarioServiceImpl(usuarioRepository);
+        PasswordEncoderConfig passwordEncoder = new PasswordEncoderConfig();
+        usuarioService = new UsuarioServiceImpl(usuarioRepository );
     }
 
     @Test(expected = Test.None.class)
