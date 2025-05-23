@@ -18,7 +18,9 @@ import java.time.LocalDate;
 @Entity
 @Table(name= "usuario", schema = "financeiro")
 public class Usuario implements Serializable{
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private static final long serialVersionUID = 1L;
+
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id")
     private Long id;

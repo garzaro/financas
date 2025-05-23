@@ -19,12 +19,6 @@ public interface UsuarioService {
 
     /**validar usuario*/
     void validarUsuario(Usuario usuario);
-
-    /*unique*/
-    void validarEmail(String email);
-    
-    /*unique */
-    void validarCpf(String cpf);
     
     Optional<Usuario> obterUsuarioPorId(Long id);
     

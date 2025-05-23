@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;
 import com.cleber.financas.api.dto.UsuarioDTO;
 import com.cleber.financas.exception.ErroDeAutenticacao;
+import com.cleber.financas.exception.ErroValidacaoException;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.LancamentoService;
@@ -28,9 +29,15 @@ public class UsuarioController {
     @Autowired
     public ConvertDtoToEntity convertDtoToEntity;
     
-    public UsuarioController(UsuarioService usuarioService, LancamentoService lancamentoService) {
+    public UsuarioController(
+    		UsuarioService usuarioService,
+    		LancamentoService lancamentoService,
+    		ConvertDtoToEntity convertDtoToEntity
+    		)
+    {
         this.usuarioService = usuarioService;
         this.lancamentoService = lancamentoService;
+        this.convertDtoToEntity = convertDtoToEntity;
     }
 
     @PostMapping("/autenticar")
@@ -60,7 +67,7 @@ public class UsuarioController {
             return new ResponseEntity(usuarioSalvo, HttpStatus.CREATED);
             /*ou usar url*/
             /*return ResponseEntity.created(URI.create("/api/usuarios/" + usuarioSalvo.getId())).build();*/
-        } catch (RegraDeNegocioException mensagemDeErro) {
+        } catch (ErroValidacaoException mensagemDeErro) {
             return ResponseEntity.badRequest().body(mensagemDeErro.getMessage());
         }
     }
