@@ -6,3 +6,8 @@ public class ErroValidacaoException extends RuntimeException{
 		super(mensagem);		
 	}	
 }
+
+
+
+
+
