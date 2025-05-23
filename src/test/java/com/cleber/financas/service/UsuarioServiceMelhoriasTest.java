@@ -39,8 +39,7 @@ public class UsuarioServiceMelhoriasTest {
         /*salvar*/
         usuarioRepository.save(cadastrarEmail);
         /*ação*/
-        usuarioService.
-                validarCpf("123456789-00");
+        usuarioService.validarUsuario(cadastrarEmail);
     }
     @Test(expected = Test.None.class)
     public void deveAutenticarUmUsuarioComSucesso(){
