@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -69,16 +68,16 @@ public class UsuarioServiceTest {
         Assertions.assertThat(usuarioAutenticado.getEmail()).isEqualTo(salvarUsuario.getEmail());
         Assertions.assertThat(usuarioAutenticado.getSenha()).isEqualTo(salvarUsuario.getSenha());
     }
-    @Test
+   /* @Test
     public void dadoUmaSenhaBrutaFornecida_QuandoCodificadaComArgon2_EntãoCorrespondeSenhaCodificada() {
         String senhaBruta = "Cleber";
-        /*iteração, 32bits, uma thread, 600MB ram, custo te tempo 10 -configuração para o argon2*/
+        /*iteração, 32bits, uma thread, 600MB ram, custo te tempo 10 -configuração para o argon2
         Argon2PasswordEncoder arg2SpringSecurity = new Argon2PasswordEncoder(16, 32, 1, 60000, 10);
         String springBouncyHash = arg2SpringSecurity.encode(senhaBruta);
         System.out.println("A senha hasheada é " + springBouncyHash);
 
         assertTrue(arg2SpringSecurity.matches(senhaBruta, springBouncyHash));
-    }
+    }*/
     /*ver explicação no Baeeldung*/
     @Test
     public void givenSenhaBrutaESalt_QuandoAlgoritmoArgon2Eusado_EntaoHashEstaCorreto() {

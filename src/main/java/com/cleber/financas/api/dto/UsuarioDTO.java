@@ -69,8 +69,8 @@ public class UsuarioDTO {
         }
 
         public UsuarioBuilder setNome(String nome) {
-        this.nome = nome;
-        return this;
+        	this.nome = nome;
+        	return this;
         }
 
         public UsuarioBuilder setCpf(String cpf) {
