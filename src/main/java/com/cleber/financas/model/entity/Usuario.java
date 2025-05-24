@@ -2,9 +2,7 @@ package com.cleber.financas.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.Constraint;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,10 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -39,7 +34,6 @@ public class Usuario implements Serializable{
     private String nome;
 
     @Column(name = "cpf")
-    @CPF(message = "CPF INVÁLIDO")
     private String cpf;
 
     @Column(name = "usuario")
@@ -49,8 +43,6 @@ public class Usuario implements Serializable{
     private String email;
 	
     @Column(name = "senha")
-    @NotBlank(message = "A senha é obriatória")
-    @Size(min = 6, message = "A senha deve ter pelo menos 6 caracteres")
     @JsonIgnore
     private String senha;
 
