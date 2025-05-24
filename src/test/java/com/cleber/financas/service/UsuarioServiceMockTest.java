@@ -46,7 +46,7 @@ public class UsuarioServiceMockTest {
         /*cenario*/
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(false);
 
-        /*ação, sem verificação, só olha se existe o email*/
+        /*ação, sem verificação, só olha se existe o email
         usuarioService.
                 validarEmail("cleber@gmail.com");
     }
@@ -56,7 +56,7 @@ public class UsuarioServiceMockTest {
         /*cenario*/
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(true);
 
-        /*ação*/
+        /*ação
         usuarioService.validarEmail("cleber@gmail.com");
     }
 
