@@ -18,6 +18,8 @@ import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/usuarios") /*para mapeamento de todas as requisições*/
 //@CrossOrigin(origins = "http://localhost:3000")
@@ -53,7 +55,7 @@ public class UsuarioController {
     /*Salvar - Este metodo é um endpoint que recebe uma requisição HTTP POST - vem la do front*/
     /*ResponseEntity representa o corpo da resposta*/
     @PostMapping
-    public ResponseEntity salvarUsuario(@RequestBody UsuarioDTO dto) {
+    public ResponseEntity salvarUsuario(@RequestBody @Valid UsuarioDTO dto) {
         Usuario usuario = Usuario.builder()
                 .nome(dto.getNome())
                 .cpf(dto.getCpf())

@@ -5,9 +5,11 @@ package com.cleber.financas.api.dto;
 
 import java.time.LocalDate;
 
+import org.hibernate.validator.constraints.br.CPF;
+
 public class UsuarioDTO {
     private Long id;
-    private String nome;
+    private String nome;   
     private String cpf;
     private String usuario;
     private String email;
