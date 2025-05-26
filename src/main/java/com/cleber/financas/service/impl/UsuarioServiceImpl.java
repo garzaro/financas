@@ -116,11 +116,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         /*validação manual*/
         if (!Pattern.matches("^[\\w-\\.]+@[\\w-\\.]+\\.[a-z]{2,}$", usuario.getEmail())) {
-            throw new ErroValidacaoException("O email deve seguir o padrao email@seudominio.com (br).");
+            throw new ErroValidacaoException("O email deve seguir o padrao email@seudominio.com");
         }
         String emailPermitido = usuario.getEmail().substring(usuario.getEmail().lastIndexOf("@") + 1);
         if (!dominiosEmailPermitidos.contains(emailPermitido)) { /*garante que o dominio extraido esteja na lista*/
-            throw new ErroValidacaoException("O email para cadastro deve constar da lista a seguir: " + dominiosEmailPermitidos);
+            throw new ErroValidacaoException("Emails permitidos no cadastro : " + dominiosEmailPermitidos);
         }
     }
     
