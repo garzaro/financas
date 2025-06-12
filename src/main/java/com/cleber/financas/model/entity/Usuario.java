@@ -42,7 +42,7 @@ public class Usuario implements Serializable{
     @Column(name = "email")
     private String email;
 	
-    @Column(name = "senha")
+    @Column(name = "senha", nullable = false, length = 255)
     @JsonIgnore
     private String senha;
 

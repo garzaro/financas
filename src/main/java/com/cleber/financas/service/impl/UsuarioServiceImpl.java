@@ -5,6 +5,7 @@ import com.cleber.financas.exception.ErroValidacaoException;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
+import com.cleber.financas.service.SenhaService;
 import com.cleber.financas.service.UsuarioService;
 import jakarta.transaction.Transactional;
 
@@ -23,10 +24,12 @@ import java.util.regex.Pattern;
 @Validated
 public class UsuarioServiceImpl implements UsuarioService {
     /*injecao por construtor*/
-    UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final SenhaService senhaService;
         
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
+    public UsuarioServiceImpl( UsuarioRepository usuarioRepository, SenhaService senhaService){
         this.usuarioRepository = usuarioRepository;
+        this.senhaService = senhaService;
     }
     /* lista de emails permitidos */
     private static final List<String> dominiosEmailPermitidos = List.of(
@@ -52,6 +55,15 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public Usuario salvarUsuario(Usuario usuario) {
         /*deve validar o email e o cpf, verificar se existe*/
+        System.out.println("Validando usuário: " + usuario);
+        System.out.println("Validando usuário:");
+        System.out.println("Nome: " + usuario.getNome());
+        System.out.println("CPF: " + usuario.getCpf());
+        System.out.println("Usuário: " + usuario.getUsuario());
+        System.out.println("Email: " + usuario.getEmail());
+        System.out.println("Senha antes do hash: " + usuario.getSenha());
+        usuario.setSenha(senhaService.hashSenha(usuario.getSenha()));
+        System.out.println("Senha após o hash: " + usuario.getSenha());
         validarUsuario(usuario);
         /*se nao existir email e nem cpf, salva a instancia com o hash da senha*/
         return usuarioRepository.save(usuario);
@@ -72,6 +84,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         validarCpf(usuario);
         validarNomeUsuario(usuario);
         validarEmail(usuario);
+        validarSenha(usuario);
+        //hashearSenha(usuario);
         /*validacao de dupliciadade*/
         validarEmailCpf(usuario.getEmail(), usuario.getCpf());        
     }
@@ -136,6 +150,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     	if (usuario.getSenha() == null || usuario.getSenha().trim().equals("")) {
     		throw new ErroValidacaoException("informe a senha.");
     	}    	
+    }
+
+    public void hashearSenha(Usuario usuario){
+        System.out.println("Senha antes do hash: " + usuario.getSenha());
+        usuario.setSenha(senhaService.hashSenha(usuario.getSenha()));
+        System.out.println("Senha após o hash: " + usuario.getSenha());
+        throw new ErroValidacaoException("Problemas ao hashear a senha");
     }
     
     @Override

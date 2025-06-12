@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import com.cleber.financas.api.converter.ConvertDtoToEntity;
+import com.cleber.financas.service.SenhaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,8 @@ import com.cleber.financas.service.UsuarioService;
 public class UsuarioController {
 	@Autowired
     public UsuarioService usuarioService;
+    @Autowired
+    public SenhaService senhaService;
 	@Autowired
 	public LancamentoService lancamentoService;
     @Autowired
@@ -32,12 +35,14 @@ public class UsuarioController {
     public UsuarioController(
     		UsuarioService usuarioService,
     		LancamentoService lancamentoService,
-    		ConvertDtoToEntity convertDtoToEntity
+    		ConvertDtoToEntity convertDtoToEntity,
+            SenhaService senhaService
     		)
     {
         this.usuarioService = usuarioService;
         this.lancamentoService = lancamentoService;
         this.convertDtoToEntity = convertDtoToEntity;
+        this.senhaService = senhaService;
     }
 
     @PostMapping("/autenticar")
@@ -59,7 +64,7 @@ public class UsuarioController {
                 .cpf(dto.getCpf())
                 .usuario(dto.getUsuario())
                 .email(dto.getEmail())
-                .senha(dto.getSenha())
+                .senha(senhaService.hashSenha(dto.getSenha()))
                 .build();
 
         try {
@@ -68,6 +73,7 @@ public class UsuarioController {
             /*ou usar url*/
             /*return ResponseEntity.created(URI.create("/api/usuarios/" + usuarioSalvo.getId())).build();*/
         } catch (ErroValidacaoException mensagemDeErro) {
+            mensagemDeErro.printStackTrace();
             return ResponseEntity.badRequest().body(mensagemDeErro.getMessage());
         }
     }

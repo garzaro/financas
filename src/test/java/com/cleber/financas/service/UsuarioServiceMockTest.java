@@ -36,9 +36,9 @@ public class UsuarioServiceMockTest {
         /*instancia de usuario repository*/
         /*Usando o @MockBean*/
         usuarioRepository = Mockito.mock(UsuarioRepository.class);
-        /*criando instancia real do usuario service*/
+        /*criando instancia real do usuario service
         PasswordEncoderConfig passwordEncoder = new PasswordEncoderConfig();
-        usuarioService = new UsuarioServiceImpl(usuarioRepository );
+        usuarioService = new UsuarioServiceImpl(usuarioRepository);*/
     }
 
     @Test(expected = Test.None.class)
