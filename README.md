@@ -160,7 +160,14 @@ O frontend estará disponível em: `http://localhost:3000`
 - Contador de caracteres
 - Loading states
 
+## Controle de versionamento
+- Migration - flayway
+
+## Auditria de dados
+- Historico de entidade - Envers 
+
 ## 🔧 Configurações
+
 
 ### Backend (application.properties)
 ```properties
