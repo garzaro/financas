@@ -9,6 +9,7 @@ import com.cleber.financas.model.entity.TipoLancamento;
 import com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.UsuarioService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,7 @@ public class ConvertDtoToEntity {
     private UsuarioService usuarioService;
     
     /* Um metodo para converter o dto em uma entidade de lancamento */
-    public Lancamento converterDtoParaEntidade(LancamentoDTO dto) {
+    public Lancamento converterDtoParaEntidade(@NotNull LancamentoDTO dto) {
         Lancamento lancamento = new Lancamento();
         lancamento.setId(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
         lancamento.setDescricao(dto.getDescricao());

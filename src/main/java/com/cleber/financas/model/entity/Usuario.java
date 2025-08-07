@@ -2,19 +2,24 @@ package com.cleber.financas.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
+//@EqualsAndHashCode(of ="id")
 @Entity
 @Table(name= "usuario", schema = "financeiro")
 public class Usuario implements Serializable{
@@ -37,7 +42,7 @@ public class Usuario implements Serializable{
     @Column(name = "email")
     private String email;
 	
-    @Column(name = "senha")
+    @Column(name = "senha", nullable = false, length = 255)
     @JsonIgnore
     private String senha;
 

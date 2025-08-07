@@ -92,14 +92,14 @@ public class LancamentoResource {
     public ResponseEntity buscarLancamento(@RequestParam(value = "descricao", required = false) String descricao,
                                            @RequestParam(value = "tipoLancamento", required = false) String tipoLancamento,
                                            @RequestParam(value = "mes", required = false) Integer mes,
-                                           @RequestParam(value = "ano", required = false) Integer ano,
+                                           @RequestParam(value = "ano") Integer ano,
             /* Parametro obrigatorio para fazer o filtro */
-                                           @RequestParam(value = "usuario", required = false) Long idusuario) {
+                                           @RequestParam(value = "usuario", required = false) Long idUsuario) {
         try {
             /* Verifica se o ID do usuário foi passado */
             
-            if (idusuario == null) {
-                return ResponseEntity.badRequest().body("O ID do usuário é obrigatório, Jão " + "[" + idusuario + "].");
+            if (idUsuario == null) {
+                return ResponseEntity.badRequest().body("O ID do usuário é obrigatório, Jão " + "[" + idUsuario + "].");
             }
             /* filtrando */
             Lancamento lancamentoFiltro = new Lancamento();
@@ -107,10 +107,10 @@ public class LancamentoResource {
             lancamentoFiltro.setMes(mes);
             lancamentoFiltro.setAno(ano);
             /* verifica se o usuario existe e define o filtro do lancamento */
-            Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(idusuario);
+            Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(idUsuario);
             if (!usuario.isPresent()) {
                 return ResponseEntity.badRequest()
-                        .body("Consulta não realizada, usuario não encontrado com o ID " + "[" + idusuario + "]");
+                        .body("Consulta não realizada, usuario não encontrado com o ID " + "[" + idUsuario + "]");
             } else {
                 lancamentoFiltro.setUsuario(usuario.get());
             }

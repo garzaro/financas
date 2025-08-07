@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 public class UsuarioDTO {
     private Long id;
-    private String nome;
+    private String nome;   
     private String cpf;
     private String usuario;
     private String email;

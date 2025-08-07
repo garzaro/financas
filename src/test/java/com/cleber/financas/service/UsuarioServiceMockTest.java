@@ -36,9 +36,9 @@ public class UsuarioServiceMockTest {
         /*instancia de usuario repository*/
         /*Usando o @MockBean*/
         usuarioRepository = Mockito.mock(UsuarioRepository.class);
-        /*criando instancia real do usuario service*/
+        /*criando instancia real do usuario service
         PasswordEncoderConfig passwordEncoder = new PasswordEncoderConfig();
-        usuarioService = new UsuarioServiceImpl(usuarioRepository );
+        usuarioService = new UsuarioServiceImpl(usuarioRepository);*/
     }
 
     @Test(expected = Test.None.class)
@@ -46,8 +46,9 @@ public class UsuarioServiceMockTest {
         /*cenario*/
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(false);
 
-        /*ação, sem verificação, só olha se existe o email*/
-        usuarioService.validarEmailCpf("cleber@gmail.com", "");
+        /*ação, sem verificação, só olha se existe o email
+        usuarioService.
+                validarEmail("cleber@gmail.com");
     }
 
     @Test(expected = RegraDeNegocioException.class)
@@ -55,8 +56,8 @@ public class UsuarioServiceMockTest {
         /*cenario*/
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(true);
 
-        /*ação*/
-        usuarioService.validarEmailCpf("cleber@gmail.com", "");
+        /*ação
+        usuarioService.validarEmail("cleber@gmail.com");
     }
 
     @Test(expected = Test.None.class)
