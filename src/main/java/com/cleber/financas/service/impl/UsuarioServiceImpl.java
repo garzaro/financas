@@ -116,7 +116,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         
         boolean existeUsuarioComEsseCpf = usuarioRepository.existsByCpf(cpf);
         if (existeUsuarioComEsseCpf) {
-        	throw new RegraDeNegocioException("Já existe usuário com esse CPF");
+        	throw new RegraDeNegocioException("Esse CPF já está em uso");
         }
     }
     
