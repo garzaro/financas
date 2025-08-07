@@ -36,7 +36,7 @@ public class UsuarioServiceTest {
         usuarioRepository.deleteAll();
         /*ação, sem verificação, só olha se existe o email*/
         usuarioService
-                .validarEmail("cleber@gmail.com");
+                .validarEmailCpf("cleber@gmail.com", "");
     }
     @Test(expected = RegraDeNegocioException.class)
     public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){
@@ -47,8 +47,7 @@ public class UsuarioServiceTest {
                 .build();
         usuarioRepository.save(cadastrarEmail);
         /*ação*/
-        usuarioService
-                .validarEmail("cleber@gmail.com");
+        usuarioService.validarEmailCpf("cleber@gmail.com", "");
     }
     @Test(expected = Test.None.class)
     public void deveAutenticarUmUsuarioComSucesso(){
