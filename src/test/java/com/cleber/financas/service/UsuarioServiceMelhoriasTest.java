@@ -28,8 +28,8 @@ public class UsuarioServiceMelhoriasTest {
     public void deveValidarEmail(){
         /*cenario*/
         usuarioRepository.deleteAll();
-        /*ação, sem verificação, só olha se existe o email*/
-        usuarioService.validarEmailCpf("cleber@gmail.com", "");
+        /*ação, sem verificação, só olha se existe o email
+        usuarioService.validarUsuario("cleber@gmail.com");
     }
     @Test(expected = RegraDeNegocioException.class)
     public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){

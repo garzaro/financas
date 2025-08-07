@@ -1,26 +1,31 @@
 package com.cleber.financas.config;
 
-import de.mkammerer.argon2.Argon2;
-import de.mkammerer.argon2.Argon2Factory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Component;
 /*Argon*/
 /*classe utilitária para encapsular a lógica de hashing*/
 @Component
 public class PasswordEncoderConfig {
-    private static final Argon2 ARGON_2 = Argon2Factory.create(
-            Argon2Factory.Argon2Types.ARGON2i, /*salt*/16, /*hash*/32
-    );
-    /*numero de iteraçoes*/
-    private static final int ITERATIONS = 3;
-    /*memoria que sera usada, em KiB - 65 MB*/
-    private static final int MEMORY = 65536;
-    /*numero de threads*/
-    private static final int PARALLELISM = 4;
-
-    public String encode(String senha){
-        return ARGON_2.hash(ITERATIONS, MEMORY, PARALLELISM, senha.toCharArray());
+    @Bean
+    public Argon2PasswordEncoder passwordEncoder(){
+        return new Argon2PasswordEncoder(
+                16,
+                32,
+                2,
+                65536,
+                5
+        );
     }
-    public boolean matches(String senhaDigitada, String hashArmazenado){
-        return ARGON_2.verify(hashArmazenado, senhaDigitada.toCharArray());
-    }
+	
 }
+
+/*
+* #Configuração do argon2
+16,  // saltLength - Tamanho do salt (padrão recomendado: 16 bytes)
+32,  // hashLength - Tamanho do hash gerado (padrão recomendado: 32 bytes)
+2,   // parallelism - Número de threads paralelas para computação (2 é um bom equilíbrio)
+65536, // memory - Memória usada em KB (64MB - recomendado para segurança)
+5    // iterations - Número de iterações, repetições do algoritmo (5 é um valor seguro)
+* */
+    
