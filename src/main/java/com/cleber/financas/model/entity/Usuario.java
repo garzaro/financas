@@ -10,9 +10,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -46,9 +48,13 @@ public class Usuario implements Serializable{
     @JsonIgnore
     private String senha;
 
-    @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
+    /*@Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     @Column(name = "data_cadastro")
-    private LocalDate dataCadastro;
+    private LocalDate dataCadastro;*/
+
+    @CreationTimestamp
+    @Column(name = "data_cadastro", updatable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
+    private LocalDateTime dataCadastro;
 
     /*GETTERS AND SETTERS*/
     /*HASHCODE AND EQUALS*/
