@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RunWith(SpringRunner.class)
@@ -98,11 +99,11 @@ public class UsuarioRepositoryMelhoriasTest {
     private static Usuario criarUsuario(){
         return Usuario.builder()
                 .nome("Madonna da Silva")
-                .usuario("cricri")
+                .nomeUsuario("cricri")
                 .cpf("123.456.789.00")
                 .email("cricri@gmail.com")
                 .senha("123456")
-                .dataCadastro(LocalDate.now())
+                .dataCadastro(LocalDateTime.now())
                 .build();
     }
 }
