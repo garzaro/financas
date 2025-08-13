@@ -33,7 +33,7 @@ public class UsuarioServiceTest {
     public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){
         /*cenario*/
         Usuario cadastrarEmail = Usuario.builder()
-                .usuario("garzaro74")
+                .nomeUsuario("garzaro74")
                 .email("cleber@gmail.com")
                 .build();
         usuarioRepository.save(cadastrarEmail);
