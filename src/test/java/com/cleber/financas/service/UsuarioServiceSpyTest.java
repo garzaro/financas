@@ -68,7 +68,7 @@ public class UsuarioServiceSpyTest {
     public static Usuario criarUsuario() {
         return Usuario.builder()
                 .id(1l)
-                .usuario("garzaro74")
+                .nomeUsuario("garzaro74")
                 .email("email@gmail.com")
                 .senha("senha")
                 .build();
