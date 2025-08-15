@@ -1,14 +1,21 @@
 package com.cleber.financas.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Component;
-/*Argon*/
-/*classe utilitária para encapsular a lógica de hashing*/
+
+/**
+ * Argon
+ * */
+/**
+ * classe utilitária para encapsular a lógica de hashing
+ * */
 @Component
+@Configuration
 public class PasswordEncoderConfig {
     @Bean
-    public Argon2PasswordEncoder passwordEncoder(){
+    Argon2PasswordEncoder passwordEncoder(){
         return new Argon2PasswordEncoder(
                 16,
                 32,
@@ -16,8 +23,7 @@ public class PasswordEncoderConfig {
                 65536,
                 5
         );
-    }
-	
+    }	
 }
 
 /*
