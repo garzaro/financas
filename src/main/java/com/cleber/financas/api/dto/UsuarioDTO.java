@@ -3,7 +3,8 @@ package com.cleber.financas.api.dto;
 /*Não usei @Builder, @Getter, @Setter
 * resolvi criar na mão o codigo*/
 
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 public class UsuarioDTO {
     private Long id;
@@ -12,7 +13,7 @@ public class UsuarioDTO {
     private String usuario;
     private String email;
     private String senha;
-    private LocalDate dataCadastro;
+    private LocalDateTime dataCadastro;
 
     public UsuarioDTO() {
 		
@@ -50,7 +51,7 @@ public class UsuarioDTO {
         return senha;
     }
 
-    public LocalDate getDataCadastro(){
+    public LocalDateTime getDataCadastro(){
         return dataCadastro;
     }
 
@@ -61,7 +62,7 @@ public class UsuarioDTO {
         private String usuario;
         private String email;
         private String senha;
-        private LocalDate dataCadastro;
+        private LocalDateTime dataCadastro;
 
         public UsuarioBuilder setId(Long id) {
             this.id = id;
@@ -93,7 +94,7 @@ public class UsuarioDTO {
             return this;
         }
 
-        public UsuarioBuilder setDataCadastro(LocalDate dataCadastro){
+        public UsuarioBuilder setDataCadastro(LocalDateTime dataCadastro){
             this.dataCadastro = dataCadastro;
             return this;
         }
