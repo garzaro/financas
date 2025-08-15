@@ -60,7 +60,9 @@ public class Lancamento {
     @Column(nullable = false)
     private Instant dataAtualizacao;
 
-    /***************************************************************************/
+    /**
+     * Enums
+     * */
 
     @Column(name = "tipo_lancamento")
     @Enumerated(value = EnumType.STRING)
