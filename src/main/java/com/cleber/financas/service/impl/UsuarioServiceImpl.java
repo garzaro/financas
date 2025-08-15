@@ -18,7 +18,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-/*endpoints*/
+/**
+ * endpoints
+ * */
 //@NoArgsConstructor
 @Service
 @Validated
