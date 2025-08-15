@@ -23,7 +23,9 @@ import java.util.regex.Pattern;
 @Service
 @Validated
 public class UsuarioServiceImpl implements UsuarioService {
-    /*injecao por construtor*/
+    /**
+     * injecao por construtor
+     * */
     @Autowired
     private final UsuarioRepository usuarioRepository;
     private Argon2PasswordEncoder passwordEncoder = new Argon2PasswordEncoder( 16, 32, 1, 16, 3 );
@@ -32,14 +34,16 @@ public class UsuarioServiceImpl implements UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    /* lista de emails permitidos */
+    /**
+     *  lista de emails permitidos
+     *  */
     private static final List<String> dominiosEmailPermitidos = List.of(
             "gmail.com", "edu.br", "gov.br"
     );
+
     /**
      * login, validação e autenticação
      */
-
     /*@Override
     public Usuario autenticar(String email, String senha) {
         Usuario usuario = usuarioRepository.findByEmail(email)
@@ -58,13 +62,19 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuario;
     }*/
 
-    /*login, validação e autenticação*/
+    /**
+     * login, validação e autenticação
+     * */
     @Override
     public Usuario autenticar(String email, String senha) {
-        /*login, validando login*/
+        /**
+         * login, validando login
+         * */
         Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
 
-        /*verificar a existencia de usuario na base de dados*/
+        /**
+         * verificar a existencia de usuario na base de dados
+         * */
         if (!usuario.isPresent()) {
             throw new ErroDeAutenticacao("Verifique seu email e tente novamente.");
         }
@@ -78,10 +88,15 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public Usuario salvarUsuario(Usuario usuario) {
-        /*deve validar o email e o cpf, verificar se existe*/
+        /**
+         * deve validar o email e o cpf, verificar se existe
+         * */
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /**hash da senha*/
         validarUsuario(usuario);
-        /*se nao existir email e nem cpf, salva a instancia com o hash da senha*/
+        /**
+         * se nao existir email e nem cpf,
+         * salva a instancia com o hash da senha
+         * */
         return usuarioRepository.save(usuario);
     }
 
@@ -92,7 +107,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.save(usuario);
     }  
 
-    /*VALIDAÇÃO*/
+    /**
+     * VALIDAÇÃO
+     * */
     @Override
     public void validarUsuario(Usuario usuario) {
         /*campos vazio*/
@@ -102,25 +119,35 @@ public class UsuarioServiceImpl implements UsuarioService {
         validarEmail(usuario);
         validarSenha(usuario);
         //hashearSenha(usuario);
-        /*validacao de dupliciadade*/
+        /**
+         * validacao de dupliciadade
+         * */
         validarEmailCpf(usuario.getEmail(), usuario.getCpf());        
     }
     
-    /*validação de existencia*/    
+    /**
+     * validação de existencia
+     * */
     public void validarEmailCpf(String email, String cpf) {
-        /*ver se o email existe*/
+        /**
+         * ver se o email existe
+         * */
         boolean existeUsuarioComEsseEmail = usuarioRepository.existsByEmail(email);
         if (existeUsuarioComEsseEmail) {
             throw new RegraDeNegocioException("Esse email já está em uso");
         }
-        /*ver se o cpf existe*/
+        /**
+         * ver se o cpf existe
+         * */
         boolean existeUsuarioComEsseCpf = usuarioRepository.existsByCpf(cpf);
         if (existeUsuarioComEsseCpf) {
         	throw new RegraDeNegocioException("Esse CPF já está em uso");
         }
     }
     
-    /*validar nome completo*/
+    /**
+     * validar nome completo
+     * */
     public void validarNome(Usuario usuario){
         //System.out.println("Nome do usuário: " + usuario.getNome());
         if (usuario.getNome() == null || usuario.getNome().trim().equals("")) {
@@ -131,7 +158,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
     }
     
-    /*validar cpf - campo vazio*/
+    /**
+     * validar cpf - campo vazio
+     * */
     public void validarCpf(Usuario usuario){
         if (usuario.getCpf() == null || usuario.getCpf().trim().equals("")) {
             throw new ErroValidacaoException("O CPF é obrigatório");
@@ -139,12 +168,16 @@ public class UsuarioServiceImpl implements UsuarioService {
         
     }
    
-    /*validar email*/
+    /**
+     * validar email
+     * */
     public void validarEmail(Usuario usuario){
         if (usuario.getEmail() == null || usuario.getEmail().trim().equals("")) {
             throw new ErroValidacaoException("O email é obrigatório");
         }
-        /*validação manual*/
+        /**
+         * validação manual
+         * */
         if (!Pattern.matches("^[\\w-\\.]+@[\\w-\\.]+\\.[a-z]{2,}$", usuario.getEmail())) {
             throw new ErroValidacaoException("O email deve seguir o padrao email@seudominio.com");
         }
@@ -154,14 +187,18 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
     }
     
-    /*validar nome usuario*/
+    /**
+     * validar nome usuario
+     * */
     public void validarNomeUsuario(Usuario usuario){
         if (usuario.getNomeUsuario() == null || usuario.getNomeUsuario().trim().equals("")) {
             throw new ErroValidacaoException("O nome de usuário é obrigatório");
         }
     }
     
-    /*validar senha - campo vazio*/
+    /**
+     * validar senha - campo vazio
+     * */
     public void validarSenha(Usuario usuario) {
     	if (usuario.getSenha() == null || usuario.getSenha().trim().equals("")) {
     		throw new ErroValidacaoException("informe a senha.");
@@ -172,7 +209,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return null;
     }
 
-    /*public void hashearSenha(Usuario usuario){
+    /**public void hashearSenha(Usuario usuario){
         System.out.println("Senha antes do hash: " + usuario.getSenha());
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         System.out.println("Senha após o hash: " + usuario.getSenha());
