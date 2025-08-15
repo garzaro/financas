@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.cleber.financas.api.converter.ConvertDtoToEntity;
 import com.cleber.financas.service.SenhaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,14 +56,18 @@ public class UsuarioController {
         }
     }
 
-    /*Salvar - Este metodo é um endpoint que recebe uma requisição HTTP POST - vem la do front*/
-    /*ResponseEntity representa o corpo da resposta*/
+    /**
+     * Salvar - Este metodo é um endpoint que recebe
+     * uma requisição HTTP POST - vem la do front
+     *
+     * ResponseEntity representa o corpo da resposta
+     **/
     @PostMapping
-    public ResponseEntity salvarUsuario(@RequestBody UsuarioDTO dto) {
+    public ResponseEntity salvarUsuario( @RequestBody UsuarioDTO dto) { /**@Valid*/
         Usuario usuario = Usuario.builder()
                 .nome(dto.getNome())
                 .cpf(dto.getCpf())
-                .usuario(dto.getUsuario())
+                .nomeUsuario(dto.getUsuario())
                 .email(dto.getEmail())
                 .senha(senhaService.hashSenha(dto.getSenha()))
                 .build();
