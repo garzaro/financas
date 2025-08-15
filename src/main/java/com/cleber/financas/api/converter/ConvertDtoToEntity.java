@@ -26,9 +26,7 @@ public class ConvertDtoToEntity {
         lancamento.setDescricao(dto.getDescricao());
         lancamento.setAno(dto.getAno());
         lancamento.setMes(dto.getMes());
-        lancamento.setDataCadastro(dto.getDataCadastro());
         lancamento.setValor(dto.getValor());
-        lancamento.setDataCadastro(dto.getDataCadastro());
         /* inicio usuario */
         /* receber o id do usuario, conforme dto */
         Usuario receberUsuario = usuarioService.obterUsuarioPorId(dto.getUsuario())
@@ -58,7 +56,7 @@ public class ConvertDtoToEntity {
         usuario.setUsuario(dto.getUsuario());
         usuario.setEmail(dto.getEmail());
         usuario.setSenha(dto.getSenha());
-        usuario.setDataCadastro(dto.getDataCadastro());
+        usuario.setDataCadstro(dto.getDataCadastro());
         return usuario;
     }
     
