@@ -21,6 +21,9 @@ public interface UsuarioService {
     /**validar usuario*/
     void validarUsuario(Usuario usuario);
     
+    /*ver se existe o email*/
+    void validarEmailCpf(String email, String cpf);
+    
     Optional<Usuario> obterUsuarioPorId(Long id);
     
     Optional<Usuario> obterUsuarioPorCpf(String cpf);   
