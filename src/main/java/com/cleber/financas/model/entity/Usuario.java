@@ -40,8 +40,8 @@ public class Usuario implements Serializable{
     @Column(name = "cpf")
     private String cpf;
 
-    @Column(name = "usuario")
-    private String usuario;
+    @Column(name = "nome_usuario")
+    private String nomeUsuario;
     
     @Column(name = "email")
     private String email;
