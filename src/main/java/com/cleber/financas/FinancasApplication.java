@@ -2,6 +2,9 @@ package com.cleber.financas;
 
 import com.cleber.financas.service.SenhaService;
 import com.cleber.financas.service.impl.SenhaServiceImpl;
+import com.password4j.Hash;
+import com.password4j.Password;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -22,8 +25,7 @@ public class FinancasApplication implements WebMvcConfigurer {
 				2,
 				65536,
 				5));
-			String hash = senhaService.hashSenha("Cl3b3r@g4rz4r0");
-			System.out.println("ESSE É O HASH GERADO: " + hash);
+			String hash = senhaService.hashSenha("senha123");
+			System.out.println("ESSE É O HASH GERADO (classe de inicialização): " + hash);
 		}
-
 	}
