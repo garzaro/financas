@@ -53,7 +53,7 @@ public class ConvertDtoToEntity {
         usuario.setId(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
         usuario.setNome(dto.getNome());
         usuario.setCpf(dto.getCpf());
-        usuario.setUsuario(dto.getUsuario());
+        usuario.setNomeUsuario(dto.getUsuario());
         usuario.setEmail(dto.getEmail());
         usuario.setSenha(dto.getSenha());
         usuario.setDataCadstro(dto.getDataCadastro());
