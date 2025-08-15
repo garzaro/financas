@@ -6,11 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
-
+@Audited
 @Entity
 @Data
 @Builder
@@ -38,11 +42,26 @@ public class Lancamento {
 
     @Column(name = "valor")
     private BigDecimal valor;
-    
-    @Column(name = "data_cadastro")
-    @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
-    private LocalDate dataCadastro;
-    
+
+    /**
+     * Registra o momento EXATO da criação da entidade.
+     * O valor é definido automaticamente pelo Hibernate na primeira vez que a entidade é salva.
+     * `updatable = false` garante que este campo nunca seja alterado após a criação.
+     */
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant dataCriacao;
+
+    /**
+     * Registra o momento EXATO da última atualização da entidade.
+     * O valor é atualizado automaticamente pelo Hibernate toda vez que a entidade é modificada.
+     */
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private Instant dataAtualizacao;
+
+    /***************************************************************************/
+
     @Column(name = "tipo_lancamento")
     @Enumerated(value = EnumType.STRING)
     private TipoLancamento tipoLancamento;
