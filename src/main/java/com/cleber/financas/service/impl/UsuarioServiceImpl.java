@@ -5,11 +5,11 @@ import com.cleber.financas.exception.ErroValidacaoException;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
-import com.cleber.financas.service.SenhaService;
 import com.cleber.financas.service.UsuarioService;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -24,28 +24,52 @@ import java.util.regex.Pattern;
 @Validated
 public class UsuarioServiceImpl implements UsuarioService {
     /*injecao por construtor*/
+    @Autowired
     private final UsuarioRepository usuarioRepository;
-    private final SenhaService senhaService;
-        
-    public UsuarioServiceImpl( UsuarioRepository usuarioRepository, SenhaService senhaService){
+    private Argon2PasswordEncoder passwordEncoder = new Argon2PasswordEncoder( 16, 32, 1, 16, 3 );
+
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository){
         this.usuarioRepository = usuarioRepository;
-        this.senhaService = senhaService;
     }
+
     /* lista de emails permitidos */
     private static final List<String> dominiosEmailPermitidos = List.of(
             "gmail.com", "edu.br", "gov.br"
     );
+    /**
+     * login, validação e autenticação
+     */
+
+    /*@Override
+    public Usuario autenticar(String email, String senha) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ErroDeAutenticacao("Credenciais inválidas."));
+        /**
+         * System.out.println("Hash do banco: " + usuario.getSenha());
+         *         System.out.println("Senha digitada: " + senha);
+         * *
+
+        boolean senhaCorreta = passwordEncoder.matches(senha, usuario.getSenha());
+        System.out.println("Resultado da comparação: " + senhaCorreta);
+
+        if (!senhaCorreta) {
+            throw new ErroDeAutenticacao("Credenciais inválidas.");
+        }
+        return usuario;
+    }*/
 
     /*login, validação e autenticação*/
     @Override
     public Usuario autenticar(String email, String senha) {
         /*login, validando login*/
         Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
+
         /*verificar a existencia de usuario na base de dados*/
         if (!usuario.isPresent()) {
             throw new ErroDeAutenticacao("Verifique seu email e tente novamente.");
         }
-        if (!usuario.get().getSenha().equals(senha)) {
+        boolean senhaCorreta = passwordEncoder.matches(senha, usuario.get().getSenha());
+        if (!senhaCorreta) {
             throw new ErroDeAutenticacao("Senha incorreta. Tente novamente ou clique em \"Esqueceu a senha?\" para escolher outra.");
         }
         return usuario.get();
@@ -55,15 +79,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public Usuario salvarUsuario(Usuario usuario) {
         /*deve validar o email e o cpf, verificar se existe*/
-        System.out.println("Validando usuário: " + usuario);
-        System.out.println("Validando usuário:");
-        System.out.println("Nome: " + usuario.getNome());
-        System.out.println("CPF: " + usuario.getCpf());
-        System.out.println("Usuário: " + usuario.getUsuario());
-        System.out.println("Email: " + usuario.getEmail());
-        System.out.println("Senha antes do hash: " + usuario.getSenha());
-        usuario.setSenha(senhaService.hashSenha(usuario.getSenha()));
-        System.out.println("Senha após o hash: " + usuario.getSenha());
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /**hash da senha*/
         validarUsuario(usuario);
         /*se nao existir email e nem cpf, salva a instancia com o hash da senha*/
         return usuarioRepository.save(usuario);
@@ -100,7 +116,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         /*ver se o cpf existe*/
         boolean existeUsuarioComEsseCpf = usuarioRepository.existsByCpf(cpf);
         if (existeUsuarioComEsseCpf) {
-        	throw new RegraDeNegocioException("Já existe usuário com esse CPF");
+        	throw new RegraDeNegocioException("Esse CPF já está em uso");
         }
     }
     
@@ -140,7 +156,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     
     /*validar nome usuario*/
     public void validarNomeUsuario(Usuario usuario){
-        if (usuario.getUsuario() == null || usuario.getUsuario().trim().equals("")) {
+        if (usuario.getNomeUsuario() == null || usuario.getNomeUsuario().trim().equals("")) {
             throw new ErroValidacaoException("O nome de usuário é obrigatório");
         }
     }
@@ -152,12 +168,16 @@ public class UsuarioServiceImpl implements UsuarioService {
     	}    	
     }
 
-    public void hashearSenha(Usuario usuario){
+    private String senhaSegura(String senha){
+        return null;
+    }
+
+    /*public void hashearSenha(Usuario usuario){
         System.out.println("Senha antes do hash: " + usuario.getSenha());
-        usuario.setSenha(senhaService.hashSenha(usuario.getSenha()));
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         System.out.println("Senha após o hash: " + usuario.getSenha());
         throw new ErroValidacaoException("Problemas ao hashear a senha");
-    }
+    }*/
     
     @Override
     public Optional<Usuario> obterUsuarioPorId(Long id) {
@@ -168,11 +188,5 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Optional<Usuario> obterUsuarioPorCpf(String cpf) {
         return  usuarioRepository.findByCpf(cpf);
     }
-
-    /*public void senhaCriptografada(Usuario usuario) {
-    	String pegarSenha = usuario.getSenha();
-    	String criptografar = encoder.encode(pegarSenha);
-    	usuario.setSenha(criptografar);
-    }*/
 
 }

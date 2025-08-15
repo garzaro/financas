@@ -12,6 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -49,12 +51,12 @@ public class UsuarioServiceMelhoriasTest {
         Usuario usuarioSalvo = usuarioRepository.save(persistirUsuario);
 
         /*verificar se o metodo autenticarUsuario funciona corretamente*/
-        Usuario usuarioAutenticado = usuarioService.autenticar(usuarioSalvo.getEmail(), usuarioSalvo.getSenha());
+        Optional<Usuario> usuarioAutenticado = Optional.ofNullable(usuarioService.autenticar(usuarioSalvo.getEmail(), usuarioSalvo.getSenha()));
 
         /*verificação*/
         Assertions.assertThat(usuarioAutenticado).isNotNull();
-        Assertions.assertThat(usuarioAutenticado.getEmail()).isEqualTo("cleber@gmail.com");
-        Assertions.assertThat(usuarioAutenticado.getSenha()).isEqualTo("senha");
+        Assertions.assertThat(usuarioAutenticado.get()).isEqualTo("cleber@gmail.com");
+        Assertions.assertThat(usuarioAutenticado.get()).isEqualTo("senha");
     }
 
     /*para criar instancias*/
@@ -62,11 +64,11 @@ public class UsuarioServiceMelhoriasTest {
         return Usuario.builder()
                 .id(1l)
                 .nome("Cleber")
-                .usuario("garzaro")
+                .nomeUsuario("garzaro")
                 .cpf("123.456.789-00")
                 .email("cleber@gmail.com")
                 .senha("senha")
-                .dataCadastro(LocalDate.now())
+                .dataCadastro(LocalDateTime.now())
                 .build();
     
     }

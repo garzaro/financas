@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @SpringBootTest
@@ -52,10 +53,10 @@ public class UsuarioRepositoryTest {
        /*cenario*/
         Usuario persistindoUsuario = Usuario.builder()
                 .nome("Cleber")
-                .usuario("garzaro74")
+                .nomeUsuario("garzaro74")
                 .email("clebergarzaro74@gmail.com")
                 .senha("senha")
-                .dataCadastro(LocalDate.now())
+                .dataCadastro(LocalDateTime.now())
                 .build();
         /*ação*/
         Usuario usuarioPersistido = usuarioRepository.save(persistindoUsuario);
@@ -68,7 +69,7 @@ public class UsuarioRepositoryTest {
     public void deveBuscarUmUsuarioPeloEmail(){
         /*cenario*/
         Usuario salvandoUsuario = Usuario.builder()
-                .usuario("garzaro74")
+                .nomeUsuario("garzaro74")
                 .email("clebergarzaro74@gmail.com")
                 .build();
         usuarioRepository.save(salvandoUsuario);
