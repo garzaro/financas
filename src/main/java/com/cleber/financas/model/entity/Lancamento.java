@@ -45,8 +45,9 @@ public class Lancamento {
 
     /**
      * Registra o momento EXATO da criação da entidade.
-     * O valor é definido automaticamente pelo Hibernate na primeira vez que a entidade é salva.
-     * `updatable = false` garante que este campo nunca seja alterado após a criação.
+     * valor definido automaticamente pelo Hibernate na
+     * primeira vez que a entidade é salva. `updatable = false`
+     * garante que este campo nunca seja alterado após a criação.
      */
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -54,7 +55,8 @@ public class Lancamento {
 
     /**
      * Registra o momento EXATO da última atualização da entidade.
-     * O valor é atualizado automaticamente pelo Hibernate toda vez que a entidade é modificada.
+     * O valor é atualizado automaticamente pelo Hibernate toda vez
+     * que a entidade é modificada.
      */
     @UpdateTimestamp
     @Column(nullable = false)
