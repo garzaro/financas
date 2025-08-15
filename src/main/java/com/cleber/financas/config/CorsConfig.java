@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfig{
-    @Bean
+	@Bean
     WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
 			@Override
@@ -21,7 +21,9 @@ public class CorsConfig{
 				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
 				.allowedHeaders("*")
 				.allowCredentials(true)
-				/*um cache de 60 minutos*/
+				/**
+				 * um cache de 60 minutos
+				 * */
 				.maxAge(3600); 
 			}
 		};
