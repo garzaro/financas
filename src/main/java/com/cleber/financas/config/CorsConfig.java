@@ -17,14 +17,24 @@ public class CorsConfig{
 			@Override
 			public void addCorsMappings(@NonNull CorsRegistry registry) {
 				registry.addMapping("/api/usuarios/**")
-				.allowedOrigins("http://localhost:3000")
-				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-				.allowedHeaders("*")
-				.allowCredentials(true)
-				/**
-				 * um cache de 60 minutos
-				 * */
-				.maxAge(3600); 
+                        .allowedOrigins("http://localhost:3000")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true)
+                        /**
+                         * um cache de 60 minutos
+                         * */
+                        .maxAge(3600);
+
+                /**
+                 * mapeamento para lancamento
+                 * **/
+                registry.addMapping("/api/lancamentos/**")
+                        .allowedOrigins("http://localhost:3000")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .maxAge(3600);
+
 			}
 		};
 	}
