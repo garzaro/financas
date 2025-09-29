@@ -15,6 +15,7 @@ import com.cleber.financas.api.dto.LancamentoDTO;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
+import com.cleber.financas.model.entity.TipoLancamento;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
@@ -34,7 +35,11 @@ public class LancamentoResource {
     private final UsuarioService usuarioService;
     private final ConvertDtoToEntity converter;
     
-    public LancamentoResource(LancamentoService lancamentoService, UsuarioService usuarioService, ConvertDtoToEntity converter) {
+    public LancamentoResource(
+            LancamentoService lancamentoService,
+            UsuarioService usuarioService,
+            ConvertDtoToEntity converter)
+    {
         this.lancamentoService = lancamentoService;
         this.usuarioService = usuarioService;
         this.converter = converter;
@@ -89,23 +94,25 @@ public class LancamentoResource {
     }
     
     @GetMapping
-    public ResponseEntity buscarLancamento(@RequestParam(value = "descricao", required = false) String descricao,
-                                           @RequestParam(value = "tipoLancamento", required = false) String tipoLancamento,
+    public ResponseEntity buscarLancamento(
+                                           @RequestParam(value = "tipoLancamento") TipoLancamento tipoLancamento,
                                            @RequestParam(value = "mes", required = false) Integer mes,
                                            @RequestParam(value = "ano") Integer ano,
             /* Parametro obrigatorio para fazer o filtro */
-                                           @RequestParam(value = "usuario", required = false) Long idUsuario) {
+                                           @RequestParam("usuario") Long idUsuario
+    ) {
         try {
             /* Verifica se o ID do usuário foi passado */
             
             if (idUsuario == null) {
-                return ResponseEntity.badRequest().body("O ID do usuário é obrigatório, Jão " + "[" + idUsuario + "].");
+                return ResponseEntity.badRequest().body("O ID do usuário é obrigatório" + "[" + idUsuario + "].");
             }
             /* filtrando */
             Lancamento lancamentoFiltro = new Lancamento();
-            lancamentoFiltro.setDescricao(descricao);
+            lancamentoFiltro.setTipoLancamento(tipoLancamento);
             lancamentoFiltro.setMes(mes);
             lancamentoFiltro.setAno(ano);
+
             /* verifica se o usuario existe e define o filtro do lancamento */
             Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(idUsuario);
             if (!usuario.isPresent()) {
