@@ -110,7 +110,7 @@ public class LancamentoResource {
             /* filtrando */
             Lancamento lancamentoFiltro = new Lancamento();
             lancamentoFiltro.setTipoLancamento(tipoLancamento);
-            lancamentoFiltro.setMes(mes);
+            lancamentoFiltro.setMes(String.valueOf(mes));
             lancamentoFiltro.setAno(ano);
 
             /* verifica se o usuario existe e define o filtro do lancamento */
