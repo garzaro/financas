@@ -206,18 +206,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     		throw new ErroValidacaoException("informe a senha.");
     	}    	
     }
-
+/***
     private String senhaSegura(String senha){
         return null;
-    }
-
-    /**public void hashearSenha(Usuario usuario){
-        System.out.println("Senha antes do hash: " + usuario.getSenha());
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        System.out.println("Senha após o hash: " + usuario.getSenha());
-        throw new ErroValidacaoException("Problemas ao hashear a senha");
     }*/
-    
+
     @Override
     public Optional<Usuario> obterUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
