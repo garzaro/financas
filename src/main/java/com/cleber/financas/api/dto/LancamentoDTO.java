@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public class LancamentoDTO {
     private Long id;
     private String descricao;
-    private Integer mes;
+    private String mes;
     private Integer ano;
 	private LocalDate dataCadastro;
 	private BigDecimal valor;
@@ -33,10 +33,10 @@ public class LancamentoDTO {
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
 	}
-	public Integer getMes() {
+	public String getMes() {
 		return mes;
 	}
-	public void setMes(Integer mes) {
+	public void setMes(String mes) {
 		this.mes = mes;
 	}
 	public Integer getAno() {
