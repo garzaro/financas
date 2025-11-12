@@ -44,9 +44,17 @@ public class LancamentoResource {
         this.usuarioService = usuarioService;
         this.converter = converter;
     }
-    
+
+    @GetMapping("{id}")
+    public ResponseEntity obterLancamento(@PathVariable("id") Long id){
+        return lancamentoService.obterLancamentoPorId(id)
+                .map( lancamento -> new ResponseEntity(converter
+                                .converterEntidadeParaDto( lancamento), HttpStatus.OK) )
+                .orElseGet( () -> new ResponseEntity(HttpStatus.NOT_FOUND) );
+    }
+
     @PostMapping
-    public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto) {
+    public ResponseEntity<?> salvarLancamento(@RequestBody LancamentoDTO dto) {
         try {
             Lancamento converteEntidade = converter.converterDtoParaEntidade(dto);
             converteEntidade = lancamentoService.salvarLancamento(converteEntidade);
@@ -75,13 +83,13 @@ public class LancamentoResource {
                 HttpStatus.BAD_REQUEST));
     }
     
-    @PutMapping("{id}/atualizar-status")
+    @PutMapping("{id}/atualizar-statusLancamento")
     public ResponseEntity atualizarStatus(@PathVariable("id") Long id, @RequestBody AtualizarStatusDTO dto) {
         return lancamentoService.obterLancamentoPorId(id).map(entity -> {
             StatusLancamento selecionarStatus = StatusLancamento.valueOf(dto.getStatus());
             
             if (selecionarStatus == null) {
-                return ResponseEntity.badRequest().body("O status informado não existe " + "[" + dto + "]" + " informar um status válido");
+                return ResponseEntity.badRequest().body("O statusLancamento informado não existe " + "[" + dto + "]" + " informar um statusLancamento válido");
             }
             try {
                 entity.setStatusLancamento(selecionarStatus);
