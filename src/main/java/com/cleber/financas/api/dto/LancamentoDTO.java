@@ -1,24 +1,30 @@
 package com.cleber.financas.api.dto;
 
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LancamentoDTO {
     private Long id;
     private String descricao;
     private String mes;
     private Integer ano;
-	private LocalDate dataCadastro;
 	private BigDecimal valor;
     /*passar só o id do usuario, nao como objeto*/
+    @NotNull
     private Long usuario;
-    private String tipo;
-    private String status;
+    private String tipoLancamento;
+    private String statusLancamento;
+	private LocalDate dataCadastro;
 
 
 	public Long getId() {
@@ -58,16 +64,16 @@ public class LancamentoDTO {
 		this.usuario = usuario;
 	}
 	public String getTipo() {
-		return tipo;
+		return tipoLancamento;
 	}
 	public void setTipo(String tipo) {
-		this.tipo = tipo;
+		this.tipoLancamento = tipo;
 	}
-	public String getStatus() {
-		return status;
+	public String getStatusLancamento() {
+		return statusLancamento;
 	}
-	public void setStatus(String status) {
-		this.status = status;
+	public void setStatusLancamento(String statusLancamento) {
+		this.statusLancamento = statusLancamento;
 	}
     
     
