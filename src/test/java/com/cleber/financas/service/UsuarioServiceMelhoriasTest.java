@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -68,7 +69,7 @@ public class UsuarioServiceMelhoriasTest {
                 .cpf("123.456.789-00")
                 .email("cleber@gmail.com")
                 .senha("senha")
-                .dataCadastro(LocalDateTime.now())
+                .dataCadastro(Instant.now())
                 .build();
     
     }
