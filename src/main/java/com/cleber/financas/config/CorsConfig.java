@@ -9,6 +9,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /*Habilitando cors -*/
 //@EnableWebMvc
 
+/**
+ * implementação (navegador)
+ * **/
 @Configuration
 public class CorsConfig{
 	@Bean
@@ -16,7 +19,7 @@ public class CorsConfig{
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(@NonNull CorsRegistry registry) {
-				registry.addMapping("/api/usuarios/**")
+				registry.addMapping("/api/**")
                         .allowedOrigins("http://localhost:3000")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
@@ -25,17 +28,6 @@ public class CorsConfig{
                          * um cache de 60 minutos
                          * */
                         .maxAge(3600);
-
-                /**
-                 * mapeamento para lancamento
-                 * **/
-                registry.addMapping("/api/lancamentos/**")
-                        .allowedOrigins("http://localhost:3000")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true)
-                        .maxAge(3600);
-
 			}
 		};
 	}

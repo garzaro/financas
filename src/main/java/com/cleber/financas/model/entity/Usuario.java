@@ -14,16 +14,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.envers.Audited;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Audited
 @Builder
+//@EqualsAndHashCode(of ="id")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-//@EqualsAndHashCode(of ="id")
+@Data
 @Entity
 @Table(name= "usuario", schema = "financeiro")
 public class Usuario implements Serializable{
@@ -51,8 +51,8 @@ public class Usuario implements Serializable{
     private String senha;
 
     @CreationTimestamp
-    @Column(name = "data_cadastro", updatable = false, columnDefinition = "DATE DEFAULT CURRENT_DATA")
-    private LocalDateTime dataCadstro;
+    @Column(name = "data_cadastro", updatable = false) /**, columnDefinition = "DATE DEFAULT CURRENT_DATA"*/
+    private Instant dataCadastro;
 
     /**@Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     @Column(name = "data_cadastro")

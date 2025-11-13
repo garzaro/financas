@@ -29,8 +29,7 @@ import com.cleber.financas.service.UsuarioService;
 public class UsuarioController {
 	@Autowired
     public UsuarioService usuarioService;
-    @Autowired
-    public SenhaService senhaService;
+
 	@Autowired
 	public LancamentoService lancamentoService;
     @Autowired
@@ -39,14 +38,13 @@ public class UsuarioController {
     public UsuarioController(
     		UsuarioService usuarioService,
     		LancamentoService lancamentoService,
-    		ConvertDtoToEntity convertDtoToEntity,
-            SenhaService senhaService
+    		ConvertDtoToEntity convertDtoToEntity
     		)
     {
         this.usuarioService = usuarioService;
         this.lancamentoService = lancamentoService;
         this.convertDtoToEntity = convertDtoToEntity;
-        this.senhaService = senhaService;
+
     }
 
     @PostMapping("/autenticar")
@@ -72,7 +70,7 @@ public class UsuarioController {
                 .cpf(dto.getCpf())
                 .nomeUsuario(dto.getUsuario())
                 .email(dto.getEmail())
-                .senha(senhaService.hashSenha(dto.getSenha()))
+                .senha(dto.getSenha())
                 .build();
 
         try {
