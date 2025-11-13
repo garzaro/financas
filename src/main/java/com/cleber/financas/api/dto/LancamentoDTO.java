@@ -26,7 +26,7 @@ public class LancamentoDTO {
     private String statusLancamento;
 	private LocalDate dataCadastro;
 
-
+/**DEIXEI PRA CASO AS ANOTATION DE PROBLEMA MAS NAO PRECISA**/
 	public Long getId() {
 		return id;
 	}

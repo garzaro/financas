@@ -38,7 +38,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 	public Lancamento salvarLancamento(Lancamento lancamento) {
 		/* chamando */
 		validarLancamento(lancamento);
-		/* lancamento salva automaticamente tem status de pendente */
+		/* lancamento salva automaticamente tem statusLancamento de pendente */
 		lancamento.setStatusLancamento(StatusLancamento.PENDENTE);
 
 		return lancamentoRepository.save(lancamento);
@@ -81,9 +81,9 @@ public class LancamentoServiceImpl implements LancamentoService {
 
 	@Override
 	public void atualizarStatus(Lancamento lancamento, StatusLancamento status) {
-		/* valida o status - nullo ou invalido */
+		/* valida o statusLancamento - nullo ou invalido */
 		if (status == null)
-			throw new RegraDeNegocioException("O status [" + status + "] é invalido, forneça um status valido.");
+			throw new RegraDeNegocioException("O statusLancamento [" + status + "] é invalido, forneça um statusLancamento valido.");
 		lancamento.setStatusLancamento(status);
 		atualizarLancamento(lancamento);
 	}
@@ -123,7 +123,11 @@ public class LancamentoServiceImpl implements LancamentoService {
 			throw new RegraDeNegocioException("Informar uma descrição válida.");
 		}
 
-		if (lancamento.getMes() == null || lancamento.getMes() < 1 || lancamento.getMes() > 12) {
+        if (lancamento.getMes() == null){
+            throw new RegraDeNegocioException("Informar um mês válido.");
+        }
+        int mes = Integer.parseInt(lancamento.getMes());
+        if (mes < 1 || mes > 12) {
 			throw new RegraDeNegocioException("Informar um mês válido.");
 		}
 

@@ -4,6 +4,7 @@ package com.cleber.financas.api.dto;
 * resolvi criar na mão o codigo*/
 
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class UsuarioDTO {
@@ -13,7 +14,7 @@ public class UsuarioDTO {
     private String usuario;
     private String email;
     private String senha;
-    private LocalDateTime dataCadastro;
+    private Instant dataCadastro;
 
     public UsuarioDTO() {
 		
@@ -51,7 +52,7 @@ public class UsuarioDTO {
         return senha;
     }
 
-    public LocalDateTime getDataCadastro(){
+    public Instant getDataCadastro(){
         return dataCadastro;
     }
 
