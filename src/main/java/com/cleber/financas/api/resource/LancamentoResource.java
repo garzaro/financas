@@ -89,7 +89,8 @@ public class LancamentoResource {
             StatusLancamento selecionarStatus = StatusLancamento.valueOf(dto.getStatus());
             
             if (selecionarStatus == null) {
-                return ResponseEntity.badRequest().body("O statusLancamento informado não existe " + "[" + dto + "]" + " informar um statusLancamento válido");
+                return ResponseEntity.badRequest().body("O statusLancamento informado não existe " +
+                        "[" + dto + "]" + " informar um statusLancamento válido");
             }
             try {
                 entity.setStatusLancamento(selecionarStatus);
