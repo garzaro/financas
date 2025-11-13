@@ -83,7 +83,7 @@ public class LancamentoServiceTest {
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
         lancamento.setId(1l);
         lancamento.setStatusLancamento(StatusLancamento.PENDENTE);
-        /*criar o novo status para o lancamento*/
+        /*criar o novo statusLancamento para o lancamento*/
         StatusLancamento statusAtualizado = StatusLancamento.EFETIVADO;
         /*nao e necessario chamar o metodo atualizar de fato*/
         Mockito.doReturn(lancamento).when(serviceImpl).atualizarLancamento(lancamento);
@@ -165,15 +165,15 @@ public class LancamentoServiceTest {
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
-        lancamento.setMes(0);
+        lancamento.setMes(String.valueOf(0));
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
-        lancamento.setMes(13);
+        lancamento.setMes(String.valueOf(13));
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
-        lancamento.setMes(1);
+        lancamento.setMes(String.valueOf(1));
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido.");
