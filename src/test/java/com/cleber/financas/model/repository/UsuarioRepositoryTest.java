@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -56,7 +57,7 @@ public class UsuarioRepositoryTest {
                 .nomeUsuario("garzaro74")
                 .email("clebergarzaro74@gmail.com")
                 .senha("senha")
-                .dataCadastro(LocalDateTime.now())
+                .dataCadastro(Instant.now())
                 .build();
         /*ação*/
         Usuario usuarioPersistido = usuarioRepository.save(persistindoUsuario);

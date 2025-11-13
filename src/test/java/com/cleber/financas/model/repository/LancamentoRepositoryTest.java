@@ -40,7 +40,7 @@ public class LancamentoRepositoryTest {
     public void deveAtualizarUmLancamento(){
         Lancamento lancamento = persistirUmLancamento();
         /*atualizar*/
-        lancamento.setMes(10);
+        lancamento.setMes("setembro");
         lancamento.setStatusLancamento(StatusLancamento.EFETIVADO);
         
         lancamentoRepository.save(lancamento);
@@ -85,7 +85,7 @@ public class LancamentoRepositoryTest {
         return Lancamento.builder()
                 .descricao("Lancamento de teste para deletar")
                 .ano(2024)
-                .mes(11)
+                .mes("novembro")
                 .valor(BigDecimal.valueOf(10.55))
                 .statusLancamento(StatusLancamento.PENDENTE)
                 .build();
