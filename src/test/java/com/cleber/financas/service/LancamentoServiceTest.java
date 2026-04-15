@@ -1,13 +1,17 @@
 package com.cleber.financas.service;
 
-import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.model.entity.Lancamento;
-import com.cleber.financas.model.entity.StatusLancamento;
-import com.cleber.financas.model.entity.TipoLancamento;
-import com.cleber.financas.model.entity.Usuario;
-import com.cleber.financas.model.repository.LancamentoRepository;
-import com.cleber.financas.model.repository.LancamentoRepositoryTest;
-import com.cleber.financas.service.impl.LancamentoServiceImpl;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,15 +22,14 @@ import org.springframework.data.domain.Example;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
-import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.mockito.Mockito.*;
+import com.cleber.financas.exception.RegraDeNegocioException;
+import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.enums.StatusLancamento;
+import com.cleber.financas.model.enums.TipoLancamento;
+import com.cleber.financas.model.repository.LancamentoRepository;
+import com.cleber.financas.model.repository.LancamentoRepositoryTest;
+import com.cleber.financas.service.impl.LancamentoServiceImpl;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
@@ -165,15 +168,15 @@ public class LancamentoServiceTest {
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
-        lancamento.setMes(String.valueOf(0));
+        lancamento.setMes(0);
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
-        lancamento.setMes(String.valueOf(13));
+        lancamento.setMes(13);
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
-        lancamento.setMes(String.valueOf(1));
+        lancamento.setMes(1);
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido.");

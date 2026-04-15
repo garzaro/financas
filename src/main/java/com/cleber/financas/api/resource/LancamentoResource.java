@@ -1,65 +1,69 @@
 package com.cleber.financas.api.resource;
 
-/*@RequiredArgsConstructor, substitui o construtor na injeção de deps, declara deps com final */
-/*@PostMapping, mapear requisição Http, criar recurso no servidor*/
-/*@RequestParams, java.util.Map<String, String> params substitui os parametros, metodo buscar */
-/*return new ResponseEntity.ok(converteEntidade*/
-/*return new ResponseEntity(lancamento, HttpStatus.CREATED)*/
-/*Spring Boot não permite null em parâmetros obrigatórios de métodos REST, como em @RequestParam - value required*/
-/*@PathVariable("id") Long id: Extrai o valor do parâmetro id da URL.*/
-/*{id} é um parâmetro de caminho.*/
+import java.util.List;
+import java.util.Optional;
 
-import com.cleber.financas.api.converter.ConvertDtoToEntity;
+//import java.util.List;
+//import java.util.Optional;
+//
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cleber.financas.api.converter.LancamentoConverter;
+import com.cleber.financas.api.converter.UsuarioConverter;
 import com.cleber.financas.api.dto.AtualizarStatusDTO;
 import com.cleber.financas.api.dto.LancamentoDTO;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Lancamento;
-import com.cleber.financas.model.entity.StatusLancamento;
-import com.cleber.financas.model.entity.TipoLancamento;
 import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.enums.StatusLancamento;
+import com.cleber.financas.model.enums.TipoLancamento;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/lancamentos")
+@RequestMapping("/api/lancamento")
 public class LancamentoResource {
     
     private final LancamentoService lancamentoService;
     private final UsuarioService usuarioService;
-    private final ConvertDtoToEntity converter;
+    private final UsuarioConverter usuarioConverter;
+    private final LancamentoConverter lancamentoConverter;
     
     public LancamentoResource(
             LancamentoService lancamentoService,
             UsuarioService usuarioService,
-            ConvertDtoToEntity converter)
-    {
+            UsuarioConverter usuarioConverter,
+            LancamentoConverter lancamentoConverter
+    ){
         this.lancamentoService = lancamentoService;
         this.usuarioService = usuarioService;
-        this.converter = converter;
+        this.usuarioConverter = usuarioConverter;
+        this.lancamentoConverter = lancamentoConverter;
     }
-
-    @GetMapping("{id}")
-    public ResponseEntity obterLancamento(@PathVariable("id") Long id){
-        return lancamentoService.obterLancamentoPorId(id)
-                .map( lancamento -> new ResponseEntity(converter
-                                .converterEntidadeParaDto( lancamento), HttpStatus.OK) )
-                .orElseGet( () -> new ResponseEntity(HttpStatus.NOT_FOUND) );
-    }
+    
+    final Logger logger = LoggerFactory.getLogger(LancamentoResource.class);
 
     @PostMapping
-    public ResponseEntity<?> salvarLancamento(@RequestBody LancamentoDTO dto) {
+    public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto) {
         try {
-            Lancamento converteEntidade = converter.converterDtoParaEntidade(dto);
+            Lancamento converteEntidade = lancamentoConverter.dtoToEntity(dto);
             converteEntidade = lancamentoService.salvarLancamento(converteEntidade);
             return new ResponseEntity(converteEntidade, HttpStatus.CREATED);
-            
         } catch (RegraDeNegocioException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -71,37 +75,70 @@ public class LancamentoResource {
         /* entity é resultado da busca pelo id */
         return lancamentoService.obterLancamentoPorId(id).map(entity -> {
             try {
-                Lancamento lancamento = converter.converterDtoParaEntidade(dto);
-                lancamento.setId(id);
+                Lancamento lancamento = lancamentoConverter.dtoToEntity(dto);
+                lancamento.setId(entity.getId()); //id
                 lancamentoService.atualizarLancamento(lancamento);
                 return ResponseEntity.ok(lancamento);
-                
             } catch (RegraDeNegocioException e) {
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
-        }).orElseGet(() -> new ResponseEntity("O lancamento com o ID " + "(" + id + ")" + " não foi encontrado",
+        }).orElseGet(() ->
+                new ResponseEntity("O lancamento com o ID " + "(" + id + ")" + " não foi encontrado",
                 HttpStatus.BAD_REQUEST));
     }
+
+    @GetMapping("{id}")
+    public ResponseEntity obterLancamentoPorId(@PathVariable("id") Long id){
+        return lancamentoService.obterLancamentoPorId(id)
+                .map( lancamento -> new ResponseEntity(lancamentoConverter.entityToDto( lancamento), HttpStatus.OK) )
+                .orElseGet( () -> new ResponseEntity(HttpStatus.NOT_FOUND) );
+    }
     
+//  if (selecionarStatus == null) {
+//  return ResponseEntity.badRequest().body("O statusLancamento informado não existe " +
+//          "[" + dto + "]" + " informar um status válido");
+//}
     @PutMapping("{id}/atualizar-statusLancamento")
-    public ResponseEntity atualizarStatus(@PathVariable("id") Long id, @RequestBody AtualizarStatusDTO dto) {
-        return lancamentoService.obterLancamentoPorId(id).map(entity -> {
-            StatusLancamento selecionarStatus = StatusLancamento.valueOf(dto.getStatus());
-            
-            if (selecionarStatus == null) {
-                return ResponseEntity.badRequest().body("O statusLancamento informado não existe " +
-                        "[" + dto + "]" + " informar um statusLancamento válido");
-            }
+    public ResponseEntity<?> atualizarStatus(@PathVariable("id") Long id, @Valid @RequestBody AtualizarStatusDTO dto) {        
+    	return lancamentoService.obterLancamentoPorId(id).map(entity -> {
+    		
+            logger.info("Se imprimir null, o problema é o mapeamento do JSON (ponto 1 e 2). " + dto.getStatusLancamento());
+            StatusLancamento selecionarStatus = StatusLancamento.valueOf(dto.getStatusLancamento());
             try {
                 entity.setStatusLancamento(selecionarStatus);
                 lancamentoService.atualizarLancamento(entity);
                 return ResponseEntity.ok(entity);
-            } catch (RegraDeNegocioException status) {
-                return ResponseEntity.badRequest().body(status.getMessage());
+            } catch (RegraDeNegocioException exception) {
+                return ResponseEntity.badRequest().body(exception.getMessage());
             }
-        }).orElseGet(() -> new ResponseEntity("Status não encontrado ", HttpStatus.BAD_REQUEST));
+        }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado! ", HttpStatus.BAD_REQUEST));
     }
     
+    
+    
+//    @PutMapping("{id}/atualizar-statusLancamento")
+//    public ResponseEntity<?> atualizarStatus(@PathVariable("id") Long id, @RequestBody AtualizarStatusDTO dto) {
+//        return lancamentoService.obterLancamentoPorId(id).map(entity -> {
+//            // Verificação: se null ou vazio, retorne erro
+//            if (dto.getStatuslancamento() == null || dto.getStatuslancamento().trim().isEmpty()) {
+//                return ResponseEntity.badRequest().body("Status do lançamento não pode ser nulo ou vazio");
+//            }
+//
+//            try {
+//                // Converta para maiúsculo e valide o enum
+//                StatusLancamento selecionarStatus = StatusLancamento.valueOf(dto.getStatuslancamento().toUpperCase());
+//                entity.setStatusLancamento(selecionarStatus);
+//                lancamentoService.atualizarLancamento(entity);
+//                return ResponseEntity.ok(entity);
+//            } catch (IllegalArgumentException e) {
+//                // Se o valor não corresponder a um enum válido (ex.: "INVALIDO")
+//                return ResponseEntity.badRequest().body("Status inválido: " + dto.getStatuslancamento());
+//            } catch (RegraDeNegocioException exception) {
+//                return ResponseEntity.badRequest().body(exception.getMessage());
+//            }
+//        }).orElseGet(() -> new ResponseEntity("Lançamento não encontrado!", HttpStatus.BAD_REQUEST));
+//    }
+       
     @GetMapping
     public ResponseEntity buscarLancamento(
                                            @RequestParam(value = "tipoLancamento") TipoLancamento tipoLancamento,
@@ -119,7 +156,7 @@ public class LancamentoResource {
             /* filtrando */
             Lancamento lancamentoFiltro = new Lancamento();
             lancamentoFiltro.setTipoLancamento(tipoLancamento);
-            lancamentoFiltro.setMes(String.valueOf(mes));
+            lancamentoFiltro.setMes(mes);
             lancamentoFiltro.setAno(ano);
 
             /* verifica se o usuario existe e define o filtro do lancamento */
@@ -152,3 +189,14 @@ public class LancamentoResource {
                         HttpStatus.BAD_REQUEST));
     }
 }
+
+/**
+ /* @RequiredArgsConstructor, substitui o construtor na injeção de deps, declara deps com final
+ * @PostMapping, mapear requisição Http, criar recurso no servidor
+ * @RequestParams, java.util.Map<String, String> params substitui os parametros, metodo buscar
+ * return new ResponseEntity.ok(converteEntidade
+ * return new ResponseEntity(lancamento, HttpStatus.CREATED)
+ * Spring Boot não permite null em parâmetros obrigatórios de métodos REST, como em @RequestParam - value required
+ * @PathVariable("id") Long id: Extrai o valor do parâmetro id da URL.
+ * {id} é um parâmetro de caminho.
+ * **/

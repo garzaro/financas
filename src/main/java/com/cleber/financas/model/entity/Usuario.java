@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Audited
 @Builder
@@ -54,7 +55,7 @@ public class Usuario implements Serializable{
     @Column(name = "data_cadastro", updatable = false) /**, columnDefinition = "DATE DEFAULT CURRENT_DATA"*/
     private Instant dataCadastro;
 
-    /**@Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
+	/**@Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
     @Column(name = "data_cadastro")
     private LocalDate dataCadastro;
      */
@@ -62,5 +63,8 @@ public class Usuario implements Serializable{
     /*GETTERS AND SETTERS*/
     /*HASHCODE AND EQUALS*/
     /*TO STRING*/
+    
+    
+    
 }
 

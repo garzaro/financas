@@ -1,23 +1,24 @@
 package com.cleber.financas.service.impl;
 
-/*@Slf4j faz parte do projeto lombok, substitui o Logger*/
-/*@Slf4j - private static Logger log = LoggerFactory.getLogger(LancamentoServiceImpl.class);*/
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
-import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.model.entity.Lancamento;
-import com.cleber.financas.model.entity.StatusLancamento;
-import com.cleber.financas.model.entity.TipoLancamento;
-import com.cleber.financas.model.repository.LancamentoRepository;
-import com.cleber.financas.service.LancamentoService;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+/*@Slf4j faz parte do projeto lombok, substitui o Logger*/
+/*@Slf4j - private static Logger log = LoggerFactory.getLogger(LancamentoServiceImpl.class);*/
+
+import com.cleber.financas.exception.RegraDeNegocioException;
+import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.enums.StatusLancamento;
+import com.cleber.financas.model.enums.TipoLancamento;
+import com.cleber.financas.model.repository.LancamentoRepository;
+import com.cleber.financas.service.LancamentoService;
 
 @Service
 public class LancamentoServiceImpl implements LancamentoService {
@@ -29,12 +30,13 @@ public class LancamentoServiceImpl implements LancamentoService {
 	public LancamentoServiceImpl(LancamentoRepository lancamentoRepository) {
 		this.lancamentoRepository = lancamentoRepository;
 	}
-
+	
+	/*
+	 * spring abre transação com a base, roda o metodo, faz commit e, se error, then
+	 * rollback
+	 */
 	@Override
-	@Transactional /*
-					 * spring abre transação com a base, roda o metodo, faz commit e, se error, then
-					 * rollback
-					 */
+	@Transactional 
 	public Lancamento salvarLancamento(Lancamento lancamento) {
 		/* chamando */
 		validarLancamento(lancamento);
@@ -51,7 +53,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 		 * Checagem: se não existir um id de lancamento salvo ele persiste e lança um
 		 * novo id...
 		 */
-		Objects.requireNonNull(lancamento.getId()); /* ...garantindo que será passado o lancamento com um novo id */
+		Objects.requireNonNull(lancamento.getId()); /* ...garantindo que será passado o lancamento com id */
 		validarLancamento(lancamento);
 		return lancamentoRepository.save(lancamento); /* ...se nao passar da nullPointerException */
 	}
@@ -81,10 +83,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 
 	@Override
 	public void atualizarStatus(Lancamento lancamento, StatusLancamento status) {
-		/* valida o statusLancamento - nullo ou invalido */
-		if (status == null)
-			throw new RegraDeNegocioException("O statusLancamento [" + status + "] é invalido, forneça um statusLancamento valido.");
-		lancamento.setStatusLancamento(status);
+        lancamento.setStatusLancamento(status);
 		atualizarLancamento(lancamento);
 	}
 
@@ -100,14 +99,18 @@ public class LancamentoServiceImpl implements LancamentoService {
 				StatusLancamento.EFETIVADO);
 		BigDecimal despesa = lancamentoRepository.obterSaldoPorTipoLancamentoEUsuarioEstatus(id, TipoLancamento.DESPESA,
 				StatusLancamento.EFETIVADO);
-
-		/*
-		 * se ambas forem nulas, define como zero if (receita == null){ receita =
-		 * BigDecimal.ZERO; } if (despesa == null){ despesa = BigDecimal.ZERO; }
-		 */
+		/**
+		 * se ambas forem nulas, define como zero
+		 **/
+		if (receita == null){ 
+			receita = BigDecimal.ZERO;
+			} 
+		if (despesa == null){ 
+			despesa = BigDecimal.ZERO;
+			}
 		/* Operador ternario */
-		receita = receita != null ? receita : BigDecimal.ZERO;
-		despesa = despesa != null ? despesa : BigDecimal.ZERO;
+//		receita = receita != null ? receita : BigDecimal.ZERO;
+//		despesa = despesa != null ? despesa : BigDecimal.ZERO;
 
 		/* calcula o saldo */
 		return receita.subtract(despesa);
@@ -120,31 +123,31 @@ public class LancamentoServiceImpl implements LancamentoService {
 		 * tornando um string vazia
 		 */
 		if (lancamento.getDescricao() == null || lancamento.getDescricao().trim().equals("")) {
-			throw new RegraDeNegocioException("Informar uma descrição válida.");
+			throw new RegraDeNegocioException("Informar uma descrição válida!");
 		}
 
-        if (lancamento.getMes() == null){
-            throw new RegraDeNegocioException("Informar um mês válido.");
+        if (lancamento.getMes() == null || lancamento.getMes() < 1 || lancamento.getMes() > 12){
+            throw new RegraDeNegocioException("Informar um mês válido!");
         }
-        int mes = Integer.parseInt(lancamento.getMes());
-        if (mes < 1 || mes > 12) {
-			throw new RegraDeNegocioException("Informar um mês válido.");
-		}
+//        int mes = Integer.parseInt(lancamento.getMes());
+//        if (mes < 1 || mes > 12) {
+//			throw new RegraDeNegocioException("Informar um mês válido.");
+//		}
 
 		if (lancamento.getAno() == null || lancamento.getAno().toString().length() != 4) {
-			throw new RegraDeNegocioException("Informar um ano válido.");
+			throw new RegraDeNegocioException("Informar um ano válido!");
 		}
 
 		if (lancamento.getUsuario() == null || lancamento.getUsuario().getId() == null) {
-			throw new RegraDeNegocioException("Informar um Usuário.");
+			throw new RegraDeNegocioException("Informar um Usuário!");
 		}
 		/* compareTo para compara valor como BigDecimal */
 		if (lancamento.getValor() == null || lancamento.getValor().compareTo(BigDecimal.ZERO) < 1) {
-			throw new RegraDeNegocioException("Informe o valor acima de 1 real.");
+			throw new RegraDeNegocioException("Informe o valor acima de 1 real!");
 		}
 
 		if (lancamento.getTipoLancamento() == null) {
-			throw new RegraDeNegocioException("Informar um tipo de lancamento.");
+			throw new RegraDeNegocioException("Informar um tipo de lancamento!");
 		}
 
 		/*
@@ -155,3 +158,12 @@ public class LancamentoServiceImpl implements LancamentoService {
 		 */
 	}
 }
+
+
+
+
+
+
+
+
+
