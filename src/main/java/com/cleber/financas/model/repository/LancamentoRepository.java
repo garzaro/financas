@@ -1,14 +1,15 @@
 package com.cleber.financas.model.repository;
 
-import com.cleber.financas.model.entity.Lancamento;
-import com.cleber.financas.model.entity.StatusLancamento;
-import com.cleber.financas.model.entity.TipoLancamento;
+import java.math.BigDecimal;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
+import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.enums.StatusLancamento;
+import com.cleber.financas.model.enums.TipoLancamento;
 
 @Repository
 public interface LancamentoRepository extends JpaRepository<Lancamento, Long> {

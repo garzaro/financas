@@ -1,8 +1,8 @@
 package com.cleber.financas.model.repository;
 
-import com.cleber.financas.model.entity.Lancamento;
-import com.cleber.financas.model.entity.StatusLancamento;
-import com.cleber.financas.model.entity.TipoLancamento;
+import java.math.BigDecimal;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,12 +11,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.enums.StatusLancamento;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -40,7 +39,7 @@ public class LancamentoRepositoryTest {
     public void deveAtualizarUmLancamento(){
         Lancamento lancamento = persistirUmLancamento();
         /*atualizar*/
-        lancamento.setMes("setembro");
+        lancamento.setMes(7);
         lancamento.setStatusLancamento(StatusLancamento.EFETIVADO);
         
         lancamentoRepository.save(lancamento);
@@ -85,7 +84,7 @@ public class LancamentoRepositoryTest {
         return Lancamento.builder()
                 .descricao("Lancamento de teste para deletar")
                 .ano(2024)
-                .mes("novembro")
+                .mes(11)
                 .valor(BigDecimal.valueOf(10.55))
                 .statusLancamento(StatusLancamento.PENDENTE)
                 .build();

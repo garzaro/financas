@@ -22,9 +22,10 @@ public class SecurityConfiguration {
                         .policyDirectives("default-src 'self'")
                         )
                 )
+//                .securityMatcher("/login")
                 .securityMatcher("/login")
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/**")
+                        .ignoringRequestMatchers("/**")
                         ) /*stateless*/
                 .authorizeHttpRequests(autorizacao -> {
                     autorizacao

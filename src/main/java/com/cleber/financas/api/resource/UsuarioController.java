@@ -3,9 +3,7 @@ package com.cleber.financas.api.resource;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.cleber.financas.api.converter.ConvertDtoToEntity;
-import com.cleber.financas.service.SenhaService;
-import jakarta.validation.Valid;
+import com.cleber.financas.api.converter.UsuarioConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,24 +25,22 @@ import com.cleber.financas.service.UsuarioService;
 @RequestMapping("/api/usuarios")
 //@CrossOrigin(origins = "http://localhost:3000")
 public class UsuarioController {
-	@Autowired
-    public UsuarioService usuarioService;
 
+    @Autowired
+    public UsuarioService usuarioService;
 	@Autowired
 	public LancamentoService lancamentoService;
     @Autowired
-    public ConvertDtoToEntity convertDtoToEntity;
+    public UsuarioConverter usuarioConverter;
     
     public UsuarioController(
-    		UsuarioService usuarioService,
-    		LancamentoService lancamentoService,
-    		ConvertDtoToEntity convertDtoToEntity
-    		)
-    {
+            UsuarioService usuarioService,
+            LancamentoService lancamentoService,
+            UsuarioConverter usuarioConverter
+    ){
         this.usuarioService = usuarioService;
         this.lancamentoService = lancamentoService;
-        this.convertDtoToEntity = convertDtoToEntity;
-
+        this.usuarioConverter = usuarioConverter;
     }
 
     @PostMapping("/autenticar")
@@ -64,7 +60,7 @@ public class UsuarioController {
      * ResponseEntity representa o corpo da resposta
      **/
     @PostMapping
-    public ResponseEntity salvarUsuario( @RequestBody UsuarioDTO dto) { /**@Valid*/
+    public ResponseEntity<?> salvarUsuario( @RequestBody UsuarioDTO dto) { /**@Valid*/
         Usuario usuario = Usuario.builder()
                 .nome(dto.getNome())
                 .cpf(dto.getCpf())
@@ -75,7 +71,7 @@ public class UsuarioController {
 
         try {
             Usuario usuarioSalvo = usuarioService.salvarUsuario(usuario);
-            return new ResponseEntity(usuarioSalvo, HttpStatus.CREATED);
+            return new ResponseEntity<>(usuarioSalvo, HttpStatus.CREATED);
             /*ou usar url*/
             /*return ResponseEntity.created(URI.create("/api/usuarios/" + usuarioSalvo.getId())).build();*/
         } catch (ErroValidacaoException mensagemDeErro) {
@@ -85,10 +81,10 @@ public class UsuarioController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity atualizar(@PathVariable("id") Long id, @RequestBody UsuarioDTO dto){
+    public ResponseEntity<?> atualizar(@PathVariable("id") Long id, @RequestBody UsuarioDTO dto){
         return usuarioService.obterUsuarioPorId(id).map(entity ->{
             try{
-                Usuario usuario = convertDtoToEntity.converterDtoParaEntidade(dto);
+                Usuario usuario = usuarioConverter.dtoToEntity(dto);
                 usuario.setId(id);
                 usuarioService.atualizarUsuario(usuario);
                 return ResponseEntity.ok(usuario);
@@ -96,12 +92,12 @@ public class UsuarioController {
             }catch (RegraDeNegocioException r){
                 return ResponseEntity.badRequest().body(r.getMessage());
             }
-        }).orElseGet(() -> new ResponseEntity(
+        }).orElseGet(() -> new ResponseEntity<>(
                 "O usuario com o ID " + "["+ id +"] " + "não foi encontrado", HttpStatus.BAD_REQUEST));
     }
     
     @GetMapping("{id}/saldo")
-    public ResponseEntity obterSaldo(@PathVariable("id") Long id) {
+    public ResponseEntity<?> obterSaldo(@PathVariable("id") Long id) {
     	/*saldo por usuario*/
     	Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(id);
     	

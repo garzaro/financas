@@ -1,19 +1,29 @@
 package com.cleber.financas.model.entity;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 
-import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
+
+import com.cleber.financas.model.enums.StatusLancamento;
+import com.cleber.financas.model.enums.TipoLancamento;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.envers.Audited;
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
 @Audited
 @Entity
 @Data
@@ -31,7 +41,7 @@ public class Lancamento {
     private String descricao;
     
     @Column(name = "mes")
-    private String mes;
+    private Integer mes;
     
     @Column(name = "ano")
     private Integer ano;
@@ -72,6 +82,5 @@ public class Lancamento {
     
     @Column(name = "status_lancamento")
     @Enumerated(value = EnumType.STRING)
-    private StatusLancamento statusLancamento;
-    
+    private StatusLancamento statusLancamento;   
 }
