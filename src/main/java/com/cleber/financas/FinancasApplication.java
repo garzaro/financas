@@ -18,14 +18,14 @@ public class FinancasApplication implements WebMvcConfigurer {
 
 		SpringApplication.run(FinancasApplication.class, args);
 		
-		SenhaService senhaService = new SenhaServiceImpl(new Argon2PasswordEncoder(
-				16,
-				32,
-				2,
-				65536,
-				5
-		));
-		String hash = senhaService.hashSenha("senha123");
-		System.out.println("ESSE É O HASH GERADO (classe de inicialização): " + hash);
+//		SenhaService senhaService = new SenhaServiceImpl(new Argon2PasswordEncoder(
+//				16,
+//				32,
+//				2,
+//				65536,
+//				5
+//		));
+//		String hash = senhaService.hashSenha("senha123");
+//		System.out.println("ESSE É O HASH GERADO (classe de inicialização): " + hash);
 		}
 	}
