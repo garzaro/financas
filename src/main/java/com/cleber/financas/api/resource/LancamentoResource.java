@@ -93,11 +93,7 @@ public class LancamentoResource {
                 .map( lancamento -> new ResponseEntity(lancamentoConverter.entityToDto( lancamento), HttpStatus.OK) )
                 .orElseGet( () -> new ResponseEntity(HttpStatus.NOT_FOUND) );
     }
-    
-//  if (selecionarStatus == null) {
-//  return ResponseEntity.badRequest().body("O statusLancamento informado não existe " +
-//          "[" + dto + "]" + " informar um status válido");
-//}
+
     @PutMapping("{id}/atualizar-statusLancamento")
     public ResponseEntity<?> atualizarStatus(@PathVariable("id") Long id, @Valid @RequestBody AtualizarStatusDTO dto) {        
     	return lancamentoService.obterLancamentoPorId(id).map(entity -> {
@@ -113,32 +109,7 @@ public class LancamentoResource {
             }
         }).orElseGet(() -> new ResponseEntity("Lancamento não encontrado! ", HttpStatus.BAD_REQUEST));
     }
-    
-    
-    
-//    @PutMapping("{id}/atualizar-statusLancamento")
-//    public ResponseEntity<?> atualizarStatus(@PathVariable("id") Long id, @RequestBody AtualizarStatusDTO dto) {
-//        return lancamentoService.obterLancamentoPorId(id).map(entity -> {
-//            // Verificação: se null ou vazio, retorne erro
-//            if (dto.getStatuslancamento() == null || dto.getStatuslancamento().trim().isEmpty()) {
-//                return ResponseEntity.badRequest().body("Status do lançamento não pode ser nulo ou vazio");
-//            }
-//
-//            try {
-//                // Converta para maiúsculo e valide o enum
-//                StatusLancamento selecionarStatus = StatusLancamento.valueOf(dto.getStatuslancamento().toUpperCase());
-//                entity.setStatusLancamento(selecionarStatus);
-//                lancamentoService.atualizarLancamento(entity);
-//                return ResponseEntity.ok(entity);
-//            } catch (IllegalArgumentException e) {
-//                // Se o valor não corresponder a um enum válido (ex.: "INVALIDO")
-//                return ResponseEntity.badRequest().body("Status inválido: " + dto.getStatuslancamento());
-//            } catch (RegraDeNegocioException exception) {
-//                return ResponseEntity.badRequest().body(exception.getMessage());
-//            }
-//        }).orElseGet(() -> new ResponseEntity("Lançamento não encontrado!", HttpStatus.BAD_REQUEST));
-//    }
-       
+
     @GetMapping
     public ResponseEntity buscarLancamento(
                                            @RequestParam(value = "tipoLancamento") TipoLancamento tipoLancamento,
