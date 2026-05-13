@@ -83,7 +83,8 @@ public class LancamentoResource {
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
         }).orElseGet(() ->
-                new ResponseEntity("O lancamento com o ID " + "(" + id + ")" + " não foi encontrado",
+//                new ResponseEntity("O lancamento com o ID " + "(" + id + ")" + " não foi encontrado",
+                new ResponseEntity("O lancamento informado não foi encontrado",
                 HttpStatus.BAD_REQUEST));
     }
 
@@ -155,8 +156,7 @@ public class LancamentoResource {
             return new ResponseEntity("lancamento excluido com sucesso.", HttpStatus.NO_CONTENT);/*OK*/ /* e devolve o resultado */
         }).orElseGet(() ->
                 new ResponseEntity(
-                        "Lançamento com ID " + "_" + id + "_" + " não encontrado na base de dados." +
-                                " Verifique se o ID está correto e tente novamente.",
+                        "Lançamento informado não foi encontrado. Verifique se a informação está correta e tente novamente.",
                         HttpStatus.BAD_REQUEST));
     }
 }
