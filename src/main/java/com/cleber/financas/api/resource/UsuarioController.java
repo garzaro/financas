@@ -93,7 +93,7 @@ public class UsuarioController {
                 return ResponseEntity.badRequest().body(r.getMessage());
             }
         }).orElseGet(() -> new ResponseEntity<>(
-                "O usuario com o ID " + "["+ id +"] " + "não foi encontrado", HttpStatus.BAD_REQUEST));
+                "O usuario informado não foi encontrado", HttpStatus.BAD_REQUEST));
     }
     
     @GetMapping("{id}/saldo")
