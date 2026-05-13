@@ -82,7 +82,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         boolean senhaCorreta = passwordEncoder.matches(senha, usuario.get().getSenha());
         if (!senhaCorreta) {
-            throw new ErroDeAutenticacao("Senha incorreta. Tente novamente ou clique em \"Esqueceu a senha?\" para escolher outra.");
+            throw new ErroDeAutenticacao("Verifique sua senha e tente novamente.");
         }
         return usuario.get();
     }
