@@ -10,6 +10,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**Contexto**/
@@ -19,7 +22,25 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
 	
 	/**Expõe o AuthenticationManager para ser injetado no Controller**/
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) 
+			throws Exception{
+		return config.getAuthenticationManager();
+	}
 	
+	/**Define o algoritmo de criptografia que o Manager vai usar mano para testar a senha**/ 
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
+	
+//	VRIFICAR ERRO AQUI COM O ARGON - OLHOAR PRA DENTRO DIREOTRIO CONFIG
+    
+//    @Bean
+//    PasswordEncoder passwordEncoder() {
+//        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+//    }
+//	
+    //CONTINUAR NA AULA DO DOUGLLAS SOUSA - PRA REFORCAR CHAPAAA.
 	
 	@Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{    	
@@ -73,10 +94,7 @@ public class SecurityConfiguration {
         return http.build();
     }
 	
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) 
-			throws Exception{
-		return config.getAuthenticationManager();
-	}	
+		
 }
 
 /*
