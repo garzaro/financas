@@ -7,6 +7,7 @@ import com.cleber.financas.api.converter.UsuarioConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;
@@ -22,7 +23,7 @@ import com.cleber.financas.service.UsuarioService;
 /**
  * para mapeamento de todas as requisições
  * */
-@RequestMapping("/api/usuarios")
+@RequestMapping("/api/usuario")
 //@CrossOrigin(origins = "http://localhost:3000")
 public class UsuarioController {
 
@@ -43,7 +44,7 @@ public class UsuarioController {
         this.usuarioConverter = usuarioConverter;
     }
 
-    @PostMapping("/autenticar")
+    @PostMapping("/auth")
     public ResponseEntity<?> autenticar(@RequestBody UsuarioAutenticacaoDTO dto) {
         try {
             Usuario usuarioAutenticado = usuarioService.autenticar(dto.getEmail(), dto.getSenha());
@@ -81,6 +82,7 @@ public class UsuarioController {
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("isAuthenticated")
     public ResponseEntity<?> atualizar(@PathVariable("id") Long id, @RequestBody UsuarioDTO dto){
         return usuarioService.obterUsuarioPorId(id).map(entity ->{
             try{
@@ -97,6 +99,7 @@ public class UsuarioController {
     }
     
     @GetMapping("{id}/saldo")
+    @PreAuthorize("isAuthenticated() and #id == authentication.principal.id") //so ve o proprio saldo
     public ResponseEntity<?> obterSaldo(@PathVariable("id") Long id) {
     	/*saldo por usuario*/
     	Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(id);
