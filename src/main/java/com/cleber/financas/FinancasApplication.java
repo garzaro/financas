@@ -17,27 +17,5 @@ public class FinancasApplication implements WebMvcConfigurer {
 	public static void main(String[] args) {
 
 		SpringApplication.run(FinancasApplication.class, args);
-		
-<<<<<<< HEAD
-		SenhaService senhaService = new SenhaServiceImpl(new Argon2PasswordEncoder(
-				16,
-				32,
-				2,
-				65536,
-				5
-		));
-		String hash = senhaService.hashSenha("senha123");
-		System.out.println("ESSE É O HASH GERADO (classe de inicialização): " + hash);
-=======
-//		SenhaService senhaService = new SenhaServiceImpl(new Argon2PasswordEncoder(
-//				16,
-//				32,
-//				2,
-//				65536,
-//				5
-//		));
-//		String hash = senhaService.hashSenha("senha123");
-//		System.out.println("ESSE É O HASH GERADO (classe de inicialização): " + hash);
->>>>>>> 76776ee74abbb5def90015f88efdf560d9352fb0
 		}
 	}
