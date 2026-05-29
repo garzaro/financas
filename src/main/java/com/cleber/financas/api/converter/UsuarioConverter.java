@@ -14,7 +14,7 @@ public class UsuarioConverter {
         usuario.setId(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
         usuario.setNome(dto.getNome());
         usuario.setCpf(dto.getCpf());
-        usuario.setNomeUsuario(dto.getUsuario());
+        usuario.setNomeUsuario(dto.getNomeUsuario());
         usuario.setEmail(dto.getEmail());
         usuario.setSenha(dto.getSenha());
         usuario.setDataCadastro(dto.getDataCadastro());

@@ -2,22 +2,14 @@ package com.cleber.financas.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.envers.Audited;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
-import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Audited
 @Builder
@@ -27,12 +19,11 @@ import java.util.Objects;
 @Data
 @Entity
 @Table(name= "usuario", schema = "financeiro")
-public class Usuario implements Serializable{
-    private static final long serialVersionUID = 1L;
-
+public class Usuario{
+    
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "id")
+    @Column(name = "id_usuario")
     private Long id;
     
     @Column(name = "nome")
@@ -67,4 +58,3 @@ public class Usuario implements Serializable{
     
     
 }
-

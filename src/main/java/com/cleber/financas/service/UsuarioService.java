@@ -3,9 +3,7 @@ package com.cleber.financas.service;
 import com.cleber.financas.model.entity.Usuario;
 
 import java.util.Optional;
-
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 @Service
 public interface UsuarioService {

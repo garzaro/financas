@@ -3,7 +3,6 @@ package com.cleber.financas.model.entity;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;

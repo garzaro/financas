@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CriptoMoedaServiceImpl implements CriptoMoedaService{
 	
-	private final CriptoMoedaRepository criptoMoedaRepository;
+private final CriptoMoedaRepository criptoMoedaRepository;
 	
 	private final CriptoMoedaMapper criptoMoedaMapper;
 	

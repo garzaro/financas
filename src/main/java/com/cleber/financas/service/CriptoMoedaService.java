@@ -12,7 +12,7 @@ import com.cleber.financas.model.enums.StatusTransacao;
 
 @Service
 public interface CriptoMoedaService {
-	CriptoMoeda salvarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO);
+CriptoMoeda salvarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO);
 	
 	CriptoMoeda atualizarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO);
 	
@@ -24,5 +24,5 @@ public interface CriptoMoedaService {
 	
 	Optional<CriptoMoeda> obterCriptomoedaPorId(Long uuid);
 	
-	BigDecimal obterValorCriptomoedaPorUsuario(Long uuid);	
+	BigDecimal obterValorCriptomoedaPorUsuario(Long uuid);		
 }

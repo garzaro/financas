@@ -2,6 +2,7 @@ package com.cleber.financas.api.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import com.cleber.financas.model.enums.StatusTransacao;
 import com.cleber.financas.model.enums.TipoTransacao;

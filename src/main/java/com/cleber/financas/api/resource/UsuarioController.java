@@ -71,7 +71,7 @@ public class UsuarioController {
         Usuario usuario = Usuario.builder()
                 .nome(dto.getNome())
                 .cpf(dto.getCpf())
-                .nomeUsuario(dto.getUsuario())
+                .nomeUsuario(dto.getNomeUsuario())
                 .email(dto.getEmail())
                 .senha(dto.getSenha())
                 .build();
