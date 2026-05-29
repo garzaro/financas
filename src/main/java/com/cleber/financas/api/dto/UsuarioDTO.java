@@ -3,45 +3,47 @@ package com.cleber.financas.api.dto;
 /*Não usei @Builder, @Getter, @Setter
 * resolvi criar na mão o codigo*/
 
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class UsuarioDTO {
     private Long id;
-    private String nome;   
+    private String nome;
     private String cpf;
-    private String usuario;
+    private String nomeUsuario;
     private String email;
     private String senha;
     private Instant dataCadastro;
 
     public UsuarioDTO() {
-		
-	}
-    
-    /*BUILDER*/
+
+    }
+
+    /* BUILDER */
     private UsuarioDTO(UsuarioBuilder builder) {
         this.id = builder.id;
         this.nome = builder.nome;
         this.cpf = builder.cpf;
-        this.usuario = builder.usuario;
+        this.nomeUsuario = builder.nomeUsuario;
         this.email = builder.email;
         this.senha = builder.senha;
         this.dataCadastro = builder.build().dataCadastro;
     }
-    public Long getId(){return id;}
+
+    public Long getId() {
+        return id;
+    }
 
     public String getNome() {
         return nome;
     }
 
-    public String getCpf(){
+    public String getCpf() {
         return cpf;
     }
 
-    public String getUsuario(){
-        return usuario;
+    public String getNomeUsuario() {
+        return nomeUsuario;
     }
 
     public String getEmail() {
@@ -52,15 +54,15 @@ public class UsuarioDTO {
         return senha;
     }
 
-    public Instant getDataCadastro(){
+    public Instant getDataCadastro() {
         return dataCadastro;
     }
 
-    public static class UsuarioBuilder{
+    public static class UsuarioBuilder {
         private Long id;
         private String nome;
         private String cpf;
-        private String usuario;
+        private String nomeUsuario;
         private String email;
         private String senha;
         private LocalDateTime dataCadastro;
@@ -71,8 +73,8 @@ public class UsuarioDTO {
         }
 
         public UsuarioBuilder setNome(String nome) {
-        	this.nome = nome;
-        	return this;
+            this.nome = nome;
+            return this;
         }
 
         public UsuarioBuilder setCpf(String cpf) {
@@ -80,8 +82,8 @@ public class UsuarioDTO {
             return this;
         }
 
-        public UsuarioBuilder setUsuario(String usuario) {
-            this.usuario = usuario;
+        public UsuarioBuilder setNomeUsuario(String nomeUsuario) {
+            this.nomeUsuario = nomeUsuario;
             return this;
         }
 
@@ -90,12 +92,12 @@ public class UsuarioDTO {
             return this;
         }
 
-        public UsuarioBuilder setSenha(String senha){
+        public UsuarioBuilder setSenha(String senha) {
             this.senha = senha;
             return this;
         }
 
-        public UsuarioBuilder setDataCadastro(LocalDateTime dataCadastro){
+        public UsuarioBuilder setDataCadastro(LocalDateTime dataCadastro) {
             this.dataCadastro = dataCadastro;
             return this;
         }
