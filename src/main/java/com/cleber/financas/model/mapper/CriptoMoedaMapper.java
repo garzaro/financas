@@ -20,8 +20,6 @@ import com.cleber.financas.model.entity.Usuario;
 @Component
 @Mapper(componentModel = "spring") // Permite injetar o mapper com @Autowired/@RequiredArgsConstructor
 public interface CriptoMoedaMapper {
-
-//	List<CriptoMoedaDTO> criptomoedaToDto (List<CriptoMoeda> critpomoeda);	
 	
 	/**request - server**/
 	@Mapping(source = "ativo", target = "criptomoeda")
