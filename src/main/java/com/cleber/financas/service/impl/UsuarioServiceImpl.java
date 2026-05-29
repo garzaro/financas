@@ -1,22 +1,23 @@
 package com.cleber.financas.service.impl;
 
-import com.cleber.financas.exception.ErroDeAutenticacao;
-import com.cleber.financas.exception.ErroValidacaoException;
-import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.model.entity.Usuario;
-import com.cleber.financas.model.repository.UsuarioRepository;
-import com.cleber.financas.service.UsuarioService;
-import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.regex.Pattern;
+import com.cleber.financas.exception.ErroDeAutenticacao;
+import com.cleber.financas.exception.ErroValidacaoException;
+import com.cleber.financas.exception.RegraDeNegocioException;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.repository.UsuarioRepository;
+import com.cleber.financas.service.UsuarioService;
+
+import jakarta.transaction.Transactional;
 
 /**
  * endpoints
@@ -29,7 +30,7 @@ public class UsuarioServiceImpl implements UsuarioService {
      * injecao por construtor
      * */
     @Autowired
-    private final UsuarioRepository usuarioRepository;
+    private UsuarioRepository usuarioRepository;
     private Argon2PasswordEncoder passwordEncoder = new Argon2PasswordEncoder( 16, 32, 1, 16, 3 );
 
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository){

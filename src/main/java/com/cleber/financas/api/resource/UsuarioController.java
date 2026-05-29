@@ -3,13 +3,18 @@ package com.cleber.financas.api.resource;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.cleber.financas.api.converter.UsuarioConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.cleber.financas.api.converter.UsuarioConverter;
 import com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;
 import com.cleber.financas.api.dto.UsuarioDTO;
 import com.cleber.financas.exception.ErroDeAutenticacao;
@@ -22,8 +27,9 @@ import com.cleber.financas.service.UsuarioService;
 @RestController
 /**
  * para mapeamento de todas as requisições
+ * implentar o user details
  * */
-@RequestMapping("/api/usuario")
+@RequestMapping("/api/usuarios")
 //@CrossOrigin(origins = "http://localhost:3000")
 public class UsuarioController {
 
@@ -44,7 +50,7 @@ public class UsuarioController {
         this.usuarioConverter = usuarioConverter;
     }
 
-    @PostMapping("/auth")
+    @PostMapping("/autenticar")
     public ResponseEntity<?> autenticar(@RequestBody UsuarioAutenticacaoDTO dto) {
         try {
             Usuario usuarioAutenticado = usuarioService.autenticar(dto.getEmail(), dto.getSenha());
@@ -82,7 +88,6 @@ public class UsuarioController {
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("isAuthenticated")
     public ResponseEntity<?> atualizar(@PathVariable("id") Long id, @RequestBody UsuarioDTO dto){
         return usuarioService.obterUsuarioPorId(id).map(entity ->{
             try{
@@ -99,7 +104,6 @@ public class UsuarioController {
     }
     
     @GetMapping("{id}/saldo")
-    @PreAuthorize("isAuthenticated() and #id == authentication.principal.id") //so ve o proprio saldo
     public ResponseEntity<?> obterSaldo(@PathVariable("id") Long id) {
     	/*saldo por usuario*/
     	Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(id);

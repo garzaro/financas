@@ -11,38 +11,37 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * implementação (navegador)
- * **/
+ **/
 @Configuration
-public class CorsConfig implements WebMvcConfigurer{
+public class CorsConfig implements WebMvcConfigurer {
 	@Bean
-    WebMvcConfigurer corsConfigurer() {
+	WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:3000")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true)
-                        /**
-                         * um cache de 60 minutos
-                         * */
-                        .maxAge(3600);
+						.allowedOrigins("http://localhost:3001")
+						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+						.allowedHeaders("*")
+						.allowCredentials(true)
+						/**
+						 * um cache de 60 minutos
+						 */
+						.maxAge(3600);
 			}
 		};
 	}
 }
 
-
-/*para permitir somente requisições vindas de um dominio especifico,
-e permitir somente metodos GET e POST, o codigo seria assim:
-public class CorsConfig  implements WebMvcConfigurer{
-@Override
-public void addCorsMappings(CorsRegistry registry) {
-	registry.addMapping("/api/**")
-			.allowedOrigins("http://seu-dominio.com")
-			.allowedMethods("GET", "POST");
-}
-*/
-
-	
+/*
+ * para permitir somente requisições vindas de um dominio especifico,
+ * e permitir somente metodos GET e POST, o codigo seria assim:
+ * public class CorsConfig implements WebMvcConfigurer{
+ * 
+ * @Override
+ * public void addCorsMappings(CorsRegistry registry) {
+ * registry.addMapping("/api/**")
+ * .allowedOrigins("http://seu-dominio.com")
+ * .allowedMethods("GET", "POST");
+ * }
+ */
