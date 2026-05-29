@@ -36,12 +36,21 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String gerarToken(Usuario usuario) {
+        /**ver a possibilidade de peagr o localdatetime do SISTEMA e converter para date
+         * a logica seria: 
+         * 
+         * LocalDate localDate = LocalDate.now();
+         * Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+         * 
+         */
         Instant agora = Instant.now();
         Instant expiracao = agora.plus(expiration, ChronoUnit.MINUTES);
 
         return Jwts.builder()
                 .subject(usuario.getEmail()) // Sequestro de sessão evitado atrelando Claims chave
                 .claim("id", usuario.getId())
+                .claim("cpf", usuario.getCpf())
+                .claim("nome_usuario", usuario.getNomeUsuario())
                 .claim("nome", usuario.getNome())
                 .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o token
                 .issuedAt(Date.from(agora))

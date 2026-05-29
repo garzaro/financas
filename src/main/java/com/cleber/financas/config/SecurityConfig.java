@@ -76,16 +76,15 @@ public class SecurityConfig {
 
     @Bean
     AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider =
-                /**
-                 * Estou falando para o provedor como buscar o usuario (banco de dados) - injecção via construtor
-                 **/
-                new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(securityUserDetailsService);
-
+        /**
+         * Estou falando para o provedor como buscar o usuario (banco de dados)
+         * através da injeção via construtor, pois o construtor vazio e o 
+         * setUserDetailsService foram depreciados.
+         **/
+        DaoAuthenticationProvider authProvider = 
+        new DaoAuthenticationProvider(securityUserDetailsService);
         /** Estou falando para o provedor como validar a senha criptograda (Argon2) **/
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 
