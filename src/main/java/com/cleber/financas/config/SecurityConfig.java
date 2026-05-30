@@ -73,7 +73,7 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults());
         return http.build();
     }
-
+    /**injecao manual do passwordEncoder e userDetailsService - Vai aparecer warning na stacktrace**/
     @Bean
     AuthenticationProvider authenticationProvider() {
         /**
@@ -83,7 +83,7 @@ public class SecurityConfig {
          **/
         DaoAuthenticationProvider authProvider = 
         new DaoAuthenticationProvider(securityUserDetailsService);
-        /** Estou falando para o provedor como validar a senha criptograda (Argon2) **/
+        /** Estou falando para o provedor como validar a senha criptograda (Argon2)**/
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

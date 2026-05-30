@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
@@ -45,13 +47,18 @@ public class JwtServiceImpl implements JwtService {
          */
         Instant agora = Instant.now();
         Instant expiracao = agora.plus(expiration, ChronoUnit.MINUTES);
-
+        
+        String horaExpiracaoToken = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                .withZone(ZoneId.systemDefault())
+                .format(expiracao);
+        
         return Jwts.builder()
                 .subject(usuario.getEmail()) // Sequestro de sessão evitado atrelando Claims chave
                 .claim("id", usuario.getId())
                 .claim("cpf", usuario.getCpf())
                 .claim("nome_usuario", usuario.getNomeUsuario())
                 .claim("nome", usuario.getNome())
+                .claim("horaExpiracao", horaExpiracaoToken) 
                 .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o token
                 .issuedAt(Date.from(agora))
                 .expiration(Date.from(expiracao))
