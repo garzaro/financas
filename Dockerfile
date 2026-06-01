@@ -28,7 +28,7 @@ USER spring:spring
 COPY --from=builder /build/target/*.jar app.jar
 
 # Expor a porta que a aplicação vai rodar
-EXPOSE 8081
+EXPOSE 8080
 
 # Comando de inicialização
 ENTRYPOINT ["java", "-jar", "app.jar"]
