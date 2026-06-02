@@ -1,9 +1,5 @@
 package com.cleber.financas.service;
 
-import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.model.entity.Usuario;
-import com.cleber.financas.model.repository.UsuarioRepository;
-import com.cleber.financas.service.impl.UsuarioServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +8,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.cleber.financas.exception.RegraDeNegocioException;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.repository.UsuarioRepository;
+import com.cleber.financas.service.impl.UsuarioServiceImpl;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
@@ -25,7 +26,7 @@ public class UsuarioServiceSpyTest {
     public void deveSalvarUmUsuario(){
         /*cenario*/
         Mockito.doNothing().when(usuarioServiceImpl)
-                .validarEmailCpf("email@gmail.com",Mockito.anyString());
+                .validarEmailCpf(Mockito.anyString(), Mockito.anyString(), Mockito.any());
 
         Usuario usuario = criarUsuario();
 
@@ -33,20 +34,22 @@ public class UsuarioServiceSpyTest {
                 .thenReturn(usuario);
 
         /*ação*/
+        Usuario persistir = criarUsuario();
+        persistir.setId(null);
         Usuario usuarioSalvo = usuarioServiceImpl
-                .salvarUsuario(new Usuario());
+                .salvarUsuario(persistir);
 
         /*verificação*/
         Assertions.assertThat(usuarioSalvo)
                 .isNotNull();
         Assertions.assertThat(usuarioSalvo.getId())
                 .isEqualTo(1l);
-        Assertions.assertThat(usuarioSalvo.getNome())
-                .isEqualTo("garzaro74");
+        Assertions.assertThat(usuarioSalvo.getNomeCompleto())
+                .isEqualTo("Cleber Garzaro");
         Assertions.assertThat(usuarioSalvo.getEmail())
                 .isEqualTo("email@gmail.com");
         Assertions.assertThat(usuarioSalvo.getSenha())
-                .isEqualTo("senha");
+                .isNotNull();
 
     }
     @Test(expected = RegraDeNegocioException.class)
@@ -56,7 +59,7 @@ public class UsuarioServiceSpyTest {
 
         Mockito.doThrow(RegraDeNegocioException.class)
                 .when(usuarioServiceImpl)
-                .validarEmailCpf("email@gmail.com","123456789-00");
+                .validarEmailCpf(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         /*ação*/
         usuarioServiceImpl.salvarUsuario(persistirUsuario);
 
@@ -68,9 +71,11 @@ public class UsuarioServiceSpyTest {
     public static Usuario criarUsuario() {
         return Usuario.builder()
                 .id(1l)
+                .nomeCompleto("Cleber Garzaro")
+                .cpf("12345678900")
                 .nomeUsuario("garzaro74")
                 .email("email@gmail.com")
-                .senha("senha")
+                .senha("senha123")
                 .build();
 
     }

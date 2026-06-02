@@ -1,12 +1,8 @@
 package com.cleber.financas.api.resource;
 
-import com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;
-import com.cleber.financas.exception.ErroDeAutenticacao;
-import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.model.entity.Usuario;
-import com.cleber.financas.service.LancamentoService;
-import com.cleber.financas.service.UsuarioService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.util.Optional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -22,8 +18,13 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+import com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;
+import com.cleber.financas.exception.ErroDeAutenticacao;
+import com.cleber.financas.exception.RegraDeNegocioException;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.service.LancamentoService;
+import com.cleber.financas.service.UsuarioService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
@@ -71,7 +72,7 @@ public class UsuarioResourceRest {
         mvc.perform(requisicao)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(usuario.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNome()))
+                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNomeCompleto()))
                 .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(usuario.getNomeUsuario()))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value(usuario.getEmail()))
                 //.andExpect(MockMvcResultMatchers.jsonPath("senha").value(usuario.getSenha()))
@@ -134,7 +135,7 @@ public class UsuarioResourceRest {
         mvc.perform(requisicao)
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(usuario.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNome()))
+                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNomeCompleto()))
                 .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(usuario.getNomeUsuario()))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value(usuario.getEmail()))
                 //.andExpect(MockMvcResultMatchers.jsonPath("senha").value(usuario.getSenha()))

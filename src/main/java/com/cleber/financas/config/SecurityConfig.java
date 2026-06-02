@@ -36,15 +36,16 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http                
+        http
+                .cors(Customizer.withDefaults()) // Adiciona o filtro de CORS no Spring Security, respeita e obedece as regras da classe CorsConfig 
                 .csrf(AbstractHttpConfigurer::disable) // usando method reference aqui só pra xiarrrr
                 /** Sessão sem estado — nenhuma HttpSession criada. **/
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 /** regras de autorização de rotas **/
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/usuario/auth").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/usuario").permitAll() // permitindo qualquer um
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios/autenticar").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll() // permitindo qualquer um
                                                                                       // cadastrar
                         // 👇 LIBERA AS ROTAS DO SWAGGER E OPENAPI 👇
                         .requestMatchers(

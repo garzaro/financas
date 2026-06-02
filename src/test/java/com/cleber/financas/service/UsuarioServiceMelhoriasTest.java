@@ -1,8 +1,8 @@
 package com.cleber.financas.service;
 
-import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.model.entity.Usuario;
-import com.cleber.financas.model.repository.UsuarioRepository;
+import java.time.Instant;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,10 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Optional;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.repository.UsuarioRepository;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -64,7 +62,7 @@ public class UsuarioServiceMelhoriasTest {
     public static Usuario criarUsuario(){
         return Usuario.builder()
                 .id(1l)
-                .nome("Cleber")
+                .nomeCompleto("Cleber")
                 .nomeUsuario("garzaro")
                 .cpf("123.456.789-00")
                 .email("cleber@gmail.com")

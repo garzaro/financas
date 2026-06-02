@@ -26,8 +26,8 @@ public class Usuario{
     @Column(name = "id_usuario")
     private Long id;
     
-    @Column(name = "nome")
-    private String nome;
+    @Column(name = "nome_completo")
+    private String nomeCompleto;
 
     @Column(name = "cpf")
     private String cpf;

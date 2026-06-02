@@ -35,9 +35,8 @@ public class UsuarioServiceMockTest {
         /*instancia de usuario repository*/
         /*Usando o @MockBean*/
         usuarioRepository = Mockito.mock(UsuarioRepository.class);
-        /*criando instancia real do usuario service
-        PasswordEncoderConfig passwordEncoder = new PasswordEncoderConfig();
-        usuarioService = new UsuarioServiceImpl(usuarioRepository);*/
+        /*criando instancia real do usuario service*/
+        usuarioService = new UsuarioServiceImpl(usuarioRepository);
     }
 
     @Test(expected = Test.None.class)
@@ -63,22 +62,19 @@ public class UsuarioServiceMockTest {
     public void deveAutenticarUmUsuarioComSucesso() {
         /*cenario*/
         String email = "cleber@gmail.com";
-        String senha = "senha";
+        String senhaOriginal = "senha";
+        
+        org.springframework.security.crypto.argon2.Argon2PasswordEncoder encoder = new org.springframework.security.crypto.argon2.Argon2PasswordEncoder( 16, 32, 1, 16, 3 );
+        String senhaHasheada = encoder.encode(senhaOriginal);
 
-        /*Somente para o visualizar
-        Usuario criarUmUsuario = Usuario.builder()
-                .email("cleber@gmail.com")
-                .senha("senha")
-                .build();
-       */
         Usuario criarUsuario = Usuario.builder()
                 .email(email)
-                .senha(senha)
+                .senha(senhaHasheada)
                 .build();
         Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(criarUsuario));
 
         /*ação*/ /*deve retornar uma instancia de usuario autenticado*/
-        Usuario resultadoAutenticacao = usuarioService.autenticar(email, senha);
+        Usuario resultadoAutenticacao = usuarioService.autenticar(email, senhaOriginal);
 
         /*verificacao*/
         Assertions.assertThat(resultadoAutenticacao).isNotNull();
@@ -115,6 +111,6 @@ public class UsuarioServiceMockTest {
         /*ação*/
         Throwable exception = Assertions.catchThrowable(() -> usuarioService
                 .autenticar("cleber@gmail.com", "123"));
-        Assertions.assertThat(exception).isInstanceOf(ErroDeAutenticacao.class).hasMessage("Senha inválida");
+        Assertions.assertThat(exception).isInstanceOf(ErroDeAutenticacao.class).hasMessage("Credenciais inválidas.");
     }
 }

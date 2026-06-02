@@ -83,7 +83,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         boolean senhaCorreta = passwordEncoder.matches(senha, usuario.get().getSenha());
         if (!senhaCorreta) {
-            throw new ErroDeAutenticacao("Verifique sua senha e tente novamente");
+            throw new ErroDeAutenticacao("Credenciais inválidas.");
         }
         return usuario.get();
     }
@@ -94,8 +94,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         /**
          * deve validar o email e o cpf, verificar se existe
          * */
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /**hash da senha*/
+        if (usuario.getSenha() == null || usuario.getSenha().trim().isEmpty()) {
+            throw new ErroValidacaoException("informe a senha.");
+        }
         validarUsuario(usuario);
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /**hash da senha*/
         /**
          * se nao existir email e nem cpf,
          * salva a instancia com o hash da senha
@@ -125,26 +128,26 @@ public class UsuarioServiceImpl implements UsuarioService {
         /**
          * validacao de dupliciadade
          * */
-        validarEmailCpf(usuario.getEmail(), usuario.getCpf());        
+        validarEmailCpf(usuario.getEmail(), usuario.getCpf(), usuario.getId());        
     }
     
     /**
      * validação de existencia
      * */
-    public void validarEmailCpf(String email, String cpf) {
+    public void validarEmailCpf(String email, String cpf, Long id) {
         /**
          * ver se o email existe
          * */
-        boolean existeUsuarioComEsseEmail = usuarioRepository.existsByEmail(email);
-        if (existeUsuarioComEsseEmail) {
+        Optional<Usuario> usuarioEmail = usuarioRepository.findByEmail(email);
+        if (usuarioEmail.isPresent() && !usuarioEmail.get().getId().equals(id)) {
             throw new RegraDeNegocioException("Esse email já está em uso");
         }
         /**
          * ver se o cpf existe
          * */
-        boolean existeUsuarioComEsseCpf = usuarioRepository.existsByCpf(cpf);
-        if (existeUsuarioComEsseCpf) {
-        	throw new RegraDeNegocioException("Esse CPF já está em uso");
+        Optional<Usuario> usuarioCpf = usuarioRepository.findByCpf(cpf);
+        if (usuarioCpf.isPresent() && !usuarioCpf.get().getId().equals(id)) {
+            throw new RegraDeNegocioException("Esse CPF já está em uso");
         }
     }
     
@@ -153,10 +156,10 @@ public class UsuarioServiceImpl implements UsuarioService {
      * */
     public void validarNome(Usuario usuario){
         //System.out.println("Nome do usuário: " + usuario.getNome());
-        if (usuario.getNome() == null || usuario.getNome().trim().equals("")) {
+        if (usuario.getNomeCompleto() == null || usuario.getNomeCompleto().trim().isEmpty()) {
             throw new ErroValidacaoException("O nome completo é obrigatório");
         }
-        if (!Pattern.matches("^[a-zA-Z\\s]+$", usuario.getNome())) {
+        if (!Pattern.matches("^[a-zA-ZÀ-ÿ\\s]+$", usuario.getNomeCompleto().trim())) {
             throw new ErroValidacaoException("O nome completo deve conter apenas letras e espaços");
         }
     }
@@ -184,10 +187,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (!Pattern.matches("^[\\w-\\.]+@[\\w-\\.]+\\.[a-z]{2,}$", usuario.getEmail())) {
             throw new ErroValidacaoException("O email deve seguir o padrao email@seudominio.com");
         }
+        /*
         String emailPermitido = usuario.getEmail().substring(usuario.getEmail().lastIndexOf("@") + 1);
-        if (!dominiosEmailPermitidos.contains(emailPermitido)) { /*garante que o dominio extraido esteja na lista*/
+        if (!dominiosEmailPermitidos.contains(emailPermitido)) {
             throw new ErroValidacaoException("Emails permitidos no cadastro : " + dominiosEmailPermitidos);
         }
+        */
     }
     
     /**

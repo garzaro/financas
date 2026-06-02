@@ -1,22 +1,25 @@
 package com.cleber.financas.service.impl;
 
-import com.cleber.financas.model.entity.Usuario;
-import com.cleber.financas.service.JwtService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.service.JwtService;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtServiceImpl implements JwtService {
@@ -28,7 +31,7 @@ public class JwtServiceImpl implements JwtService {
     private Long expiration;
 
     // Constante para definir e validar a origem do Token (evita vazamento de escopo)
-    private static final String ISSUER = "financas-api";
+    private static final String ISSUER = "financas";
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
@@ -57,7 +60,7 @@ public class JwtServiceImpl implements JwtService {
                 .claim("id", usuario.getId())
                 .claim("cpf", usuario.getCpf())
                 .claim("nome_usuario", usuario.getNomeUsuario())
-                .claim("nome", usuario.getNome())
+                .claim("nome", usuario.getNomeCompleto())
                 .claim("horaExpiracao", horaExpiracaoToken) 
                 .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o token
                 .issuedAt(Date.from(agora))

@@ -20,7 +20,7 @@ public interface UsuarioService {
     void validarUsuario(Usuario usuario);
     
     /*ver se existe o email*/
-    void validarEmailCpf(String email, String cpf);
+    void validarEmailCpf(String email, String cpf, Long id);
     
     Optional<Usuario> obterUsuarioPorId(Long id);
     

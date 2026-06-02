@@ -4,12 +4,16 @@ package com.cleber.financas.api.dto;
 * resolvi criar na mão o codigo*/
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 public class UsuarioDTO {
     private Long id;
-    private String nome;
+    @JsonAlias({"nome_completo", "nomeCompleto"})
+    private String nomeCompleto;
     private String cpf;
+    
+    @JsonAlias({"nome_usuario", "nomeUsuario"})
     private String nomeUsuario;
     private String email;
     private String senha;
@@ -22,20 +26,20 @@ public class UsuarioDTO {
     /* BUILDER */
     private UsuarioDTO(UsuarioBuilder builder) {
         this.id = builder.id;
-        this.nome = builder.nome;
+        this.nomeCompleto = builder.nomeCompleto;
         this.cpf = builder.cpf;
         this.nomeUsuario = builder.nomeUsuario;
         this.email = builder.email;
         this.senha = builder.senha;
-        this.dataCadastro = builder.build().dataCadastro;
+        this.dataCadastro = builder.dataCadastro;
     }
 
     public Long getId() {
         return id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getNomeCompleto() {
+        return nomeCompleto;
     }
 
     public String getCpf() {
@@ -60,20 +64,20 @@ public class UsuarioDTO {
 
     public static class UsuarioBuilder {
         private Long id;
-        private String nome;
+        private String nomeCompleto;
         private String cpf;
         private String nomeUsuario;
         private String email;
         private String senha;
-        private LocalDateTime dataCadastro;
+        private Instant dataCadastro;
 
         public UsuarioBuilder setId(Long id) {
             this.id = id;
             return this;
         }
 
-        public UsuarioBuilder setNome(String nome) {
-            this.nome = nome;
+        public UsuarioBuilder setNomeCompleto(String nomeCompleto) {
+            this.nomeCompleto = nomeCompleto;
             return this;
         }
 
@@ -97,7 +101,7 @@ public class UsuarioDTO {
             return this;
         }
 
-        public UsuarioBuilder setDataCadastro(LocalDateTime dataCadastro) {
+        public UsuarioBuilder setDataCadastro(Instant dataCadastro) {
             this.dataCadastro = dataCadastro;
             return this;
         }

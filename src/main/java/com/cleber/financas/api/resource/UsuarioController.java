@@ -69,7 +69,7 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity<?> salvarUsuario( @RequestBody UsuarioDTO dto) { /**@Valid*/
         Usuario usuario = Usuario.builder()
-                .nome(dto.getNome())
+                .nomeCompleto(dto.getNomeCompleto())
                 .cpf(dto.getCpf())
                 .nomeUsuario(dto.getNomeUsuario())
                 .email(dto.getEmail())
