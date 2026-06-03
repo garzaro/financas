@@ -53,8 +53,8 @@ public class JwtServiceImpl implements JwtService {
                 .claim("nome_usuario", usuario.getNomeUsuario())
                 .claim("nome", usuario.getNome())
                 .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o token
-                .issuedAt(Date.from(agora))
-                .expiration(Date.from(expiracao))
+                .issuedAt(Date.from(agora)) //emitido em
+                .expiration(Date.from(expiracao)) //expira em
                 .signWith(getSigningKey()) // Usa JWS seguro padrão (HS256 ou melhor) e impede Alg None
                 .compact();
     }
