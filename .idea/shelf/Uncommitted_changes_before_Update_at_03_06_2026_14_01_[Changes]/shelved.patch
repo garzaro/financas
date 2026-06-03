@@ -1,0 +1,1519 @@
+Index: src/main/java/com/cleber/financas/FinancasApplication.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas;\n\nimport org.springframework.boot.SpringApplication;import org.springframework.boot.autoconfigure.SpringBootApplication;\nimport org.springframework.web.servlet.config.annotation.WebMvcConfigurer;\n\n@SpringBootApplication\npublic class FinancasApplication implements WebMvcConfigurer {\n\n\tpublic static void main(String[] args) {\n\n\t\tSpringApplication.run(FinancasApplication.class, args);\n\t\t}\n\t}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/FinancasApplication.java b/src/main/java/com/cleber/financas/FinancasApplication.java
+--- a/src/main/java/com/cleber/financas/FinancasApplication.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/FinancasApplication.java	(date 1780505766083)
+@@ -11,3 +11,4 @@
+ 		SpringApplication.run(FinancasApplication.class, args);
+ 		}
+ 	}
++
+Index: src/main/java/com/cleber/financas/service/impl/JwtServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.service.impl;\n\nimport com.cleber.financas.model.entity.Usuario;\nimport com.cleber.financas.service.JwtService;\nimport io.jsonwebtoken.Claims;\nimport io.jsonwebtoken.ExpiredJwtException;\nimport io.jsonwebtoken.JwtException;\nimport io.jsonwebtoken.Jwts;\nimport io.jsonwebtoken.security.Keys;\nimport org.springframework.beans.factory.annotation.Value;\nimport org.springframework.stereotype.Service;\n\nimport javax.crypto.SecretKey;\nimport java.nio.charset.StandardCharsets;\nimport java.time.Instant;\nimport java.time.temporal.ChronoUnit;\nimport java.util.Date;\n\n@Service\npublic class JwtServiceImpl implements JwtService {\n\n    @Value(\"${application.security.jwt.secret-key}\")\n    private String secret;\n\n    @Value(\"${application.security.jwt.expiration}\") //:30\n    private Long expiration;\n\n    // Constante para definir e validar a origem do Token (evita vazamento de escopo)\n    private static final String ISSUER = \"financas-api\";\n\n    private SecretKey getSigningKey() {\n        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);\n        // O hmacShaKeyFor cria a chave apropriada. O JJWT escolhe a assinatura forte baseada na chave.\n        return Keys.hmacShaKeyFor(keyBytes);\n    }\n\n    @Override\n    public String gerarToken(Usuario usuario) {\n        /**ver a possibilidade de peagr o localdatetime do SISTEMA e converter para date\n         * a logica seria: \n         * \n         * LocalDate localDate = LocalDate.now();\n         * Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());\n         * \n         */\n        Instant agora = Instant.now();\n        Instant expiracao = agora.plus(expiration, ChronoUnit.MINUTES);\n\n        return Jwts.builder()\n                .subject(usuario.getEmail()) // Sequestro de sessão evitado atrelando Claims chave\n                .claim(\"id\", usuario.getId())\n                .claim(\"cpf\", usuario.getCpf())\n                .claim(\"nome_usuario\", usuario.getNomeUsuario())\n                .claim(\"nome\", usuario.getNome())\n                .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o token\n                .issuedAt(Date.from(agora)) //emitido em\n                .expiration(Date.from(expiracao)) //expira em\n                .signWith(getSigningKey()) // Usa JWS seguro padrão (HS256 ou melhor) e impede Alg None\n                .compact();\n    }\n\n    @Override\n    public Claims obterClaims(String token) throws ExpiredJwtException {\n        try {\n            return Jwts.parser()\n                    .verifyWith(getSigningKey()) // Obriga a verificação com a chave, rejeita token sem assinatura (Alg None)\n                    .requireIssuer(ISSUER) // Reivindicação rigorosa: Garante que foi nossa API que gerou\n                    .build()\n                    .parseSignedClaims(token) // Exige explicitamente um token ASSINADO, blindagem total contra Alg None\n                    .getPayload();\n        } catch (ExpiredJwtException e) {\n            // Repassado para tratar na camada de filtro/segurança de forma específica\n            throw e;\n        } catch (JwtException | IllegalArgumentException e) {\n            // Qualquer outra adulteração (assinatura inválida, Claims faltando, malformado)\n            throw new RuntimeException(\"Token JWT inválido, adulterado ou malformado.\", e);\n        }\n    }\n\n    @Override\n    public boolean isTokenValido(String token) {\n        try {\n            Claims claims = obterClaims(token);\n            Date dataExpiracao = claims.getExpiration();\n            // Validação rigorosa do timestamp\n            return dataExpiracao != null && !dataExpiracao.before(new Date());\n        } catch (RuntimeException e) { // JwtException | IllegalArgumentException | \n            return false;\n        }\n    }\n\n    @Override\n    public String getUserLogin(String token) {\n        Claims claims = obterClaims(token);\n        return claims.getSubject();\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/service/impl/JwtServiceImpl.java b/src/main/java/com/cleber/financas/service/impl/JwtServiceImpl.java
+--- a/src/main/java/com/cleber/financas/service/impl/JwtServiceImpl.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/service/impl/JwtServiceImpl.java	(date 1780505766085)
+@@ -1,20 +1,25 @@
+ package com.cleber.financas.service.impl;
+ 
++import java.nio.charset.StandardCharsets;
++import java.time.Instant;
++import java.time.ZoneId;
++import java.time.format.DateTimeFormatter;
++import java.time.temporal.ChronoUnit;
++import java.util.Date;
++
++import javax.crypto.SecretKey;
++
++import org.springframework.beans.factory.annotation.Value;
++import org.springframework.stereotype.Service;
++
+ import com.cleber.financas.model.entity.Usuario;
+ import com.cleber.financas.service.JwtService;
++
+ import io.jsonwebtoken.Claims;
+ import io.jsonwebtoken.ExpiredJwtException;
+ import io.jsonwebtoken.JwtException;
+ import io.jsonwebtoken.Jwts;
+ import io.jsonwebtoken.security.Keys;
+-import org.springframework.beans.factory.annotation.Value;
+-import org.springframework.stereotype.Service;
+-
+-import javax.crypto.SecretKey;
+-import java.nio.charset.StandardCharsets;
+-import java.time.Instant;
+-import java.time.temporal.ChronoUnit;
+-import java.util.Date;
+ 
+ @Service
+ public class JwtServiceImpl implements JwtService {
+@@ -26,7 +31,7 @@
+     private Long expiration;
+ 
+     // Constante para definir e validar a origem do Token (evita vazamento de escopo)
+-    private static final String ISSUER = "financas-api";
++    private static final String ISSUER = "financas";
+ 
+     private SecretKey getSigningKey() {
+         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+@@ -45,13 +50,18 @@
+          */
+         Instant agora = Instant.now();
+         Instant expiracao = agora.plus(expiration, ChronoUnit.MINUTES);
+-
++        
++        String horaExpiracaoToken = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
++                .withZone(ZoneId.systemDefault())
++                .format(expiracao);
++        
+         return Jwts.builder()
+                 .subject(usuario.getEmail()) // Sequestro de sessão evitado atrelando Claims chave
+                 .claim("id", usuario.getId())
+                 .claim("cpf", usuario.getCpf())
+                 .claim("nome_usuario", usuario.getNomeUsuario())
+-                .claim("nome", usuario.getNome())
++                .claim("nome", usuario.getNomeCompleto())
++                .claim("horaExpiracao", horaExpiracaoToken) 
+                 .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o token
+                 .issuedAt(Date.from(agora)) //emitido em
+                 .expiration(Date.from(expiracao)) //expira em
+Index: src/main/java/com/cleber/financas/api/dto/UsuarioDTO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.api.dto;\n\n/*Não usei @Builder, @Getter, @Setter\n* resolvi criar na mão o codigo*/\n\nimport java.time.Instant;\nimport java.time.LocalDateTime;\n\npublic class UsuarioDTO {\n    private Long id;\n    private String nome;\n    private String cpf;\n    private String nomeUsuario;\n    private String email;\n    private String senha;\n    private Instant dataCadastro;\n\n    public UsuarioDTO() {\n\n    }\n\n    /* BUILDER */\n    private UsuarioDTO(UsuarioBuilder builder) {\n        this.id = builder.id;\n        this.nome = builder.nome;\n        this.cpf = builder.cpf;\n        this.nomeUsuario = builder.nomeUsuario;\n        this.email = builder.email;\n        this.senha = builder.senha;\n        this.dataCadastro = builder.build().dataCadastro;\n    }\n\n    public Long getId() {\n        return id;\n    }\n\n    public String getNome() {\n        return nome;\n    }\n\n    public String getCpf() {\n        return cpf;\n    }\n\n    public String getNomeUsuario() {\n        return nomeUsuario;\n    }\n\n    public String getEmail() {\n        return email;\n    }\n\n    public String getSenha() {\n        return senha;\n    }\n\n    public Instant getDataCadastro() {\n        return dataCadastro;\n    }\n\n    public static class UsuarioBuilder {\n        private Long id;\n        private String nome;\n        private String cpf;\n        private String nomeUsuario;\n        private String email;\n        private String senha;\n        private LocalDateTime dataCadastro;\n\n        public UsuarioBuilder setId(Long id) {\n            this.id = id;\n            return this;\n        }\n\n        public UsuarioBuilder setNome(String nome) {\n            this.nome = nome;\n            return this;\n        }\n\n        public UsuarioBuilder setCpf(String cpf) {\n            this.cpf = cpf;\n            return this;\n        }\n\n        public UsuarioBuilder setNomeUsuario(String nomeUsuario) {\n            this.nomeUsuario = nomeUsuario;\n            return this;\n        }\n\n        public UsuarioBuilder setEmail(String email) {\n            this.email = email;\n            return this;\n        }\n\n        public UsuarioBuilder setSenha(String senha) {\n            this.senha = senha;\n            return this;\n        }\n\n        public UsuarioBuilder setDataCadastro(LocalDateTime dataCadastro) {\n            this.dataCadastro = dataCadastro;\n            return this;\n        }\n\n        public UsuarioDTO build() {\n            return new UsuarioDTO(this);\n        }\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/api/dto/UsuarioDTO.java b/src/main/java/com/cleber/financas/api/dto/UsuarioDTO.java
+--- a/src/main/java/com/cleber/financas/api/dto/UsuarioDTO.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/api/dto/UsuarioDTO.java	(date 1780505766083)
+@@ -4,12 +4,16 @@
+ * resolvi criar na mão o codigo*/
+ 
+ import java.time.Instant;
+-import java.time.LocalDateTime;
++
++import com.fasterxml.jackson.annotation.JsonAlias;
+ 
+ public class UsuarioDTO {
+     private Long id;
+-    private String nome;
++    @JsonAlias({"nome_completo", "nomeCompleto"})
++    private String nomeCompleto;
+     private String cpf;
++    
++    @JsonAlias({"nome_usuario", "nomeUsuario"})
+     private String nomeUsuario;
+     private String email;
+     private String senha;
+@@ -22,20 +26,20 @@
+     /* BUILDER */
+     private UsuarioDTO(UsuarioBuilder builder) {
+         this.id = builder.id;
+-        this.nome = builder.nome;
++        this.nomeCompleto = builder.nomeCompleto;
+         this.cpf = builder.cpf;
+         this.nomeUsuario = builder.nomeUsuario;
+         this.email = builder.email;
+         this.senha = builder.senha;
+-        this.dataCadastro = builder.build().dataCadastro;
++        this.dataCadastro = builder.dataCadastro;
+     }
+ 
+     public Long getId() {
+         return id;
+     }
+ 
+-    public String getNome() {
+-        return nome;
++    public String getNomeCompleto() {
++        return nomeCompleto;
+     }
+ 
+     public String getCpf() {
+@@ -60,20 +64,20 @@
+ 
+     public static class UsuarioBuilder {
+         private Long id;
+-        private String nome;
++        private String nomeCompleto;
+         private String cpf;
+         private String nomeUsuario;
+         private String email;
+         private String senha;
+-        private LocalDateTime dataCadastro;
++        private Instant dataCadastro;
+ 
+         public UsuarioBuilder setId(Long id) {
+             this.id = id;
+             return this;
+         }
+ 
+-        public UsuarioBuilder setNome(String nome) {
+-            this.nome = nome;
++        public UsuarioBuilder setNomeCompleto(String nomeCompleto) {
++            this.nomeCompleto = nomeCompleto;
+             return this;
+         }
+ 
+@@ -97,7 +101,7 @@
+             return this;
+         }
+ 
+-        public UsuarioBuilder setDataCadastro(LocalDateTime dataCadastro) {
++        public UsuarioBuilder setDataCadastro(Instant dataCadastro) {
+             this.dataCadastro = dataCadastro;
+             return this;
+         }
+Index: src/main/java/com/cleber/financas/api/resource/UsuarioController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.api.resource;\n\nimport java.math.BigDecimal;\nimport java.util.Optional;\n\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.http.HttpStatus;\nimport org.springframework.http.ResponseEntity;\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.PathVariable;\nimport org.springframework.web.bind.annotation.PostMapping;\nimport org.springframework.web.bind.annotation.PutMapping;\nimport org.springframework.web.bind.annotation.RequestBody;\nimport org.springframework.web.bind.annotation.RequestMapping;\nimport org.springframework.web.bind.annotation.RestController;\n\nimport com.cleber.financas.api.converter.UsuarioConverter;\nimport com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;\nimport com.cleber.financas.api.dto.UsuarioDTO;\nimport com.cleber.financas.exception.ErroDeAutenticacao;\nimport com.cleber.financas.exception.ErroValidacaoException;\nimport com.cleber.financas.exception.RegraDeNegocioException;\nimport com.cleber.financas.model.entity.Usuario;\nimport com.cleber.financas.service.LancamentoService;\nimport com.cleber.financas.service.UsuarioService;\n\n@RestController\n/**\n * para mapeamento de todas as requisições\n * implentar o user details\n * */\n@RequestMapping(\"/api/usuarios\")\n//@CrossOrigin(origins = \"http://localhost:3000\")\npublic class UsuarioController {\n\n    @Autowired\n    public UsuarioService usuarioService;\n\t@Autowired\n\tpublic LancamentoService lancamentoService;\n    @Autowired\n    public UsuarioConverter usuarioConverter;\n    \n    public UsuarioController(\n            UsuarioService usuarioService,\n            LancamentoService lancamentoService,\n            UsuarioConverter usuarioConverter\n    ){\n        this.usuarioService = usuarioService;\n        this.lancamentoService = lancamentoService;\n        this.usuarioConverter = usuarioConverter;\n    }\n\n    @PostMapping(\"/autenticar\")\n    public ResponseEntity<?> autenticar(@RequestBody UsuarioAutenticacaoDTO dto) {\n        try {\n            Usuario usuarioAutenticado = usuarioService.autenticar(dto.getEmail(), dto.getSenha());\n            return ResponseEntity.ok(usuarioAutenticado);\n        } catch (ErroDeAutenticacao e) {\n            return ResponseEntity.badRequest().body(e.getMessage());\n        }\n    }\n\n    /**\n     * Salvar - Este metodo é um endpoint que recebe\n     * uma requisição HTTP POST - vem la do front\n     *\n     * ResponseEntity representa o corpo da resposta\n     **/\n    @PostMapping\n    public ResponseEntity<?> salvarUsuario( @RequestBody UsuarioDTO dto) { /**@Valid*/\n        Usuario usuario = Usuario.builder()\n                .nome(dto.getNome())\n                .cpf(dto.getCpf())\n                .nomeUsuario(dto.getNomeUsuario())\n                .email(dto.getEmail())\n                .senha(dto.getSenha())\n                .build();\n\n        try {\n            Usuario usuarioSalvo = usuarioService.salvarUsuario(usuario);\n            return new ResponseEntity<>(usuarioSalvo, HttpStatus.CREATED);\n            /*ou usar url*/\n            /*return ResponseEntity.created(URI.create(\"/api/usuarios/\" + usuarioSalvo.getId())).build();*/\n        } catch (ErroValidacaoException mensagemDeErro) {\n            mensagemDeErro.printStackTrace();\n            return ResponseEntity.badRequest().body(mensagemDeErro.getMessage());\n        }\n    }\n\n    @PutMapping(\"{id}\")\n    public ResponseEntity<?> atualizar(@PathVariable(\"id\") Long id, @RequestBody UsuarioDTO dto){\n        return usuarioService.obterUsuarioPorId(id).map(entity ->{\n            try{\n                Usuario usuario = usuarioConverter.dtoToEntity(dto);\n                usuario.setId(id);\n                usuarioService.atualizarUsuario(usuario);\n                return ResponseEntity.ok(usuario);\n\n            }catch (RegraDeNegocioException r){\n                return ResponseEntity.badRequest().body(r.getMessage());\n            }\n        }).orElseGet(() -> new ResponseEntity<>(\n                \"O usuario informado não foi encontrado\", HttpStatus.BAD_REQUEST));\n    }\n    \n    @GetMapping(\"{id}/saldo\")\n    public ResponseEntity<?> obterSaldo(@PathVariable(\"id\") Long id) {\n    \t/*saldo por usuario*/\n    \tOptional<Usuario> usuario = usuarioService.obterUsuarioPorId(id);\n    \t\n    \tif(!usuario.isPresent()) {\n    \t\treturn new ResponseEntity<>(HttpStatus.NOT_FOUND);\n    \t}\n    \tBigDecimal saldo = lancamentoService.obterSaldoPorUsuario(id);\n    \treturn ResponseEntity.ok(saldo);\n    }\n    /*@GetMapping(\"/\")public String helloWorld() {return \"Fala dev\";}*/\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/api/resource/UsuarioController.java b/src/main/java/com/cleber/financas/api/resource/UsuarioController.java
+--- a/src/main/java/com/cleber/financas/api/resource/UsuarioController.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/api/resource/UsuarioController.java	(date 1780505766084)
+@@ -27,7 +27,7 @@
+ @RestController
+ /**
+  * para mapeamento de todas as requisições
+- * implentar o user details
++ * 
+  * */
+ @RequestMapping("/api/usuarios")
+ //@CrossOrigin(origins = "http://localhost:3000")
+@@ -69,7 +69,7 @@
+     @PostMapping
+     public ResponseEntity<?> salvarUsuario( @RequestBody UsuarioDTO dto) { /**@Valid*/
+         Usuario usuario = Usuario.builder()
+-                .nome(dto.getNome())
++                .nomeCompleto(dto.getNomeCompleto())
+                 .cpf(dto.getCpf())
+                 .nomeUsuario(dto.getNomeUsuario())
+                 .email(dto.getEmail())
+Index: src/test/java/com/cleber/financas/service/UsuarioServiceSpyTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.service;\n\nimport com.cleber.financas.exception.RegraDeNegocioException;\nimport com.cleber.financas.model.entity.Usuario;\nimport com.cleber.financas.model.repository.UsuarioRepository;\nimport com.cleber.financas.service.impl.UsuarioServiceImpl;\nimport org.assertj.core.api.Assertions;\nimport org.junit.Test;\nimport org.junit.runner.RunWith;\nimport org.mockito.Mockito;\nimport org.springframework.boot.test.mock.mockito.MockBean;\nimport org.springframework.boot.test.mock.mockito.SpyBean;\nimport org.springframework.test.context.ActiveProfiles;\nimport org.springframework.test.context.junit4.SpringRunner;\n\n@RunWith(SpringRunner.class)\n@ActiveProfiles(\"test\")\npublic class UsuarioServiceSpyTest {\n    @SpyBean\n    UsuarioServiceImpl usuarioServiceImpl;\n    @MockBean\n    UsuarioRepository usuarioRepository;\n\n    @Test(expected = Test.None.class)\n    public void deveSalvarUmUsuario(){\n        /*cenario*/\n        Mockito.doNothing().when(usuarioServiceImpl)\n                .validarEmailCpf(\"email@gmail.com\",Mockito.anyString());\n\n        Usuario usuario = criarUsuario();\n\n        Mockito.when(usuarioRepository.save(Mockito.any(Usuario.class)))\n                .thenReturn(usuario);\n\n        /*ação*/\n        Usuario usuarioSalvo = usuarioServiceImpl\n                .salvarUsuario(new Usuario());\n\n        /*verificação*/\n        Assertions.assertThat(usuarioSalvo)\n                .isNotNull();\n        Assertions.assertThat(usuarioSalvo.getId())\n                .isEqualTo(1l);\n        Assertions.assertThat(usuarioSalvo.getNome())\n                .isEqualTo(\"garzaro74\");\n        Assertions.assertThat(usuarioSalvo.getEmail())\n                .isEqualTo(\"email@gmail.com\");\n        Assertions.assertThat(usuarioSalvo.getSenha())\n                .isEqualTo(\"senha\");\n\n    }\n    @Test(expected = RegraDeNegocioException.class)\n    public void naoDeveSalvarUmUsuarioComEmailJaCadastrado(){\n\n        Usuario persistirUsuario = criarUsuario();\n\n        Mockito.doThrow(RegraDeNegocioException.class)\n                .when(usuarioServiceImpl)\n                .validarEmailCpf(\"email@gmail.com\",\"123456789-00\");\n        /*ação*/\n        usuarioServiceImpl.salvarUsuario(persistirUsuario);\n\n        /*verificação*/\n        Mockito.verify(usuarioRepository, Mockito.never())\n                .save(persistirUsuario);\n    }\n    /*criar instacias*/\n    public static Usuario criarUsuario() {\n        return Usuario.builder()\n                .id(1l)\n                .nomeUsuario(\"garzaro74\")\n                .email(\"email@gmail.com\")\n                .senha(\"senha\")\n                .build();\n\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/com/cleber/financas/service/UsuarioServiceSpyTest.java b/src/test/java/com/cleber/financas/service/UsuarioServiceSpyTest.java
+--- a/src/test/java/com/cleber/financas/service/UsuarioServiceSpyTest.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/test/java/com/cleber/financas/service/UsuarioServiceSpyTest.java	(date 1780505766086)
+@@ -1,9 +1,5 @@
+ package com.cleber.financas.service;
+ 
+-import com.cleber.financas.exception.RegraDeNegocioException;
+-import com.cleber.financas.model.entity.Usuario;
+-import com.cleber.financas.model.repository.UsuarioRepository;
+-import com.cleber.financas.service.impl.UsuarioServiceImpl;
+ import org.assertj.core.api.Assertions;
+ import org.junit.Test;
+ import org.junit.runner.RunWith;
+@@ -13,6 +9,11 @@
+ import org.springframework.test.context.ActiveProfiles;
+ import org.springframework.test.context.junit4.SpringRunner;
+ 
++import com.cleber.financas.exception.RegraDeNegocioException;
++import com.cleber.financas.model.entity.Usuario;
++import com.cleber.financas.model.repository.UsuarioRepository;
++import com.cleber.financas.service.impl.UsuarioServiceImpl;
++
+ @RunWith(SpringRunner.class)
+ @ActiveProfiles("test")
+ public class UsuarioServiceSpyTest {
+@@ -25,7 +26,7 @@
+     public void deveSalvarUmUsuario(){
+         /*cenario*/
+         Mockito.doNothing().when(usuarioServiceImpl)
+-                .validarEmailCpf("email@gmail.com",Mockito.anyString());
++                .validarEmailCpf(Mockito.anyString(), Mockito.anyString(), Mockito.any());
+ 
+         Usuario usuario = criarUsuario();
+ 
+@@ -33,20 +34,22 @@
+                 .thenReturn(usuario);
+ 
+         /*ação*/
++        Usuario persistir = criarUsuario();
++        persistir.setId(null);
+         Usuario usuarioSalvo = usuarioServiceImpl
+-                .salvarUsuario(new Usuario());
++                .salvarUsuario(persistir);
+ 
+         /*verificação*/
+         Assertions.assertThat(usuarioSalvo)
+                 .isNotNull();
+         Assertions.assertThat(usuarioSalvo.getId())
+                 .isEqualTo(1l);
+-        Assertions.assertThat(usuarioSalvo.getNome())
+-                .isEqualTo("garzaro74");
++        Assertions.assertThat(usuarioSalvo.getNomeCompleto())
++                .isEqualTo("Cleber Garzaro");
+         Assertions.assertThat(usuarioSalvo.getEmail())
+                 .isEqualTo("email@gmail.com");
+         Assertions.assertThat(usuarioSalvo.getSenha())
+-                .isEqualTo("senha");
++                .isNotNull();
+ 
+     }
+     @Test(expected = RegraDeNegocioException.class)
+@@ -56,7 +59,7 @@
+ 
+         Mockito.doThrow(RegraDeNegocioException.class)
+                 .when(usuarioServiceImpl)
+-                .validarEmailCpf("email@gmail.com","123456789-00");
++                .validarEmailCpf(Mockito.anyString(), Mockito.anyString(), Mockito.any());
+         /*ação*/
+         usuarioServiceImpl.salvarUsuario(persistirUsuario);
+ 
+@@ -68,9 +71,11 @@
+     public static Usuario criarUsuario() {
+         return Usuario.builder()
+                 .id(1l)
++                .nomeCompleto("Cleber Garzaro")
++                .cpf("12345678900")
+                 .nomeUsuario("garzaro74")
+                 .email("email@gmail.com")
+-                .senha("senha")
++                .senha("senha123")
+                 .build();
+ 
+     }
+Index: src/test/java/com/cleber/financas/service/UsuarioServiceMockTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.service;\n\nimport com.cleber.financas.exception.ErroDeAutenticacao;\nimport com.cleber.financas.exception.RegraDeNegocioException;\nimport com.cleber.financas.model.entity.Usuario;\nimport com.cleber.financas.model.repository.UsuarioRepository;\nimport com.cleber.financas.service.impl.UsuarioServiceImpl;\nimport org.assertj.core.api.Assertions;\nimport org.junit.Before;\nimport org.junit.Test;\nimport org.junit.runner.RunWith;\nimport org.mockito.Mockito;\nimport org.springframework.boot.test.mock.mockito.MockBean;\nimport org.springframework.test.context.ActiveProfiles;\nimport org.springframework.test.context.junit4.SpringRunner;\n\nimport java.util.Optional;\n\n/*Não é necessario @DataJpaTest, lembrando que é possivel\n mockar bean gerenciado pelo spring framework, adiconar dentro\n  do contexto do spring framework*/\n\n@RunWith(SpringRunner.class) /*@MockBean, mockar o contexto do spring framework*/\n@ActiveProfiles(\"test\")\npublic class UsuarioServiceMockTest {\n    /*com o uso de mock nao é necessario injetar*/\n    @MockBean\n    UsuarioRepository usuarioRepository;\n\n    UsuarioService usuarioService;\n\n    /*metodo configurado*/\n    @Before\n    public void setUp() {\n        /*instancia de usuario repository*/\n        /*Usando o @MockBean*/\n        usuarioRepository = Mockito.mock(UsuarioRepository.class);\n        /*criando instancia real do usuario service\n        PasswordEncoderConfig passwordEncoder = new PasswordEncoderConfig();\n        usuarioService = new UsuarioServiceImpl(usuarioRepository);*/\n    }\n\n    @Test(expected = Test.None.class)\n    public void deveValidarEmail() {\n        /*cenario*/\n        Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(false);\n\n        /*ação, sem verificação, só olha se existe o email\n        usuarioService.\n                validarEmail(\"cleber@gmail.com\");\n    }\n\n    @Test(expected = RegraDeNegocioException.class)\n    public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado() {\n        /*cenario*/\n        Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(true);\n\n        /*ação\n        usuarioService.validarEmail(\"cleber@gmail.com\");\n    }\n\n    @Test(expected = Test.None.class)\n    public void deveAutenticarUmUsuarioComSucesso() {\n        /*cenario*/\n        String email = \"cleber@gmail.com\";\n        String senha = \"senha\";\n\n        /*Somente para o visualizar\n        Usuario criarUmUsuario = Usuario.builder()\n                .email(\"cleber@gmail.com\")\n                .senha(\"senha\")\n                .build();\n       */\n        Usuario criarUsuario = Usuario.builder()\n                .email(email)\n                .senha(senha)\n                .build();\n        Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(criarUsuario));\n\n        /*ação*/ /*deve retornar uma instancia de usuario autenticado*/\n        Usuario resultadoAutenticacao = usuarioService.autenticar(email, senha);\n\n        /*verificacao*/\n        Assertions.assertThat(resultadoAutenticacao).isNotNull();\n\n    }\n\n    /*Alteração nos metdos de verificação de emailme senha\n     * Para se certificar o que está sendo validado\n     * Vou fazer ajustes, retirando o expected e usando\n     * o metodo Throwable.catchThrowable*/\n\n    /*com expected*/\n    @Test(expected = ErroDeAutenticacao.class)\n    public void DeveLancarErroQuandoNaoEncontrarUsuarioCadastradoComOEmailInformado() {\n        /*cenario*/\n        Mockito.when(usuarioRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());\n\n        String email = \"cleber@gmail.com\";\n        String senha = \"senha123\";\n\n        /*ação*/\n        usuarioService.autenticar(email, senha);\n    }\n    /*sem o expected*/\n    @Test\n    public void deveLancarErroQuandoSenhaNaoBater() {\n        /*cenario*/\n        String senha = \"senha\";\n        Usuario usuario = Usuario.builder()\n                .email(\"cleber@gmail.com\")\n                .senha(senha)\n                .build();\n        Mockito.when(usuarioRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(usuario));\n        /*ação*/\n        Throwable exception = Assertions.catchThrowable(() -> usuarioService\n                .autenticar(\"cleber@gmail.com\", \"123\"));\n        Assertions.assertThat(exception).isInstanceOf(ErroDeAutenticacao.class).hasMessage(\"Senha inválida\");\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/com/cleber/financas/service/UsuarioServiceMockTest.java b/src/test/java/com/cleber/financas/service/UsuarioServiceMockTest.java
+--- a/src/test/java/com/cleber/financas/service/UsuarioServiceMockTest.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/test/java/com/cleber/financas/service/UsuarioServiceMockTest.java	(date 1780505766086)
+@@ -35,9 +35,8 @@
+         /*instancia de usuario repository*/
+         /*Usando o @MockBean*/
+         usuarioRepository = Mockito.mock(UsuarioRepository.class);
+-        /*criando instancia real do usuario service
+-        PasswordEncoderConfig passwordEncoder = new PasswordEncoderConfig();
+-        usuarioService = new UsuarioServiceImpl(usuarioRepository);*/
++        /*criando instancia real do usuario service*/
++        usuarioService = new UsuarioServiceImpl(usuarioRepository);
+     }
+ 
+     @Test(expected = Test.None.class)
+@@ -63,22 +62,19 @@
+     public void deveAutenticarUmUsuarioComSucesso() {
+         /*cenario*/
+         String email = "cleber@gmail.com";
+-        String senha = "senha";
++        String senhaOriginal = "senha";
++        
++        org.springframework.security.crypto.argon2.Argon2PasswordEncoder encoder = new org.springframework.security.crypto.argon2.Argon2PasswordEncoder( 16, 32, 1, 16, 3 );
++        String senhaHasheada = encoder.encode(senhaOriginal);
+ 
+-        /*Somente para o visualizar
+-        Usuario criarUmUsuario = Usuario.builder()
+-                .email("cleber@gmail.com")
+-                .senha("senha")
+-                .build();
+-       */
+         Usuario criarUsuario = Usuario.builder()
+                 .email(email)
+-                .senha(senha)
++                .senha(senhaHasheada)
+                 .build();
+         Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(criarUsuario));
+ 
+         /*ação*/ /*deve retornar uma instancia de usuario autenticado*/
+-        Usuario resultadoAutenticacao = usuarioService.autenticar(email, senha);
++        Usuario resultadoAutenticacao = usuarioService.autenticar(email, senhaOriginal);
+ 
+         /*verificacao*/
+         Assertions.assertThat(resultadoAutenticacao).isNotNull();
+@@ -115,6 +111,6 @@
+         /*ação*/
+         Throwable exception = Assertions.catchThrowable(() -> usuarioService
+                 .autenticar("cleber@gmail.com", "123"));
+-        Assertions.assertThat(exception).isInstanceOf(ErroDeAutenticacao.class).hasMessage("Senha inválida");
++        Assertions.assertThat(exception).isInstanceOf(ErroDeAutenticacao.class).hasMessage("Credenciais inválidas.");
+     }
+ }
+Index: src/main/java/com/cleber/financas/service/impl/UsuarioServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.service.impl;\n\nimport java.util.List;\nimport java.util.Objects;\nimport java.util.Optional;\nimport java.util.regex.Pattern;\n\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.security.crypto.argon2.Argon2PasswordEncoder;\nimport org.springframework.stereotype.Service;\nimport org.springframework.validation.annotation.Validated;\n\nimport com.cleber.financas.exception.ErroDeAutenticacao;\nimport com.cleber.financas.exception.ErroValidacaoException;\nimport com.cleber.financas.exception.RegraDeNegocioException;\nimport com.cleber.financas.model.entity.Usuario;\nimport com.cleber.financas.model.repository.UsuarioRepository;\nimport com.cleber.financas.service.UsuarioService;\n\nimport jakarta.transaction.Transactional;\n\n/**\n * endpoints\n * */\n//@NoArgsConstructor\n@Service\n@Validated\npublic class UsuarioServiceImpl implements UsuarioService {\n    /**\n     * injecao por construtor\n     * */\n    @Autowired\n    private UsuarioRepository usuarioRepository;\n    private Argon2PasswordEncoder passwordEncoder = new Argon2PasswordEncoder( 16, 32, 1, 16, 3 );\n\n    public UsuarioServiceImpl(UsuarioRepository usuarioRepository){\n        this.usuarioRepository = usuarioRepository;\n    }\n\n    /**\n     *  lista de emails permitidos\n     *  */\n    private static final List<String> dominiosEmailPermitidos = List.of(\n            \"gmail.com\", \"edu.br\", \"gov.br\"\n    );\n\n    /**\n     * login, validação e autenticação\n     */\n    /*@Override\n    public Usuario autenticar(String email, String senha) {\n        Usuario usuario = usuarioRepository.findByEmail(email)\n                .orElseThrow(() -> new ErroDeAutenticacao(\"Credenciais inválidas.\"));\n        /**\n         * System.out.println(\"Hash do banco: \" + usuario.getSenha());\n         *         System.out.println(\"Senha digitada: \" + senha);\n         * *\n\n        boolean senhaCorreta = passwordEncoder.matches(senha, usuario.getSenha());\n        System.out.println(\"Resultado da comparação: \" + senhaCorreta);\n\n        if (!senhaCorreta) {\n            throw new ErroDeAutenticacao(\"Credenciais inválidas.\");\n        }\n        return usuario;\n    }*/\n\n    /**\n     * login, validação e autenticação\n     * */\n    @Override\n    public Usuario autenticar(String email, String senha) {\n        /**\n         * login, validando login\n         * */\n        Optional<Usuario> usuario = usuarioRepository.findByEmail(email);\n\n        /**\n         * verificar a existencia de usuario na base de dados\n         * */\n        if (!usuario.isPresent()) {\n            throw new ErroDeAutenticacao(\"Verifique seu email e tente novamente.\");\n        }\n        boolean senhaCorreta = passwordEncoder.matches(senha, usuario.get().getSenha());\n        if (!senhaCorreta) {\n            throw new ErroDeAutenticacao(\"Verifique sua senha e tente novamente\");\n        }\n        return usuario.get();\n    }\n    \n    @Override\n    @Transactional\n    public Usuario salvarUsuario(Usuario usuario) {\n        /**\n         * deve validar o email e o cpf, verificar se existe\n         * */\n        usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /**hash da senha*/\n        validarUsuario(usuario);\n        /**\n         * se nao existir email e nem cpf,\n         * salva a instancia com o hash da senha\n         * */\n        return usuarioRepository.save(usuario);\n    }\n\n    @Override\n    public Usuario atualizarUsuario(Usuario usuario) {\n        Objects.requireNonNull(usuario.getId());\n        validarUsuario(usuario);\n        return usuarioRepository.save(usuario);\n    }  \n\n    /**\n     * VALIDAÇÃO\n     * */\n    @Override\n    public void validarUsuario(Usuario usuario) {\n        /*campos vazio*/\n    \tvalidarNome(usuario);\n        validarCpf(usuario);\n        validarNomeUsuario(usuario);\n        validarEmail(usuario);\n        validarSenha(usuario);\n        //hashearSenha(usuario);\n        /**\n         * validacao de dupliciadade\n         * */\n        validarEmailCpf(usuario.getEmail(), usuario.getCpf());        \n    }\n    \n    /**\n     * validação de existencia\n     * */\n    public void validarEmailCpf(String email, String cpf) {\n        /**\n         * ver se o email existe\n         * */\n        boolean existeUsuarioComEsseEmail = usuarioRepository.existsByEmail(email);\n        if (existeUsuarioComEsseEmail) {\n            throw new RegraDeNegocioException(\"Esse email já está em uso\");\n        }\n        /**\n         * ver se o cpf existe\n         * */\n        boolean existeUsuarioComEsseCpf = usuarioRepository.existsByCpf(cpf);\n        if (existeUsuarioComEsseCpf) {\n        \tthrow new RegraDeNegocioException(\"Esse CPF já está em uso\");\n        }\n    }\n    \n    /**\n     * validar nome completo\n     * */\n    public void validarNome(Usuario usuario){\n        //System.out.println(\"Nome do usuário: \" + usuario.getNome());\n        if (usuario.getNome() == null || usuario.getNome().trim().equals(\"\")) {\n            throw new ErroValidacaoException(\"O nome completo é obrigatório\");\n        }\n        if (!Pattern.matches(\"^[a-zA-Z\\\\s]+$\", usuario.getNome())) {\n            throw new ErroValidacaoException(\"O nome completo deve conter apenas letras e espaços\");\n        }\n    }\n    \n    /**\n     * validar cpf - campo vazio\n     * */\n    public void validarCpf(Usuario usuario){\n        if (usuario.getCpf() == null || usuario.getCpf().trim().equals(\"\")) {\n            throw new ErroValidacaoException(\"O CPF é obrigatório\");\n        }\n        \n    }\n   \n    /**\n     * validar email\n     * */\n    public void validarEmail(Usuario usuario){\n        if (usuario.getEmail() == null || usuario.getEmail().trim().equals(\"\")) {\n            throw new ErroValidacaoException(\"O email é obrigatório\");\n        }\n        /**\n         * validação manual\n         * */\n        if (!Pattern.matches(\"^[\\\\w-\\\\.]+@[\\\\w-\\\\.]+\\\\.[a-z]{2,}$\", usuario.getEmail())) {\n            throw new ErroValidacaoException(\"O email deve seguir o padrao email@seudominio.com\");\n        }\n        String emailPermitido = usuario.getEmail().substring(usuario.getEmail().lastIndexOf(\"@\") + 1);\n        if (!dominiosEmailPermitidos.contains(emailPermitido)) { /*garante que o dominio extraido esteja na lista*/\n            throw new ErroValidacaoException(\"Emails permitidos no cadastro : \" + dominiosEmailPermitidos);\n        }\n    }\n    \n    /**\n     * validar nome usuario\n     * */\n    public void validarNomeUsuario(Usuario usuario){\n        if (usuario.getNomeUsuario() == null || usuario.getNomeUsuario().trim().equals(\"\")) {\n            throw new ErroValidacaoException(\"O nome de usuário é obrigatório\");\n        }\n    }\n    \n    /**\n     * validar senha - campo vazio\n     * */\n    public void validarSenha(Usuario usuario) {\n    \tif (usuario.getSenha() == null || usuario.getSenha().trim().equals(\"\")) {\n    \t\tthrow new ErroValidacaoException(\"informe a senha.\");\n    \t}    \t\n    }\n/***\n    private String senhaSegura(String senha){\n        return null;\n    }*/\n\n    @Override\n    public Optional<Usuario> obterUsuarioPorId(Long id) {\n        return usuarioRepository.findById(id);\n    }\n\n    @Override\n    public Optional<Usuario> obterUsuarioPorCpf(String cpf) {\n        return  usuarioRepository.findByCpf(cpf);\n    }\n\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/service/impl/UsuarioServiceImpl.java b/src/main/java/com/cleber/financas/service/impl/UsuarioServiceImpl.java
+--- a/src/main/java/com/cleber/financas/service/impl/UsuarioServiceImpl.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/service/impl/UsuarioServiceImpl.java	(date 1780505766085)
+@@ -83,7 +83,7 @@
+         }
+         boolean senhaCorreta = passwordEncoder.matches(senha, usuario.get().getSenha());
+         if (!senhaCorreta) {
+-            throw new ErroDeAutenticacao("Verifique sua senha e tente novamente");
++            throw new ErroDeAutenticacao("Credenciais inválidas.");
+         }
+         return usuario.get();
+     }
+@@ -94,8 +94,11 @@
+         /**
+          * deve validar o email e o cpf, verificar se existe
+          * */
+-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /**hash da senha*/
++        if (usuario.getSenha() == null || usuario.getSenha().trim().isEmpty()) {
++            throw new ErroValidacaoException("informe a senha.");
++        }
+         validarUsuario(usuario);
++        usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /**hash da senha*/
+         /**
+          * se nao existir email e nem cpf,
+          * salva a instancia com o hash da senha
+@@ -125,26 +128,26 @@
+         /**
+          * validacao de dupliciadade
+          * */
+-        validarEmailCpf(usuario.getEmail(), usuario.getCpf());        
++        validarEmailCpf(usuario.getEmail(), usuario.getCpf(), usuario.getId());        
+     }
+     
+     /**
+      * validação de existencia
+      * */
+-    public void validarEmailCpf(String email, String cpf) {
++    public void validarEmailCpf(String email, String cpf, Long id) {
+         /**
+          * ver se o email existe
+          * */
+-        boolean existeUsuarioComEsseEmail = usuarioRepository.existsByEmail(email);
+-        if (existeUsuarioComEsseEmail) {
++        Optional<Usuario> usuarioEmail = usuarioRepository.findByEmail(email);
++        if (usuarioEmail.isPresent() && !usuarioEmail.get().getId().equals(id)) {
+             throw new RegraDeNegocioException("Esse email já está em uso");
+         }
+         /**
+          * ver se o cpf existe
+          * */
+-        boolean existeUsuarioComEsseCpf = usuarioRepository.existsByCpf(cpf);
+-        if (existeUsuarioComEsseCpf) {
+-        	throw new RegraDeNegocioException("Esse CPF já está em uso");
++        Optional<Usuario> usuarioCpf = usuarioRepository.findByCpf(cpf);
++        if (usuarioCpf.isPresent() && !usuarioCpf.get().getId().equals(id)) {
++            throw new RegraDeNegocioException("Esse CPF já está em uso");
+         }
+     }
+     
+@@ -153,10 +156,10 @@
+      * */
+     public void validarNome(Usuario usuario){
+         //System.out.println("Nome do usuário: " + usuario.getNome());
+-        if (usuario.getNome() == null || usuario.getNome().trim().equals("")) {
++        if (usuario.getNomeCompleto() == null || usuario.getNomeCompleto().trim().isEmpty()) {
+             throw new ErroValidacaoException("O nome completo é obrigatório");
+         }
+-        if (!Pattern.matches("^[a-zA-Z\\s]+$", usuario.getNome())) {
++        if (!Pattern.matches("^[a-zA-ZÀ-ÿ\\s]+$", usuario.getNomeCompleto().trim())) {
+             throw new ErroValidacaoException("O nome completo deve conter apenas letras e espaços");
+         }
+     }
+@@ -184,10 +187,12 @@
+         if (!Pattern.matches("^[\\w-\\.]+@[\\w-\\.]+\\.[a-z]{2,}$", usuario.getEmail())) {
+             throw new ErroValidacaoException("O email deve seguir o padrao email@seudominio.com");
+         }
++        /*
+         String emailPermitido = usuario.getEmail().substring(usuario.getEmail().lastIndexOf("@") + 1);
+-        if (!dominiosEmailPermitidos.contains(emailPermitido)) { /*garante que o dominio extraido esteja na lista*/
++        if (!dominiosEmailPermitidos.contains(emailPermitido)) {
+             throw new ErroValidacaoException("Emails permitidos no cadastro : " + dominiosEmailPermitidos);
+         }
++        */
+     }
+     
+     /**
+Index: src/main/java/com/cleber/financas/config/SecurityConfig.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.config;\n\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.context.annotation.Bean;\nimport org.springframework.context.annotation.Configuration;\nimport org.springframework.http.HttpMethod;\nimport org.springframework.security.authentication.AuthenticationManager;\nimport org.springframework.security.authentication.AuthenticationProvider;\nimport org.springframework.security.authentication.dao.DaoAuthenticationProvider;\nimport org.springframework.security.config.Customizer;\nimport org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;\nimport org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;\nimport org.springframework.security.config.annotation.web.builders.HttpSecurity;\nimport org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;\nimport org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;\nimport org.springframework.security.config.http.SessionCreationPolicy;\nimport org.springframework.security.crypto.argon2.Argon2PasswordEncoder;\nimport org.springframework.security.crypto.password.PasswordEncoder;\nimport org.springframework.security.web.SecurityFilterChain;\n\nimport com.cleber.financas.security.SecurityUserDetailsService;\n\nimport lombok.RequiredArgsConstructor;\n\n/** Contexto **/\n\n@Configuration\n@EnableWebSecurity\n@EnableMethodSecurity\n@RequiredArgsConstructor\npublic class SecurityConfig {\n\n    @Autowired\n    private SecurityUserDetailsService securityUserDetailsService;\n\n    @Bean\n    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {\n\n        http                \n                .csrf(AbstractHttpConfigurer::disable) // usando method reference aqui só pra xiarrrr\n                /** Sessão sem estado — nenhuma HttpSession criada. **/\n                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))\n\n                /** regras de autorização de rotas **/\n                .authorizeHttpRequests(auth -> auth\n                        .requestMatchers(HttpMethod.POST, \"/api/usuario/auth\").permitAll()\n                        .requestMatchers(HttpMethod.POST, \"/api/usuario\").permitAll() // permitindo qualquer um\n                                                                                      // cadastrar\n                        // \uD83D\uDC47 LIBERA AS ROTAS DO SWAGGER E OPENAPI \uD83D\uDC47\n                        .requestMatchers(\n                                \"/v3/api-docs/**\",\n                                \"/swagger-ui/**\",\n                                \"/swagger-ui.html\")\n                        .permitAll()\n                        .requestMatchers(\"/actuator/**\").hasRole(\"ADMIN\")\n                        .requestMatchers(\"/api/admin/**\").hasAuthority(\"ADMIN\")\n                        .anyRequest().authenticated() // qualqer outra requisicao deve esta autenticado\n                )\n\n                /** Configurei o provedor de autenticação personalizado. **/\n                // .userDetailsService(securityUserDetailsService)\n\n                .formLogin(formulario -> formulario\n                        .loginPage(\"/login\")\n                        .loginProcessingUrl(\"/login\")\n                        .defaultSuccessUrl(\"/\", true)\n                        .permitAll())\n                .logout(logout -> logout\n                        .logoutUrl(\"/logout\")\n                        .logoutSuccessUrl(\"/public\") /* definir redirecionamento */\n                        .permitAll())\n                /** pra uso do postman/Insomnia **/\n                .httpBasic(Customizer.withDefaults());\n        return http.build();\n    }\n\n    @Bean\n    AuthenticationProvider authenticationProvider() {\n        /**\n         * Estou falando para o provedor como buscar o usuario (banco de dados)\n         * através da injeção via construtor, pois o construtor vazio e o \n         * setUserDetailsService foram depreciados.\n         **/\n        DaoAuthenticationProvider authProvider = \n        new DaoAuthenticationProvider(securityUserDetailsService);\n        /** Estou falando para o provedor como validar a senha criptograda (Argon2) **/\n        authProvider.setPasswordEncoder(passwordEncoder());\n        return authProvider;\n    }\n\n    /** Expõe o gerenciador de autenticação para o Controller **/\n    @Bean\n    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {\n        return authConfig.getAuthenticationManager();\n    }\n\n    /**\n     * Define o algoritmo de criptografia que o Manager vai usar mano para testar a\n     * senha\n     **/\n    @Bean\n    PasswordEncoder passwordEncoder() {\n        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();\n    }\n}\n\n/**\n * \n * Para entender como a segurança do Spring funciona na prática, imagine um\n * banco físico.\n * \n * O SecurityConfig é a planta do prédio e o manual de regras (diz quais portas\n * estão trancadas\n * e quem gerencia a segurança).\n * \n * O AuthenticationManager é o chefe da segurança na recepção. Ele não conhece\n * os clientes\n * pessoalmente, mas sabe como validar se uma credencial é verdadeira.\n * \n * O UserDetailsService é o arquivo central do banco. Quando o chefe da\n * segurança precisa verificar um cliente, ele liga para esse setor para buscar\n * a ficha cadastral do usuário no banco de dados.\n * \n * ***************\n * \n * .csrf(csrf -> csrf.disable())\n * \n * httpSecurity - objeto reside dentro do contexto de seguranca do spring -\n * pré configurado usado para configurar a seguranca antes de chamar o build.\n * \n * existe varias confs que podem ser feitas -\n * \n * O sfltrc declarado aqui sobrepoe o padrao -\n * Exemplo: aquele que habilitou o formulario de login no browser e protegeu\n * nossa api.\n * \n * Para o formulario padrao do spring security com o\n * .formLogin(Customizer.withDefaults())\n * \n * Para receber autenticação via formulario de login ou postman\n * .httpBasic(Customizer.withDefaults())\n * \n * \n * { configurer -> configurer\n * .loginPage(\"/login\")\n * .successForwardUrl(\"/home\"))\n * }\n * *\n **/\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/config/SecurityConfig.java b/src/main/java/com/cleber/financas/config/SecurityConfig.java
+--- a/src/main/java/com/cleber/financas/config/SecurityConfig.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/config/SecurityConfig.java	(date 1780505766084)
+@@ -36,15 +36,16 @@
+     @Bean
+     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+ 
+-        http                
++        http
++                .cors(Customizer.withDefaults()) // Adiciona o filtro de CORS no Spring Security, respeita e obedece as regras da classe CorsConfig 
+                 .csrf(AbstractHttpConfigurer::disable) // usando method reference aqui só pra xiarrrr
+                 /** Sessão sem estado — nenhuma HttpSession criada. **/
+                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+ 
+                 /** regras de autorização de rotas **/
+                 .authorizeHttpRequests(auth -> auth
+-                        .requestMatchers(HttpMethod.POST, "/api/usuario/auth").permitAll()
+-                        .requestMatchers(HttpMethod.POST, "/api/usuario").permitAll() // permitindo qualquer um
++                        .requestMatchers(HttpMethod.POST, "/api/usuarios/autenticar").permitAll()
++                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll() // permitindo qualquer um
+                                                                                       // cadastrar
+                         // 👇 LIBERA AS ROTAS DO SWAGGER E OPENAPI 👇
+                         .requestMatchers(
+@@ -73,7 +74,7 @@
+                 .httpBasic(Customizer.withDefaults());
+         return http.build();
+     }
+-
++    /**injecao manual do passwordEncoder e userDetailsService - Vai aparecer warning na stacktrace**/
+     @Bean
+     AuthenticationProvider authenticationProvider() {
+         /**
+@@ -83,7 +84,7 @@
+          **/
+         DaoAuthenticationProvider authProvider = 
+         new DaoAuthenticationProvider(securityUserDetailsService);
+-        /** Estou falando para o provedor como validar a senha criptograda (Argon2) **/
++        /** Estou falando para o provedor como validar a senha criptograda (Argon2)**/
+         authProvider.setPasswordEncoder(passwordEncoder());
+         return authProvider;
+     }
+Index: src/test/java/com/cleber/financas/service/UsuarioServiceMelhoriasTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.service;\n\nimport com.cleber.financas.exception.RegraDeNegocioException;\nimport com.cleber.financas.model.entity.Usuario;\nimport com.cleber.financas.model.repository.UsuarioRepository;\nimport org.assertj.core.api.Assertions;\nimport org.junit.Test;\nimport org.junit.runner.RunWith;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.boot.test.context.SpringBootTest;\nimport org.springframework.test.context.ActiveProfiles;\nimport org.springframework.test.context.junit4.SpringRunner;\n\nimport java.time.Instant;\nimport java.time.LocalDate;\nimport java.time.LocalDateTime;\nimport java.util.Optional;\n\n@SpringBootTest\n@RunWith(SpringRunner.class)\n@ActiveProfiles(\"test\")\npublic class UsuarioServiceMelhoriasTest {\n    \n    @Autowired\n    UsuarioService usuarioService;\n    \n    @Autowired\n    UsuarioRepository usuarioRepository;\n    \n    @Test(expected = Test.None.class)\n    public void deveValidarEmail(){\n        /*cenario*/\n        usuarioRepository.deleteAll();\n        /*ação, sem verificação, só olha se existe o email\n        usuarioService.validarUsuario(\"cleber@gmail.com\");\n    }\n    @Test(expected = RegraDeNegocioException.class)\n    public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){\n        /*cenario*/\n        Usuario cadastrarEmail = criarUsuario();\n        /*salvar*/\n        usuarioRepository.save(cadastrarEmail);\n        /*ação*/\n        usuarioService.validarUsuario(cadastrarEmail);\n    }\n    @Test(expected = Test.None.class)\n    public void deveAutenticarUmUsuarioComSucesso(){\n        /*cenario*/\n        Usuario persistirUsuario = criarUsuario();\n\n        /*ação*/\n        Usuario usuarioSalvo = usuarioRepository.save(persistirUsuario);\n\n        /*verificar se o metodo autenticarUsuario funciona corretamente*/\n        Optional<Usuario> usuarioAutenticado = Optional.ofNullable(usuarioService.autenticar(usuarioSalvo.getEmail(), usuarioSalvo.getSenha()));\n\n        /*verificação*/\n        Assertions.assertThat(usuarioAutenticado).isNotNull();\n        Assertions.assertThat(usuarioAutenticado.get()).isEqualTo(\"cleber@gmail.com\");\n        Assertions.assertThat(usuarioAutenticado.get()).isEqualTo(\"senha\");\n    }\n\n    /*para criar instancias*/\n    public static Usuario criarUsuario(){\n        return Usuario.builder()\n                .id(1l)\n                .nome(\"Cleber\")\n                .nomeUsuario(\"garzaro\")\n                .cpf(\"123.456.789-00\")\n                .email(\"cleber@gmail.com\")\n                .senha(\"senha\")\n                .dataCadastro(Instant.now())\n                .build();\n    \n    }\n    \n    \n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/com/cleber/financas/service/UsuarioServiceMelhoriasTest.java b/src/test/java/com/cleber/financas/service/UsuarioServiceMelhoriasTest.java
+--- a/src/test/java/com/cleber/financas/service/UsuarioServiceMelhoriasTest.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/test/java/com/cleber/financas/service/UsuarioServiceMelhoriasTest.java	(date 1780505766086)
+@@ -1,8 +1,8 @@
+ package com.cleber.financas.service;
+ 
+-import com.cleber.financas.exception.RegraDeNegocioException;
+-import com.cleber.financas.model.entity.Usuario;
+-import com.cleber.financas.model.repository.UsuarioRepository;
++import java.time.Instant;
++import java.util.Optional;
++
+ import org.assertj.core.api.Assertions;
+ import org.junit.Test;
+ import org.junit.runner.RunWith;
+@@ -11,10 +11,8 @@
+ import org.springframework.test.context.ActiveProfiles;
+ import org.springframework.test.context.junit4.SpringRunner;
+ 
+-import java.time.Instant;
+-import java.time.LocalDate;
+-import java.time.LocalDateTime;
+-import java.util.Optional;
++import com.cleber.financas.model.entity.Usuario;
++import com.cleber.financas.model.repository.UsuarioRepository;
+ 
+ @SpringBootTest
+ @RunWith(SpringRunner.class)
+@@ -64,7 +62,7 @@
+     public static Usuario criarUsuario(){
+         return Usuario.builder()
+                 .id(1l)
+-                .nome("Cleber")
++                .nomeCompleto("Cleber")
+                 .nomeUsuario("garzaro")
+                 .cpf("123.456.789-00")
+                 .email("cleber@gmail.com")
+Index: src/main/java/com/cleber/financas/api/converter/UsuarioConverter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.api.converter;\n\n\nimport com.cleber.financas.api.dto.UsuarioDTO;\nimport com.cleber.financas.model.entity.Usuario;\nimport org.springframework.stereotype.Component;\n\n@Component\npublic class UsuarioConverter {\n\n    /* Um metodo para converter o dto em uma entidade de usuario */\n    public Usuario dtoToEntity(UsuarioDTO dto) {\n        Usuario usuario = new Usuario();\n        usuario.setId(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */\n        usuario.setNome(dto.getNome());\n        usuario.setCpf(dto.getCpf());\n        usuario.setNomeUsuario(dto.getNomeUsuario());\n        usuario.setEmail(dto.getEmail());\n        usuario.setSenha(dto.getSenha());\n        usuario.setDataCadastro(dto.getDataCadastro());\n        return usuario;\n    }\n}\n\n\n\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/api/converter/UsuarioConverter.java b/src/main/java/com/cleber/financas/api/converter/UsuarioConverter.java
+--- a/src/main/java/com/cleber/financas/api/converter/UsuarioConverter.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/api/converter/UsuarioConverter.java	(date 1780505766083)
+@@ -1,9 +1,10 @@
+ package com.cleber.financas.api.converter;
+ 
+ 
++import org.springframework.stereotype.Component;
++
+ import com.cleber.financas.api.dto.UsuarioDTO;
+ import com.cleber.financas.model.entity.Usuario;
+-import org.springframework.stereotype.Component;
+ 
+ @Component
+ public class UsuarioConverter {
+@@ -12,7 +13,7 @@
+     public Usuario dtoToEntity(UsuarioDTO dto) {
+         Usuario usuario = new Usuario();
+         usuario.setId(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
+-        usuario.setNome(dto.getNome());
++        usuario.setNomeCompleto(dto.getNomeCompleto());
+         usuario.setCpf(dto.getCpf());
+         usuario.setNomeUsuario(dto.getNomeUsuario());
+         usuario.setEmail(dto.getEmail());
+Index: src/main/resources/application.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#spring.application.name=financas\n#spring.datasource.url=jdbc:postgresql://${IP_ADDRESS}:5432/DB\nserver.port=8081\nserver.forward-headers-strategy=native\n\n#spring.datasource.url=jdbc:postgresql://localhost:5432/financa \nspring.datasource.url={SPRING_DATASOURCE_URL}\nspring.datasource.username={SPRING_DATASOURCE_USERNAME}\nspring.datasource.password={SPRING_DATASOURCE_PASSWORD}\nspring.datasource.driver-class-name=org.postgresql.Driver\nspring.jpa.hibernate.ddl-auto=update\nspring.jpa.properties.hibernate.format_sql=true\nspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect\nspring.jpa.show-sql=true\nspring.messages.basename=messages\n\n\n# Configurações recomendadas para Serverless\n# Como o Neon pode entrar em \"sleep\", um timeout maior ajuda na primeira conexão\nspring.datasource.hikari.connection-timeout=30000\nspring.datasource.hikari.maximum-pool-size=10\n# spring.datasource.hikari.minimum-idle=2\n# spring.datasource.hikari.idle-timeout=600000\n# spring.datasource.hikari.max-lifetime=1800000\n\n\n#Migration\nspring.flyway.enabled=true\nspring.flyway.url={FLYWAY_URL}\nspring.flyway.user={FLYWAY_USER}\nspring.flyway.password={FLYWAY_PASSWORD}\nspring.flyway.locations={FLYWAY_LOCATIONS}\nspring.flyway.table=historico\nspring.flyway.schemas=financeiro\nspring.flyway.baseline-on-migrate=true\nspring.flyway.baseline-version=1\n\n#DOCUMENTAÇÃO\n# Altera o caminho da interface visual do Swagger (PadrÃ£o: /swagger-ui/index.html) /swagger-ui.html\nspringdoc.swagger-ui.path=/swagger-ui/index.html\n# Altera o caminho onde o JSON bruto da especificação é gerado (Padrão: /v3/api-docs) /api-docs\nspringdoc.api-docs.path=/v3/api-docs\n\n\n#logging.level.root=INFO\n#logging.file.name=arquivo.log\n#logging.pattern.console=%d{dd-MM-yyyy HH:mm } == %logger{40} >>> %msg%n\n\n\n#Mysql\n#spring.datasource.url=jdbc:mysql://localhost:3306/financas\n#spring.datasource.username=cleber\n#spring.datasource.password=QssyaG!hk5ag\n#spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver\n#spring.jpa.hibernate.ddl-auto=update\n#spring.jpa.properties.hibernate.format_sql=true\n#spring.jpa.show-sql=true\n\n#testes\n#spring.datasource.url=jdbc:h2:mem:financas;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS financas;\n#spring.datasource.username=sa\n#spring.datasource.password=sa\n#spring.datasource.driver-class-name=org.h2.Driver\n#spring.jpa.show-sql: true\n#spring.jpa.database-platform=org.hibernate.dialect.H2Dialect\n\n#spring.jpa.hibernate.ddl-auto=update\n#spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:3306/db_example\n#spring.datasource.username=springuser\n#spring.datasource.password=ThePassword\n#pring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver\n#spring.jpa.show-sql: true\n\n# Configurações JWT\napplication.security.jwt.secret-key=IlNpbmNlIG1hbiBjYW5ub3QgbGl2ZSB3aXRob3V0IG1pcmFjbGVzLCBoZSB3aWxsIHBycG92aWFkZSBoaW1zZWxmICB3aXRoIHRoZSBtaXJhY2xlIG9mIHRoZSBvd24gbWFraW5nIGhlIHdpbCBiZWxpZXZlIGluIGFueSBraW5kIG9mIGRlaXR5IGV2ZW4gdGhvdWdoIGhlIG1heSBvdGhlcndpc2UgYmUgYSBoZXJldGljIGFuZCBhdGhlaXN0IGFuZCB0aGUgcmViZWwiLiBGeW9kb3IgZG9zdG95ZXZza3k=\napplication.security.jwt.expiration=30\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/application.properties b/src/main/resources/application.properties
+--- a/src/main/resources/application.properties	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/resources/application.properties	(date 1780505766085)
+@@ -1,4 +1,5 @@
+ #spring.application.name=financas
++<<<<<<< HEAD
+ #spring.datasource.url=jdbc:postgresql://${IP_ADDRESS}:5432/DB
+ server.port=8081
+ server.forward-headers-strategy=native
+@@ -7,13 +8,28 @@
+ spring.datasource.url={SPRING_DATASOURCE_URL}
+ spring.datasource.username={SPRING_DATASOURCE_USERNAME}
+ spring.datasource.password={SPRING_DATASOURCE_PASSWORD}
++=======
++#spring.datasource.url=jdbc:postgresql://[IP_ADDRESS]/db
++#server.port=0
++
++# propriedade para lidar com proxy
++server.forward-headers-strategy=native
++# Carrega arquivo .env (com override de variáveis de ambiente do sistema)
++spring.config.import=optional:file:.env[.properties]
++
++spring.datasource.url=${DB_URL}
++spring.datasource.username=${DB_USERNAME}
++spring.datasource.password=${DB_PASSWORD}
++>>>>>>> 009aa7846286b83501f8dc4a8fa2130edeca1c2e
+ spring.datasource.driver-class-name=org.postgresql.Driver
+-spring.jpa.hibernate.ddl-auto=update
++spring.jpa.hibernate.ddl-auto=create
+ spring.jpa.properties.hibernate.format_sql=true
+ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+ spring.jpa.show-sql=true
+ spring.messages.basename=messages
+ 
++#Suppress o warning de injecao de dependencias
++logging.level.org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer=ERROR
+ 
+ # Configurações recomendadas para Serverless
+ # Como o Neon pode entrar em "sleep", um timeout maior ajuda na primeira conexão
+@@ -26,10 +42,14 @@
+ 
+ #Migration
+ spring.flyway.enabled=true
++<<<<<<< HEAD
+ spring.flyway.url={FLYWAY_URL}
+ spring.flyway.user={FLYWAY_USER}
+ spring.flyway.password={FLYWAY_PASSWORD}
+ spring.flyway.locations={FLYWAY_LOCATIONS}
++=======
++spring.flyway.locations=${FLYWAY_LOCATIONS}
++>>>>>>> 009aa7846286b83501f8dc4a8fa2130edeca1c2e
+ spring.flyway.table=historico
+ spring.flyway.schemas=financeiro
+ spring.flyway.baseline-on-migrate=true
+@@ -41,6 +61,9 @@
+ # Altera o caminho onde o JSON bruto da especificação é gerado (Padrão: /v3/api-docs) /api-docs
+ springdoc.api-docs.path=/v3/api-docs
+ 
++# Configurações JWT
++application.security.jwt.secret-key=${JWT_SECRET}
++application.security.jwt.expiration=${JWT_EXPIRATION}
+ 
+ #logging.level.root=INFO
+ #logging.file.name=arquivo.log
+@@ -48,9 +71,9 @@
+ 
+ 
+ #Mysql
+-#spring.datasource.url=jdbc:mysql://localhost:3306/financas
+-#spring.datasource.username=cleber
+-#spring.datasource.password=QssyaG!hk5ag
++#spring.datasource.url=jdbc:mysql://[IP_ADDRESS]/:3306/db
++#spring.datasource.username=user
++#spring.datasource.password=senha
+ #spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+ #spring.jpa.hibernate.ddl-auto=update
+ #spring.jpa.properties.hibernate.format_sql=true
+@@ -71,6 +94,3 @@
+ #pring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+ #spring.jpa.show-sql: true
+ 
+-# Configurações JWT
+-application.security.jwt.secret-key=IlNpbmNlIG1hbiBjYW5ub3QgbGl2ZSB3aXRob3V0IG1pcmFjbGVzLCBoZSB3aWxsIHBycG92aWFkZSBoaW1zZWxmICB3aXRoIHRoZSBtaXJhY2xlIG9mIHRoZSBvd24gbWFraW5nIGhlIHdpbCBiZWxpZXZlIGluIGFueSBraW5kIG9mIGRlaXR5IGV2ZW4gdGhvdWdoIGhlIG1heSBvdGhlcndpc2UgYmUgYSBoZXJldGljIGFuZCBhdGhlaXN0IGFuZCB0aGUgcmViZWwiLiBGeW9kb3IgZG9zdG95ZXZza3k=
+-application.security.jwt.expiration=30
+Index: src/main/resources/application-test.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>spring.datasource.url=jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FINANCEIRO\nspring.datasource.driver-class-name=org.h2.Driver\nspring.datasource.username=sa\nspring.datasource.password=sa\n#spring.jpa.database-platform=org.hibernate.dialect.H2Dialect\nspring.h2.console.enabled=true\nspring.jpa.hibernate.ddl-auto=update\nspring.jpa.show-sql=true\n\n\n#spring.datasource.driverClassName=org.h2.Driver
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/application-test.properties b/src/main/resources/application-test.properties
+--- a/src/main/resources/application-test.properties	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/resources/application-test.properties	(date 1780505766085)
+@@ -1,4 +1,4 @@
+-spring.datasource.url=jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS FINANCEIRO
++spring.datasource.url=jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS db
+ spring.datasource.driver-class-name=org.h2.Driver
+ spring.datasource.username=sa
+ spring.datasource.password=sa
+Index: Dockerfile
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Etapa 1: Build Otimizado\nFROM maven:3.9-eclipse-temurin-17-alpine AS builder\nWORKDIR /app\n\n# Otimização do cache de dependências: Baixar dependências antes de compilar\nCOPY pom.xml ./\n\n# O \"-B\" força o Maven a rodar em batch mode, melhorando a saída no Docker\nRUN mvn dependency:go-offline -B -q\n\n# Compila o projeto\nCOPY src ./src\nRUN mvn clean package -DskipTests -B -q\n\n# Etapa 2: Runtime Minimalista\nFROM eclipse-temurin:17-jre-alpine\nWORKDIR /app\n\n# Criação de usuário não-root (Boas práticas de segurança)\nRUN addgroup -S spring && adduser -S spring -G spring\nUSER spring:spring\n\n# Copiar apenas o JAR\nCOPY --from=builder /app/target/*.jar app.jar\n\n# A aplicação Spring Boot está configurada no application.properties para usar a porta 8081\nEXPOSE 8081\n\nENTRYPOINT [\"java\", \"-jar\", \"app.jar\"]\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Dockerfile b/Dockerfile
+--- a/Dockerfile	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/Dockerfile	(date 1780505766083)
+@@ -1,3 +1,4 @@
++<<<<<<< HEAD
+ # Etapa 1: Build Otimizado
+ FROM maven:3.9-eclipse-temurin-17-alpine AS builder
+ WORKDIR /app
+@@ -27,3 +28,40 @@
+ EXPOSE 8081
+ 
+ ENTRYPOINT ["java", "-jar", "app.jar"]
++=======
++# Estágio 1: Build
++FROM maven:3.9.6-eclipse-temurin-17-alpine AS builder
++
++WORKDIR /build
++
++# 1. Velocidade de build (cache): Copia somente o pom.xml primeiro.
++# Assim, o Docker faz cache do download das dependências se o pom.xml não for alterado.
++COPY pom.xml .
++RUN mvn dependency:go-offline -B
++
++# 2. Copia o código fonte e realiza o build da aplicação.
++COPY src ./src
++RUN mvn clean package -DskipTests
++
++# Estágio 2: Run
++# 3. Tamanho reduzido: Usei uma imagem JRE (Java Runtime Environment) menor,
++# em vez de uma imagem JDK, já que não preisei mais compilar código.
++FROM eclipse-temurin:17-jre-alpine
++
++WORKDIR /app
++
++# 4. Segurança: Criei um usuário não-root para rodar a aplicação,
++# evitando que a aplicação tenha privilégios totais de root dentro do container.
++RUN addgroup -S spring && adduser -S spring -G spring
++USER spring:spring
++
++# Copia apenas o artefato final (JAR) gerado no estágio anterior (builder).
++COPY --from=builder /build/target/*.jar app.jar
++
++# Expor a porta que a aplicação vai rodar
++EXPOSE 8080
++
++# Comando de inicialização
++ENTRYPOINT ["java", "-jar", "app.jar"]
++
++>>>>>>> 009aa7846286b83501f8dc4a8fa2130edeca1c2e
+Index: src/main/java/com/cleber/financas/model/entity/Usuario.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.model.entity;\n\nimport com.fasterxml.jackson.annotation.JsonIgnore;\nimport jakarta.persistence.*;\nimport java.time.Instant;\nimport lombok.AllArgsConstructor;\nimport lombok.Builder;\nimport lombok.Data;\nimport lombok.NoArgsConstructor;\nimport org.hibernate.annotations.CreationTimestamp;\nimport org.hibernate.envers.Audited;\nimport org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;\n\n@Audited\n@Builder\n//@EqualsAndHashCode(of =\"id\")\n@AllArgsConstructor\n@NoArgsConstructor\n@Data\n@Entity\n@Table(name= \"usuario\", schema = \"financeiro\")\npublic class Usuario{\n    \n\t@GeneratedValue(strategy = GenerationType.IDENTITY)\n    @Id\n    @Column(name = \"id_usuario\")\n    private Long id;\n    \n    @Column(name = \"nome\")\n    private String nome;\n\n    @Column(name = \"cpf\")\n    private String cpf;\n\n    @Column(name = \"nome_usuario\")\n    private String nomeUsuario;\n    \n    @Column(name = \"email\")\n    private String email;\n\t\n    @Column(name = \"senha\", nullable = false, length = 255)\n    @JsonIgnore\n    private String senha;\n\n    @CreationTimestamp\n    @Column(name = \"data_cadastro\", updatable = false) /**, columnDefinition = \"DATE DEFAULT CURRENT_DATA\"*/\n    private Instant dataCadastro;\n\n\t/**@Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)\n    @Column(name = \"data_cadastro\")\n    private LocalDate dataCadastro;\n     */\n\n    /*GETTERS AND SETTERS*/\n    /*HASHCODE AND EQUALS*/\n    /*TO STRING*/\n    \n    \n    \n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/model/entity/Usuario.java b/src/main/java/com/cleber/financas/model/entity/Usuario.java
+--- a/src/main/java/com/cleber/financas/model/entity/Usuario.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/model/entity/Usuario.java	(date 1780505766084)
+@@ -26,8 +26,8 @@
+     @Column(name = "id_usuario")
+     private Long id;
+     
+-    @Column(name = "nome")
+-    private String nome;
++    @Column(name = "nome_completo")
++    private String nomeCompleto;
+ 
+     @Column(name = "cpf")
+     private String cpf;
+Index: src/test/java/com/cleber/financas/api/resource/UsuarioResourceRest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.api.resource;\n\nimport com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;\nimport com.cleber.financas.exception.ErroDeAutenticacao;\nimport com.cleber.financas.exception.RegraDeNegocioException;\nimport com.cleber.financas.model.entity.Usuario;\nimport com.cleber.financas.service.LancamentoService;\nimport com.cleber.financas.service.UsuarioService;\nimport com.fasterxml.jackson.databind.ObjectMapper;\nimport org.junit.Test;\nimport org.junit.runner.RunWith;\nimport org.mockito.Mockito;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;\nimport org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;\nimport org.springframework.boot.test.mock.mockito.MockBean;\nimport org.springframework.http.MediaType;\nimport org.springframework.test.context.ActiveProfiles;\nimport org.springframework.test.context.junit4.SpringRunner;\nimport org.springframework.test.web.servlet.MockMvc;\nimport org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;\nimport org.springframework.test.web.servlet.request.MockMvcRequestBuilders;\nimport org.springframework.test.web.servlet.result.MockMvcResultMatchers;\n\nimport java.math.BigDecimal;\nimport java.util.Optional;\n\n@RunWith(SpringRunner.class)\n@AutoConfigureMockMvc\n@WebMvcTest(controllers = UsuarioController.class)\n@ActiveProfiles(\"test\")\npublic class UsuarioResourceRest {\n    \n    static final String API = \"/api/usuarios\";\n    static final MediaType JSON = MediaType.APPLICATION_JSON; /*constante*/\n    \n    @Autowired\n    MockMvc mvc;\n    @MockBean\n    UsuarioService usuarioService;\n    @MockBean\n    LancamentoService lancamentoService;\n    \n    @Test\n    public void deveAutenticarUmUsuario() throws Exception {\n        /*cenario*/\n        String email = \"cleber@gmail.com\";\n        String senha = \"senha\";\n        UsuarioAutenticacaoDTO dto = UsuarioAutenticacaoDTO.builder() /*json a ser enviado*/\n                .email(email)\n                .senha(senha)\n                .build();\n        \n        Usuario usuario = Usuario.builder() /*usuario autenticado*/\n                .id(1l)\n                .email(email)\n                .senha(senha)\n                .build();\n        /*simulação de autenticação*/\n        Mockito.when(usuarioService.autenticar(\"cleber@gmail.com\", \"senha\")).thenReturn(usuario);\n        /*para transformar objeto de qualquer tipo em string json*/\n        String json = new ObjectMapper().writeValueAsString(dto);\n        \n        /*ação e verificação*/\n        MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders\n                .post(API.concat(\"/autenticar\"))\n                .accept(JSON) /*aceita receber objeto do tipo json*/\n                .contentType(JSON) /*enviar conteudo json*/\n                .content(json); /*passar o objeto json*/\n        \n        mvc.perform(requisicao)\n                .andExpect(MockMvcResultMatchers.status().isOk())\n                .andExpect(MockMvcResultMatchers.jsonPath(\"id\").value(usuario.getId()))\n                .andExpect(MockMvcResultMatchers.jsonPath(\"nomeCompleto\").value(usuario.getNome()))\n                .andExpect(MockMvcResultMatchers.jsonPath(\"nomeUsuario\").value(usuario.getNomeUsuario()))\n                .andExpect(MockMvcResultMatchers.jsonPath(\"email\").value(usuario.getEmail()))\n                //.andExpect(MockMvcResultMatchers.jsonPath(\"senha\").value(usuario.getSenha()))\n                .andExpect(MockMvcResultMatchers.jsonPath(\"cadastroPessoaFisica\")\n                        .value(usuario.getCpf()));\n    }\n    \n    @Test\n    public void deveRetornarBadRequestQuandoHouverErroDeAutenticao() throws Exception {\n        /*cenario*/\n        String email = \"cleber@gmail.com\";\n        String senha = \"senha\";\n        UsuarioAutenticacaoDTO dto = UsuarioAutenticacaoDTO.builder() /*json a ser enviado*/\n                .email(email)\n                .senha(senha)\n                .build();\n        /*simulação de autenticação*/\n        Mockito.when(usuarioService.autenticar(email, senha)).thenThrow(ErroDeAutenticacao.class);\n        /*para transformar objeto de qualquer tipo em string json*/\n        String json = new ObjectMapper().writeValueAsString(dto);\n        \n        /*ação e verificação*/\n        MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders\n                .post(API.concat(\"/autenticar\"))\n                .accept(JSON) /*aceita receber objeto do tipo json*/\n                .contentType(JSON) /*enviar conteudo json*/\n                .content(json); /*passar o objeto json*/\n        \n        mvc.perform(requisicao)\n                .andExpect(MockMvcResultMatchers.status().isBadRequest());\n    }\n    \n    @Test\n    public void deveSalvarUmUsuario() throws Exception {\n        /*cenario*/\n        String email = \"cleber@gmail.com\";\n        String senha = \"senha\";\n        UsuarioAutenticacaoDTO dto = UsuarioAutenticacaoDTO.builder() /*json a ser enviado*/\n                .email(email)\n                .senha(senha)\n                .build();\n        \n        Usuario usuario = Usuario.builder() /*usuario autenticado*/\n                .id(1l)\n                .email(email)\n                .senha(senha)\n                .build();\n        /*simulação de autenticação*/\n        Mockito.when(usuarioService.salvarUsuario(Mockito.any(Usuario.class))).thenReturn(usuario);\n        /*para transformar objeto de qualquer tipo em string json*/\n        String json = new ObjectMapper().writeValueAsString(dto);\n        \n        /*ação e verificação*/\n        MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders\n                .post(API)\n                .accept(JSON) /*aceita receber objeto do tipo json*/\n                .contentType(JSON) /*enviar conteudo json*/\n                .content(json); /*passar o objeto json*/\n        \n        mvc.perform(requisicao)\n                .andExpect(MockMvcResultMatchers.status().isCreated())\n                .andExpect(MockMvcResultMatchers.jsonPath(\"id\").value(usuario.getId()))\n                .andExpect(MockMvcResultMatchers.jsonPath(\"nomeCompleto\").value(usuario.getNome()))\n                .andExpect(MockMvcResultMatchers.jsonPath(\"nomeUsuario\").value(usuario.getNomeUsuario()))\n                .andExpect(MockMvcResultMatchers.jsonPath(\"email\").value(usuario.getEmail()))\n                //.andExpect(MockMvcResultMatchers.jsonPath(\"senha\").value(usuario.getSenha()))\n                .andExpect(MockMvcResultMatchers.jsonPath(\"cadastroPessoaFisica\")\n                        .value(usuario.getCpf()));\n    }\n    \n    @Test\n    public void deveRetornarBadRequestAoTentarSalvarUmUsuarioInvalido() throws Exception {\n        /*cenario*/\n        String email = \"cleber@gmail.com\";\n        String senha = \"senha\";\n        UsuarioAutenticacaoDTO dto = UsuarioAutenticacaoDTO.builder() /*json a ser enviado*/\n                .email(email)\n                .senha(senha)\n                .build();\n        /*simulação de autenticação*/\n        Mockito.when(usuarioService.salvarUsuario(Mockito.any(Usuario.class))).thenThrow(RegraDeNegocioException.class);\n        /*para transformar objeto de qualquer tipo em string json*/\n        String json = new ObjectMapper().writeValueAsString(dto);\n        \n        /*ação e verificação*/\n        MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders\n                .post(API)\n                .accept(JSON) /*aceita receber objeto do tipo json*/\n                .contentType(JSON) /*enviar conteudo json*/\n                .content(json); /*passar o objeto json*/\n        \n        mvc.perform(requisicao).andExpect(MockMvcResultMatchers.status().isBadRequest());\n    }\n    \n    @Test\n    public void deveRetornarOSaldoDeUmUsuario() throws Exception {\n        /*cenario*/\n        String email = \"cleber@gmail.com\";\n        String senha = \"senha\";\n        Long id = 1l;\n        \n        BigDecimal saldo = BigDecimal.valueOf(1500);\n        Usuario usuario = Usuario.builder().id(id).email(email).senha(senha).build();\n        /*simulação de autenticação*/\n        Mockito.when(usuarioService.obterUsuarioPorId(id)).thenReturn(Optional.of(usuario));\n        Mockito.when(lancamentoService.obterSaldoPorUsuario(id)).thenReturn(saldo);\n        /*ação e verificação*/\n        MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders\n                .get(API.concat(\"/1/saldo\"))\n                .accept(JSON) /*aceita receber objeto do tipo json*/\n                .contentType(JSON); /*enviar conteudo json*/\n        \n        mvc.perform(requisicao)\n                .andExpect(MockMvcResultMatchers.status().isOk())\n                .andExpect(MockMvcResultMatchers.content().string(\"1500\"));\n    }\n    \n    @Test\n    public void deveResourceNaoEncontradoNaoExistirUsuarioParaObterSaldo() throws Exception {\n        /*cenario*/\n        Long id = 1l;\n        /*simulação de autenticação*/\n        Mockito.when(usuarioService.obterUsuarioPorId(id)).thenReturn(Optional.empty());\n        /*ação e verificação*/\n        MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders\n                .get(API.concat(\"/1/saldo\"))\n                .accept(JSON) /*aceita receber objeto do tipo json*/\n                .contentType(JSON); /*enviar conteudo json*/\n        \n        mvc.perform(requisicao)\n                .andExpect(MockMvcResultMatchers.status().isNotFound());\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/com/cleber/financas/api/resource/UsuarioResourceRest.java b/src/test/java/com/cleber/financas/api/resource/UsuarioResourceRest.java
+--- a/src/test/java/com/cleber/financas/api/resource/UsuarioResourceRest.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/test/java/com/cleber/financas/api/resource/UsuarioResourceRest.java	(date 1780505766086)
+@@ -1,12 +1,8 @@
+ package com.cleber.financas.api.resource;
+ 
+-import com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;
+-import com.cleber.financas.exception.ErroDeAutenticacao;
+-import com.cleber.financas.exception.RegraDeNegocioException;
+-import com.cleber.financas.model.entity.Usuario;
+-import com.cleber.financas.service.LancamentoService;
+-import com.cleber.financas.service.UsuarioService;
+-import com.fasterxml.jackson.databind.ObjectMapper;
++import java.math.BigDecimal;
++import java.util.Optional;
++
+ import org.junit.Test;
+ import org.junit.runner.RunWith;
+ import org.mockito.Mockito;
+@@ -22,8 +18,13 @@
+ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+ 
+-import java.math.BigDecimal;
+-import java.util.Optional;
++import com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;
++import com.cleber.financas.exception.ErroDeAutenticacao;
++import com.cleber.financas.exception.RegraDeNegocioException;
++import com.cleber.financas.model.entity.Usuario;
++import com.cleber.financas.service.LancamentoService;
++import com.cleber.financas.service.UsuarioService;
++import com.fasterxml.jackson.databind.ObjectMapper;
+ 
+ @RunWith(SpringRunner.class)
+ @AutoConfigureMockMvc
+@@ -71,7 +72,7 @@
+         mvc.perform(requisicao)
+                 .andExpect(MockMvcResultMatchers.status().isOk())
+                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(usuario.getId()))
+-                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNome()))
++                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNomeCompleto()))
+                 .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(usuario.getNomeUsuario()))
+                 .andExpect(MockMvcResultMatchers.jsonPath("email").value(usuario.getEmail()))
+                 //.andExpect(MockMvcResultMatchers.jsonPath("senha").value(usuario.getSenha()))
+@@ -134,7 +135,7 @@
+         mvc.perform(requisicao)
+                 .andExpect(MockMvcResultMatchers.status().isCreated())
+                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(usuario.getId()))
+-                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNome()))
++                .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(usuario.getNomeCompleto()))
+                 .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(usuario.getNomeUsuario()))
+                 .andExpect(MockMvcResultMatchers.jsonPath("email").value(usuario.getEmail()))
+                 //.andExpect(MockMvcResultMatchers.jsonPath("senha").value(usuario.getSenha()))
+Index: src/main/java/com/cleber/financas/config/CorsConfig.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.config;\n\nimport org.springframework.context.annotation.Bean;\nimport org.springframework.context.annotation.Configuration;\nimport org.springframework.lang.NonNull;\nimport org.springframework.web.servlet.config.annotation.CorsRegistry;\n//import org.springframework.web.servlet.config.annotation.EnableWebMvc;\nimport org.springframework.web.servlet.config.annotation.WebMvcConfigurer;\n/*Habilitando cors -*/\n//@EnableWebMvc\n\n/**\n * implementação (navegador)\n **/\n@Configuration\npublic class CorsConfig implements WebMvcConfigurer {\n\t@Bean\n\tWebMvcConfigurer corsConfigurer() {\n\t\treturn new WebMvcConfigurer() {\n\t\t\t@Override\n\t\t\tpublic void addCorsMappings(CorsRegistry registry) {\n\t\t\t\tregistry.addMapping(\"/api/**\")\n\t\t\t\t\t\t.allowedOrigins(\"http://localhost:3001\")\n\t\t\t\t\t\t.allowedMethods(\"GET\", \"POST\", \"PUT\", \"DELETE\", \"OPTIONS\")\n\t\t\t\t\t\t.allowedHeaders(\"*\")\n\t\t\t\t\t\t.allowCredentials(true)\n\t\t\t\t\t\t/**\n\t\t\t\t\t\t * um cache de 60 minutos\n\t\t\t\t\t\t */\n\t\t\t\t\t\t.maxAge(3600);\n\t\t\t}\n\t\t};\n\t}\n}\n\n/*\n * para permitir somente requisições vindas de um dominio especifico,\n * e permitir somente metodos GET e POST, o codigo seria assim:\n * public class CorsConfig implements WebMvcConfigurer{\n * \n * @Override\n * public void addCorsMappings(CorsRegistry registry) {\n * registry.addMapping(\"/api/**\")\n * .allowedOrigins(\"http://seu-dominio.com\")\n * .allowedMethods(\"GET\", \"POST\");\n * }\n */\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/config/CorsConfig.java b/src/main/java/com/cleber/financas/config/CorsConfig.java
+--- a/src/main/java/com/cleber/financas/config/CorsConfig.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/config/CorsConfig.java	(date 1780505766084)
+@@ -2,7 +2,6 @@
+ 
+ import org.springframework.context.annotation.Bean;
+ import org.springframework.context.annotation.Configuration;
+-import org.springframework.lang.NonNull;
+ import org.springframework.web.servlet.config.annotation.CorsRegistry;
+ //import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+@@ -20,7 +19,7 @@
+ 			@Override
+ 			public void addCorsMappings(CorsRegistry registry) {
+ 				registry.addMapping("/api/**")
+-						.allowedOrigins("http://localhost:3001")
++						.allowedOrigins("http://localhost:3000")
+ 						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+ 						.allowedHeaders("*")
+ 						.allowCredentials(true)
+Index: src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.model.repository;\n\nimport com.cleber.financas.model.entity.Usuario;\nimport org.assertj.core.api.Assertions;\nimport org.junit.Test;\nimport org.junit.runner.RunWith;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.boot.test.context.SpringBootTest;\nimport org.springframework.test.context.ActiveProfiles;\nimport org.springframework.test.context.junit4.SpringRunner;\n\nimport java.time.Instant;\nimport java.time.LocalDate;\nimport java.time.LocalDateTime;\nimport java.util.Optional;\n\n@SpringBootTest\n@RunWith(SpringRunner.class)\n@ActiveProfiles(\"test\")\npublic class UsuarioRepositoryTest {\n    /*Inicio teste com Dougllas Sousa (Udemy)*/\n    @Autowired\n    UsuarioRepository usuarioRepository;\n   \n    @Test\n    public void deveVerificarAExistenciaDeUmEmailNaBaseDeDados() {\n        /*cenario*/\n        Usuario usuarioDeTeste = Usuario.builder()\n                .nome(\"Madonna da Silva\")\n                .email(\"clebergarzaro74@gmail.com\")\n                .build();\n        usuarioRepository.save(usuarioDeTeste);\n        \n        /*execução/ação*/\n       boolean verficarSeExisteEmail = usuarioRepository.existsByEmail(\"clebergarzaro74@gmail.com\");\n       \n       /*verficação*/\n       Assertions.assertThat(verficarSeExisteEmail).isTrue();\n       \n    }\n    \n    @Test\n    public void deveRetornarFalsoQuandoNaoHouverUsuarioCadastradoComOEmail() {\n       /*cenario, não deve existir email na base*/\n        usuarioRepository.deleteAll();\n        boolean verificarSeExisteUsuarioCadastradoComEmail =usuarioRepository\n                .existsByEmail(\"clebergarzaro@gmail.com\");\n        /*verificação*/\n        Assertions.assertThat(verificarSeExisteUsuarioCadastradoComEmail).isFalse();\n    }\n    \n    @Test\n    public void devePersistirUsuarioNaBaseDeDados(){\n       /*cenario*/\n        Usuario persistindoUsuario = Usuario.builder()\n                .nome(\"Cleber\")\n                .nomeUsuario(\"garzaro74\")\n                .email(\"clebergarzaro74@gmail.com\")\n                .senha(\"senha\")\n                .dataCadastro(Instant.now())\n                .build();\n        /*ação*/\n        Usuario usuarioPersistido = usuarioRepository.save(persistindoUsuario);\n        \n        /*verificação*/\n        Assertions.assertThat(usuarioPersistido.getId()).isNotNull();\n    }\n    \n    @Test\n    public void deveBuscarUmUsuarioPeloEmail(){\n        /*cenario*/\n        Usuario salvandoUsuario = Usuario.builder()\n                .nomeUsuario(\"garzaro74\")\n                .email(\"clebergarzaro74@gmail.com\")\n                .build();\n        usuarioRepository.save(salvandoUsuario);\n        /*ação*/\n        Optional<Usuario> pesquisarUsuarioPeloEmail = usuarioRepository\n                .findByEmail(\"clebergarzaro74@gmail.com\");\n        /*verificação*/\n        Assertions.assertThat(pesquisarUsuarioPeloEmail.isPresent()).isTrue();\n    }\n    \n    @Test\n    public void deveRetornarVazioAoBuscarUsuarioPorEmailQueNaoExisteNaBase() {\n        /*cenario - nao presença de email*/\n        usuarioRepository.deleteAll();\n        /*ação*/\n        Optional<Usuario> usuarioInexistente =usuarioRepository\n                .findByEmail(\"clebergarzaro74@gmail.com\");\n        /*verificação*/\n        Assertions.assertThat(usuarioInexistente.isPresent()).isFalse();\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryTest.java b/src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryTest.java
+--- a/src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryTest.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryTest.java	(date 1780505766086)
+@@ -1,6 +1,8 @@
+ package com.cleber.financas.model.repository;
+ 
+-import com.cleber.financas.model.entity.Usuario;
++import java.time.Instant;
++import java.util.Optional;
++
+ import org.assertj.core.api.Assertions;
+ import org.junit.Test;
+ import org.junit.runner.RunWith;
+@@ -9,10 +11,7 @@
+ import org.springframework.test.context.ActiveProfiles;
+ import org.springframework.test.context.junit4.SpringRunner;
+ 
+-import java.time.Instant;
+-import java.time.LocalDate;
+-import java.time.LocalDateTime;
+-import java.util.Optional;
++import com.cleber.financas.model.entity.Usuario;
+ 
+ @SpringBootTest
+ @RunWith(SpringRunner.class)
+@@ -26,7 +25,7 @@
+     public void deveVerificarAExistenciaDeUmEmailNaBaseDeDados() {
+         /*cenario*/
+         Usuario usuarioDeTeste = Usuario.builder()
+-                .nome("Madonna da Silva")
++                .nomeCompleto("Madonna da Silva")
+                 .email("clebergarzaro74@gmail.com")
+                 .build();
+         usuarioRepository.save(usuarioDeTeste);
+@@ -53,7 +52,7 @@
+     public void devePersistirUsuarioNaBaseDeDados(){
+        /*cenario*/
+         Usuario persistindoUsuario = Usuario.builder()
+-                .nome("Cleber")
++                .nomeCompleto("Cleber")
+                 .nomeUsuario("garzaro74")
+                 .email("clebergarzaro74@gmail.com")
+                 .senha("senha")
+Index: src/test/java/com/cleber/financas/service/impl/JwtServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/com/cleber/financas/service/impl/JwtServiceTest.java b/src/test/java/com/cleber/financas/service/impl/JwtServiceTest.java
+new file mode 100644
+--- /dev/null	(date 1780505766087)
++++ b/src/test/java/com/cleber/financas/service/impl/JwtServiceTest.java	(date 1780505766087)
+@@ -0,0 +1,554 @@
++package com.cleber.financas.service.impl;
++
++import com.cleber.financas.model.entity.Usuario;
++import com.cleber.financas.service.JwtService;
++import io.jsonwebtoken.Claims;
++import io.jsonwebtoken.ExpiredJwtException;
++import io.jsonwebtoken.Jwts;
++import io.jsonwebtoken.security.Keys;
++import org.junit.jupiter.api.*;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.test.context.ActiveProfiles;
++import org.springframework.test.context.TestPropertySource;
++
++import javax.crypto.SecretKey;
++import java.nio.charset.StandardCharsets;
++import java.time.Instant;
++import java.time.temporal.ChronoUnit;
++import java.util.Date;
++
++import static org.assertj.core.api.Assertions.*;
++
++/**
++ * Testes completos do JwtServiceImpl cobrindo:
++ *  - Geração de token
++ *  - Validação de claims
++ *  - Expiração
++ *  - Tokens adulterados / assinatura inválida
++ *  - Token sem subject
++ *  - getUserLogin
++ *  - isTokenValido (todos os ramos)
++ *  - obterClaims (todos os ramos)
++ *  - Proteção contra Alg None
++ *  - Validação do ISSUER
++ */
++@SpringBootTest
++@ActiveProfiles("test")
++@TestPropertySource(properties = {
++    "application.security.jwt.secret-key=chave-super-secreta-de-testes-com-256bits-minimos-ok",
++    "application.security.jwt.expiration=60",
++    "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
++    "spring.datasource.driver-class-name=org.h2.Driver",
++    "spring.datasource.username=sa",
++    "spring.datasource.password=",
++    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
++    "spring.jpa.hibernate.ddl-auto=create-drop",
++    "spring.flyway.enabled=false"
++})
++@DisplayName("JwtService - Testes de seguranca completos")
++class JwtServiceTest {
++
++    /* constantes reutilizadas */
++    private static final String SECRET =
++            "chave-super-secreta-de-testes-com-256bits-minimos-ok";
++
++//  O ISSUER (que significa "emissor", em inglês) é um claim padrão do
++//  JWT que identifica qual sistema, aplicação ou serviço gerou aquele
++//  token específico.
++//  O JSON interno do token fica mais ou menos assim:
++//  Payload
++//{
++//  "iss": "project",
++//  "sub": "usuario@email.com",
++//  "exp": 1717372800
++//}
++    private static final String ISSUER = "financas";
++
++    @Autowired
++    private JwtService jwtService;
++
++    private Usuario usuarioBase;
++
++    /**configuration**/ 
++    @BeforeEach
++    void setUp() {
++        usuarioBase = Usuario.builder()
++                .id(1L)
++                .nomeCompleto("Cleber Teste")
++                .nomeUsuario("cleber")
++                .email("cleber@gmail.com")
++                .cpf("12345678900")
++                .senha("senha-hash-qualquer")
++                .build();
++    }
++
++    /**1- geracao do token*/ 
++    @Nested
++    @DisplayName("geracao do token")
++    class GerarToken {
++
++        @Test
++        @DisplayName("deve retornar uma string JWT não nula e não vazia")
++        void deveRetornarTokenNaoNuloNaoVazio() {
++            String token = jwtService.gerarToken(usuarioBase);
++            assertThat(token).isNotNull().isNotBlank();
++        }
++
++        @Test
++        @DisplayName("deve gerar token com 3 partes separadas por ponto (header.payload.signature)")
++        void deveGerarTokenComTresPartesHeaderPayloadSignature() {
++            String token = jwtService.gerarToken(usuarioBase);
++            String[] partes = token.split("\\.");
++            assertThat(partes).hasSize(3);
++        }
++
++        @Test
++        @DisplayName("dois tokens gerados para o mesmo usuário devem ser diferentes (timestamp diferente)")
++        void doisTokensDevemTerTimestampDiferentes() throws InterruptedException {
++            String token1 = jwtService.gerarToken(usuarioBase);
++            Thread.sleep(1_100); // garante issuedAt diferente (precisão em segundos)
++            String token2 = jwtService.gerarToken(usuarioBase);
++            assertThat(token1).isNotEqualTo(token2);
++        }
++    }
++
++    /**2. CLAIMS**/
++    @Nested
++    @DisplayName("obterClaims()")
++    class ObterClaims {
++
++        @Test
++        @DisplayName("subject deve ser o email do usuário")
++        void subjectDeveSerEmail() {
++            String token = jwtService.gerarToken(usuarioBase);
++            //decodificando a carga útil (o Payload) do JWT e extraindo um mapa de chaves e valores, cada chaves e valores é um claim
++            Claims claims = jwtService.obterClaims(token); //Retorna a identidade do usuário - email, cpf
++            assertThat(claims.getSubject()).isEqualTo("cleber@gmail.com");
++        }
++
++        @Test
++        @DisplayName("claim 'id' deve corresponder ao id do usuário")
++        void claimIdDeveEstarPresenteCorreponderUsuario() {
++            String token = jwtService.gerarToken(usuarioBase);
++            Claims claims = jwtService.obterClaims(token);
++            // JJWT deserializa números como Integer ou Long dependendo do valor
++            Number idClaim = (Number) claims.get("id");
++            assertThat(idClaim.longValue()).isEqualTo(1L);
++        }
++
++        @Test
++        @DisplayName("claim 'cpf' deve estar presente e correto")
++        void claimCpfDeveEstarPresente() {
++            String token = jwtService.gerarToken(usuarioBase);
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(claims.get("cpf", String.class)).isEqualTo("12345678900");
++        }
++
++        @Test
++        @DisplayName("claim 'nome_usuario' deve estar presente e correto")
++        void claimNomeUsuarioDeveEstarPresente() {
++            String token = jwtService.gerarToken(usuarioBase);
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(claims.get("nome_usuario", String.class)).isEqualTo("cleber");
++        }
++
++        @Test
++        @DisplayName("claim 'nome' deve estar presente e correto")
++        void claimNomeDeveEstarPresente() {
++            String token = jwtService.gerarToken(usuarioBase);
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(claims.get("nome", String.class)).isEqualTo("Cleber Teste");
++        }
++
++        @Test
++        @DisplayName("claim 'horaExpiracao' deve estar presente e não vazio")
++        void claimHoraExpiracaoDeveEstarPresenteNaoVazio() {
++            String token = jwtService.gerarToken(usuarioBase);
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(claims.get("horaExpiracao", String.class))
++                    .isNotNull()
++                    .isNotBlank()
++                    .matches("\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}:\\d{2}");
++        }
++
++        @Test
++        @DisplayName("issuer deve ser 'financas'")
++        void issuerDeveSerFinancas() {
++            String token = jwtService.gerarToken(usuarioBase);
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(claims.getIssuer()).isEqualTo(ISSUER);
++        }
++
++        @Test
++        @DisplayName("issuedAt deve ser anterior ou igual ao momento atual")
++        void emissaoIssuedAtDeveSerAnteriorAoMomentoAtual() {
++            String token = jwtService.gerarToken(usuarioBase);
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(claims.getIssuedAt()).isBeforeOrEqualTo(new Date());
++        }
++
++        @Test
++        @DisplayName("expiration deve ser posterior ao issuedAt")
++        void expirationDeveSerPosteriorAoIssuedAt() {
++            String token = jwtService.gerarToken(usuarioBase);
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(claims.getExpiration()).isAfter(claims.getIssuedAt());
++        }
++
++        @Test
++        @DisplayName("expiration deve ser posterior ao momento atual")
++        void expirationDeveSerPosteriorAoMomentoAtual() {
++            String token = jwtService.gerarToken(usuarioBase);
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(claims.getExpiration()).isAfter(new Date());
++        }
++    }
++
++    /**3. getUserLogin**/
++
++    @Nested
++    @DisplayName("3 — getUserLogin()")
++    class GetUserLogin {
++
++        @Test
++        @DisplayName("deve retornar o email do usuário dono do token")
++        void deveRetornarEmailDoDonoDoTokenCorretamente() {
++            String token = jwtService.gerarToken(usuarioBase);
++            String login = jwtService.getUserLogin(token);
++            assertThat(login).isEqualTo("cleber@gmail.com");
++        }
++
++        @Test
++        @DisplayName("deve diferenciar tokens de usuários distintos")
++        void deveDiferenciarTokensDeUsuariosDistintos() {
++            /**cenario**/
++            Usuario usuarioDistinto = Usuario.builder()
++                    .id(2L)
++                    .nomeCompleto("Usuario Distinto")
++                    .nomeUsuario("distinto")
++                    .email("distinto@gmail.com")
++                    .cpf("98765432100")
++                    .senha("hash-distinta")
++                    .build();
++            /**acção/execução**/
++            String tokenA = jwtService.gerarToken(usuarioBase);
++            String tokenB = jwtService.gerarToken(usuarioDistinto);
++            /**verificação**/
++            assertThat(jwtService.getUserLogin(tokenA)).isEqualTo("cleber@gmail.com");
++            assertThat(jwtService.getUserLogin(tokenB)).isEqualTo("distinto@gmail.com");
++            assertThat(jwtService.getUserLogin(tokenA)).isNotEqualTo("distinto@gmail.com");
++            assertThat(jwtService.getUserLogin(tokenB)).isNotEqualTo("cleber@gmail.com");
++        }
++    }
++
++    /**4. isTokenValido — caminho feliz**/
++
++    @Nested
++    @DisplayName("isTokenValido() — token válido")
++    class IsTokenValidoFeliz {
++
++        @Test
++        @DisplayName("token recém-gerado deve ser válido")
++        void tokenRecenteDeveSerValido() {
++            String token = jwtService.gerarToken(usuarioBase);
++            assertThat(jwtService.isTokenValido(token)).isTrue();
++        }
++
++        @Test
++        @DisplayName("token válido de usuário diferente também deve retornar true")
++        void tokenDeOutroUsuarioDeveSerValido() {
++            Usuario outro = Usuario.builder()
++                    .id(99L)
++                    .nomeCompleto("usuario")
++                    .nomeUsuario("usuario")
++                    .email("usuario@gmail.com")
++                    .cpf("12345678900")
++                    .senha("senha")
++                    .build();
++            assertThat(jwtService.isTokenValido(jwtService.gerarToken(outro))).isTrue();
++        }
++    }
++
++    /**5. isTokenValido — cenários de falha / segurança**/
++
++    @Nested
++    @DisplayName("5 — isTokenValido() — cenários de falha")
++    class IsTokenValidoFalha {
++
++        @Test
++        @DisplayName("token expirado deve retornar false")
++        void tokenExpiradoDeveRetornarFalse() {
++            // cria token já expirado manualmente
++            String tokenExpirado = criarTokenExpirado();
++            assertThat(jwtService.isTokenValido(tokenExpirado)).isFalse();
++        }
++
++        @Test
++        @DisplayName("token com assinatura adulterada deve retornar false")
++        void tokenComAssinaturaAdulteradaDeveRetornarFalse() {
++            String token = jwtService.gerarToken(usuarioBase);
++            // corrompe o último caractere da assinatura
++            String adulterado = token.substring(0, token.length() - 3) + "QUEBROU-LA-DENTRO";
++            assertThat(jwtService.isTokenValido(adulterado)).isFalse();
++        }
++
++        @Test
++        @DisplayName("token completamente inválido deve retornar false")
++        void tokenInvalidoDeveRetornarFalse() {
++            assertThat(jwtService.isTokenValido("isso.nao.e.um.token")).isFalse();
++        }
++
++        @Test
++        @DisplayName("token vazio deve retornar false")
++        void tokenVazioDeveRetornarFalse() {
++            assertThat(jwtService.isTokenValido("")).isFalse();
++        }
++
++        @Test
++        @DisplayName("token null deve retornar false")
++        void tokenNullDeveRetornarFalse() {
++            assertThat(jwtService.isTokenValido(null)).isFalse();
++        }
++
++        @Test
++        @DisplayName("token assinado com chave diferente deve retornar false")
++        void tokenAssinadoComChaveDiferenteDeveRetornarFalse() {
++            String tokenFalso = criarTokenComChaveDiferente();
++            assertThat(jwtService.isTokenValido(tokenFalso)).isFalse();
++        }
++
++        @Test
++        @DisplayName("token com issuer diferente deve retornar false")
++        void tokenComIssuerDiferenteDeveRetornarFalse() {
++            String tokenFalso = criarTokenComIssuerDiferente();
++            assertThat(jwtService.isTokenValido(tokenFalso)).isFalse();
++        }
++
++        @Test
++        @DisplayName("token sem issuer deve retornar false (ISSUER é obrigatório)")
++        void tokenSemIssuerDeveRetornarFalse() {
++            String tokenSemIssuer = criarTokenSemIssuer();
++            assertThat(jwtService.isTokenValido(tokenSemIssuer)).isFalse();
++        }
++    }
++
++    /**6. obterClaims — cenários de exceção**/
++
++    @Nested
++    @DisplayName("obterClaims() — cenários de exceção")
++    class ObterClaimsExcecoes {
++
++        @Test
++        @DisplayName("token expirado deve lançar ExpiredJwtException")
++        void tokenExpiradoDeveLancarExpiredJwtException() {
++            String tokenExpirado = criarTokenExpirado();
++            assertThatThrownBy(() -> jwtService.obterClaims(tokenExpirado))
++                    .isInstanceOf(ExpiredJwtException.class);
++        }
++
++        @Test
++        @DisplayName("token adulterado deve lançar RuntimeException")
++        void tokenAdulteradoDeveLancarRuntimeException() {
++            String token = jwtService.gerarToken(usuarioBase);
++            String adulterado = token.substring(0, token.length() - 3) + "ZZZ";
++            assertThatThrownBy(() -> jwtService.obterClaims(adulterado))
++                    .isInstanceOf(RuntimeException.class)
++                    .hasMessageContaining("Token JWT inválido");
++        }
++
++        @Test
++        @DisplayName("token malformado deve lançar RuntimeException com mensagem esperada")
++        void tokenMalformadoDeveLancarRuntimeException() {
++            assertThatThrownBy(() -> jwtService.obterClaims("lixo.total.aqui"))
++                    .isInstanceOf(RuntimeException.class)
++                    .hasMessageContaining("Token JWT inválido");
++        }
++
++        @Test
++        @DisplayName("token assinado com outra chave deve lançar RuntimeException")
++        void tokenDeOutraChaveDeveLancarRuntimeException() {
++            String tokenFalso = criarTokenComChaveDiferente();
++            assertThatThrownBy(() -> jwtService.obterClaims(tokenFalso))
++                    .isInstanceOf(RuntimeException.class)
++                    .hasMessageContaining("Token JWT inválido");
++        }
++
++        @Test
++        @DisplayName("token com issuer errado deve lançar RuntimeException")
++        void tokenComIssuerErradoDeveLancarRuntimeException() {
++            String tokenFalso = criarTokenComIssuerDiferente();
++            assertThatThrownBy(() -> jwtService.obterClaims(tokenFalso))
++                    .isInstanceOf(RuntimeException.class)
++                    .hasMessageContaining("Token JWT inválido");
++        }
++    }
++
++    // ════════════════════════════════════════════════════════════════════════
++    // 7. Proteção contra Alg None (ataque crítico de JWT)
++    // ════════════════════════════════════════════════════════════════════════
++
++    @Nested
++    @DisplayName("7 — Proteção contra ataque 'Algorithm None'")
++    class ProtecaoAlgNone {
++
++        /**
++         * O ataque "alg:none" consiste em enviar um JWT cujo header declara
++         * algoritmo "none" e sem assinatura, tentando burlar a verificação.
++         * O JJWT 0.12.x rejeita isso em parseSignedClaims() por exigir
++         * explicitamente um token assinado (JWS).
++         */
++        @Test
++        @DisplayName("token com alg=none deve ser rejeitado — isTokenValido retorna false")
++        void tokenAlgNoneDeveSerRejeitadoPorIsTokenValido() {
++            String tokenAlgNone = criarTokenAlgNone();
++            assertThat(jwtService.isTokenValido(tokenAlgNone)).isFalse();
++        }
++
++        @Test
++        @DisplayName("token com alg=none deve lançar RuntimeException em obterClaims")
++        void tokenAlgNoneDeveLancarExcecaoEmObterClaims() {
++            String tokenAlgNone = criarTokenAlgNone();
++            assertThatThrownBy(() -> jwtService.obterClaims(tokenAlgNone))
++                    .isInstanceOf(RuntimeException.class);
++        }
++    }
++
++    // ════════════════════════════════════════════════════════════════════════
++    // 8. Integridade do ciclo completo (round-trip)
++    // ════════════════════════════════════════════════════════════════════════
++
++    @Nested
++    @DisplayName("8 — Round-trip: gerar → parsear → validar")
++    class RoundTrip {
++
++        @Test
++        @DisplayName("ciclo completo com usuário de id máximo (Long)")
++        void cicloCompletoComIdMaximo() {
++            Usuario u = Usuario.builder()
++                    .id(Long.MAX_VALUE)
++                    .nomeCompleto("Max User")
++                    .nomeUsuario("maxuser")
++                    .email("max@gov.br")
++                    .cpf("00000000000")
++                    .senha("h")
++                    .build();
++
++            String token = jwtService.gerarToken(u);
++            assertThat(jwtService.isTokenValido(token)).isTrue();
++            assertThat(jwtService.getUserLogin(token)).isEqualTo("max@gov.br");
++
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(((Number) claims.get("id")).longValue()).isEqualTo(Long.MAX_VALUE);
++        }
++
++        @Test
++        @DisplayName("ciclo completo com caracteres especiais no nome")
++        void cicloCompletoComCaracteresEspeciais() {
++            Usuario u = Usuario.builder()
++                    .id(5L)
++                    .nomeCompleto("Álvaro Müller Ção")
++                    .nomeUsuario("alvaro")
++                    .email("alvaro@edu.br")
++                    .cpf("55555555555")
++                    .senha("h")
++                    .build();
++
++            String token = jwtService.gerarToken(u);
++            Claims claims = jwtService.obterClaims(token);
++            assertThat(claims.get("nome", String.class)).isEqualTo("Álvaro Müller Ção");
++            assertThat(jwtService.isTokenValido(token)).isTrue();
++        }
++
++        @Test
++        @DisplayName("getUserLogin deve ser consistente com subject retornado por obterClaims")
++        void getUserLoginDeveSerConsistenteComObterClaims() {
++            String token = jwtService.gerarToken(usuarioBase);
++            String loginDireto = jwtService.getUserLogin(token);
++            String loginViaClaims = jwtService.obterClaims(token).getSubject();
++            assertThat(loginDireto).isEqualTo(loginViaClaims);
++        }
++    }
++
++    /** MEUS HELPERS — fábrica de tokens bichado para os testes**/
++
++    /** Token já expirado (expirou há 1 hora) */
++    private String criarTokenExpirado() {
++        SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
++        Instant agora = Instant.now();
++        return Jwts.builder()
++                .subject(usuarioBase.getEmail())
++                .issuer(ISSUER)
++                .issuedAt(Date.from(agora.minus(2, ChronoUnit.HOURS)))
++                .expiration(Date.from(agora.minus(1, ChronoUnit.HOURS))) // expirou há 1h
++                .signWith(key)
++                .compact();
++    }
++
++    /** Token assinado com uma chave diferente da configurada */
++    private String criarTokenComChaveDiferente() {
++        String chaveDiferente = "chave-completamente-diferente-e-invalida-256bits!!";
++        SecretKey key = Keys.hmacShaKeyFor(chaveDiferente.getBytes(StandardCharsets.UTF_8));
++        Instant agora = Instant.now();
++        return Jwts.builder()
++                .subject(usuarioBase.getEmail())
++                .issuer(ISSUER)
++                .issuedAt(Date.from(agora))
++                .expiration(Date.from(agora.plus(60, ChronoUnit.MINUTES)))
++                .signWith(key)
++                .compact();
++    }
++
++    /** Token assinado com a chave correta, mas issuer diferente */
++    private String criarTokenComIssuerDiferente() {
++        SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
++        Instant agora = Instant.now();
++        return Jwts.builder()
++                .subject(usuarioBase.getEmail())
++                .issuer("atacante-externo") // issuer inválido
++                .issuedAt(Date.from(agora))
++                .expiration(Date.from(agora.plus(60, ChronoUnit.MINUTES)))
++                .signWith(key)
++                .compact();
++    }
++
++    /** Token sem issuer algum */
++    private String criarTokenSemIssuer() {
++        SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
++        Instant agora = Instant.now();
++        return Jwts.builder()
++                .subject(usuarioBase.getEmail())
++                // sem .issuer()
++                .issuedAt(Date.from(agora))
++                .expiration(Date.from(agora.plus(60, ChronoUnit.MINUTES)))
++                .signWith(key)
++                .compact();
++    }
++
++    /**
++     * Simula o ataque "Algorithm None":
++     * monta manualmente um JWT com header {"alg":"none"} e sem assinatura.
++     * Formato: base64(header).base64(payload).  (sem assinatura)
++     */
++    private String criarTokenAlgNone() {
++        // Gera um token real e extrai o payload (parte 2)
++        String tokenReal = jwtService.gerarToken(usuarioBase);
++        String payloadBase64 = tokenReal.split("\\.")[1];
++
++        // Header declarando alg=none (Base64url de {"alg":"none","typ":"JWT"})
++        String headerAlgNone = java.util.Base64.getUrlEncoder()
++                .withoutPadding()
++                .encodeToString("{\"alg\":\"none\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
++
++        return headerAlgNone + "." + payloadBase64 + "."; // sem assinatura
++    }
++}
++
++//1. Claims Padrão (Registered Claims)
++//São informações recomendadas pela especificação do JWT para garantir a segurança do token. O objeto Claims possui métodos nativos para buscá-las:
++//
++//        claims.getSubject(): Retorna a identidade do usuário (geralmente o e-mail, username ou ID).
++//
++//        claims.getExpiration(): Retorna a data e hora em que o token expira.
++//
++//        claims.getIssuedAt(): Retorna o momento exato em que o token foi criado.
+Index: src/main/java/com/cleber/financas/service/UsuarioService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.service;\n\nimport com.cleber.financas.model.entity.Usuario;\n\nimport java.util.Optional;\nimport org.springframework.stereotype.Service;\n\n@Service\npublic interface UsuarioService {\n    /*verificar se o usuario existe na base, validação*/\n    Usuario autenticar(String email, String senha);\n\n    /*salvar o usuario na base*/\n    Usuario salvarUsuario(Usuario usuario);\n\n    /*atualizar o usuario*/\n    Usuario atualizarUsuario(Usuario usuario);\n\n    /**validar usuario*/\n    void validarUsuario(Usuario usuario);\n    \n    /*ver se existe o email*/\n    void validarEmailCpf(String email, String cpf);\n    \n    Optional<Usuario> obterUsuarioPorId(Long id);\n    \n    Optional<Usuario> obterUsuarioPorCpf(String cpf);   \n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/com/cleber/financas/service/UsuarioService.java b/src/main/java/com/cleber/financas/service/UsuarioService.java
+--- a/src/main/java/com/cleber/financas/service/UsuarioService.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/main/java/com/cleber/financas/service/UsuarioService.java	(date 1780505766085)
+@@ -20,7 +20,7 @@
+     void validarUsuario(Usuario usuario);
+     
+     /*ver se existe o email*/
+-    void validarEmailCpf(String email, String cpf);
++    void validarEmailCpf(String email, String cpf, Long id);
+     
+     Optional<Usuario> obterUsuarioPorId(Long id);
+     
+Index: src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryMelhoriasTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.cleber.financas.model.repository;\n\nimport com.cleber.financas.model.entity.Usuario;\nimport org.assertj.core.api.Assertions;\nimport org.junit.Test;\nimport org.junit.runner.RunWith;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;\nimport org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;\nimport org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;\nimport org.springframework.boot.test.context.SpringBootTest;\nimport org.springframework.test.context.ActiveProfiles;\nimport org.springframework.test.context.junit4.SpringRunner;\n\nimport java.time.Instant;\nimport java.time.LocalDate;\nimport java.time.LocalDateTime;\nimport java.util.Optional;\n\n@RunWith(SpringRunner.class)\n@ActiveProfiles(\"test\")\n\n/*@DataJpaTest - Sobrescreve qualquer configuração\n no banco de teste, cria uma instancia no bd h2, ao\n  finalizar ela deleta da memoria, rollback após\n  a execução de cada metodo*/\n@DataJpaTest\n\n/*@AutoConfigureTestDatabase - mantem as configurações do banco de teste h2\n (DataJpaTest, desconfiguratudo)*/\n@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)\npublic class UsuarioRepositoryMelhoriasTest {\n    \n    /*Inicio teste com Dougllas Sousa (Udemy)*/\n\n    @Autowired\n    UsuarioRepository usuarioRepository;\n\n    @Autowired\n    /*TestEntityManager - Responsavel pelas operações na base de dados, CRUD\n    * este é configurado apenas para testes, nao é o real*/\n    TestEntityManager entityManager;\n    \n    @Test\n    public void deveVerificarAExistenciaDeUmEmailNaBaseDeDados() {\n        /*cenario*/\n        Usuario usuarioDeTeste = criarUsuario();\n        entityManager.persist(usuarioDeTeste);\n\n        /*execução/ação*/\n        boolean verficarSeExisteEmail = usuarioRepository\n                .existsByEmail(\"cricri@gmail.com\");\n        /*verficação*/\n        Assertions.assertThat(verficarSeExisteEmail).isTrue();\n        \n    }\n    @Test\n    public void deveRetornarFalsoQuandoNaoHouverUsuarioCadastradoComOEmail() {\n        /*cenario, - com o @DataJpaTest nao é necessario delete por causa do rollback*/\n        /*usuarioRepository.deleteAll();*/\n\n        boolean verificarSeExisteUsuarioCadastradoComEmail = usuarioRepository\n                .existsByEmail(\"cricri@gmail.com\");\n        \n        /*verificação*/\n        Assertions.assertThat(verificarSeExisteUsuarioCadastradoComEmail).isFalse();\n    }\n    @Test\n    public void devePersistirUsuarioNaBaseDeDados(){\n        /*cenario*/\n        Usuario persistindoUsuario = criarUsuario();\n        /*ação*/\n        Usuario usuarioPersistido = usuarioRepository.save(persistindoUsuario);\n        \n        /*verificação*/\n        Assertions.assertThat(usuarioPersistido.getId()).isNotNull();\n    }\n    @Test\n    public void deveBuscarUmUsuarioPeloEmail(){\n        /*cenario*/\n        Usuario salvandoUsuario = criarUsuario();\n        usuarioRepository.save(salvandoUsuario);\n        /*ação*/\n        Optional<Usuario> pesquisarUsuarioPeloEmail = usuarioRepository\n                .findByEmail(\"cricri@gmail.com\");\n        /*verificação*/\n        Assertions.assertThat(pesquisarUsuarioPeloEmail.isPresent()).isTrue();\n    }\n    @Test\n    public void deveRetornarVazioAoBuscarUsuarioPorEmailQueNaoExisteNaBase() {\n        /*cenario, - com o @DataJpaTest nao é necessario delete por causa do rollback*/\n        /*usuarioRepository.deleteAll();*/\n        /*ação*/\n        Optional<Usuario> usuarioInexistente =usuarioRepository\n                .findByEmail(\"cricri@gmail.com\");\n        /*verificação*/\n        Assertions.assertThat(usuarioInexistente.isPresent()).isFalse();\n    }\n\n    private static Usuario criarUsuario(){\n        return Usuario.builder()\n                .nome(\"Madonna da Silva\")\n                .nomeUsuario(\"cricri\")\n                .cpf(\"123.456.789.00\")\n                .email(\"cricri@gmail.com\")\n                .senha(\"123456\")\n                .dataCadastro(Instant.now())\n                .build();\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryMelhoriasTest.java b/src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryMelhoriasTest.java
+--- a/src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryMelhoriasTest.java	(revision 4be5d6648f3064a2a10f9595aaf8b5700c5d199a)
++++ b/src/test/java/com/cleber/financas/model/repository/UsuarioRepositoryMelhoriasTest.java	(date 1780505766086)
+@@ -1,6 +1,8 @@
+ package com.cleber.financas.model.repository;
+ 
+-import com.cleber.financas.model.entity.Usuario;
++import java.time.Instant;
++import java.util.Optional;
++
+ import org.assertj.core.api.Assertions;
+ import org.junit.Test;
+ import org.junit.runner.RunWith;
+@@ -8,14 +10,10 @@
+ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+-import org.springframework.boot.test.context.SpringBootTest;
+ import org.springframework.test.context.ActiveProfiles;
+ import org.springframework.test.context.junit4.SpringRunner;
+ 
+-import java.time.Instant;
+-import java.time.LocalDate;
+-import java.time.LocalDateTime;
+-import java.util.Optional;
++import com.cleber.financas.model.entity.Usuario;
+ 
+ @RunWith(SpringRunner.class)
+ @ActiveProfiles("test")
+@@ -99,7 +97,7 @@
+ 
+     private static Usuario criarUsuario(){
+         return Usuario.builder()
+-                .nome("Madonna da Silva")
++                .nomeCompleto("Madonna da Silva")
+                 .nomeUsuario("cricri")
+                 .cpf("123.456.789.00")
+                 .email("cricri@gmail.com")
