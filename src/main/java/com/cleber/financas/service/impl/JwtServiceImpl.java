@@ -1,25 +1,20 @@
 package com.cleber.financas.service.impl;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-
-import javax.crypto.SecretKey;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.JwtService;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 @Service
 public class JwtServiceImpl implements JwtService {
@@ -31,7 +26,7 @@ public class JwtServiceImpl implements JwtService {
     private Long expiration;
 
     // Constante para definir e validar a origem do Token (evita vazamento de escopo)
-    private static final String ISSUER = "financas";
+    private static final String ISSUER = "financas-api";
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
@@ -50,21 +45,16 @@ public class JwtServiceImpl implements JwtService {
          */
         Instant agora = Instant.now();
         Instant expiracao = agora.plus(expiration, ChronoUnit.MINUTES);
-        
-        String horaExpiracaoToken = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
-                .withZone(ZoneId.systemDefault())
-                .format(expiracao);
-        
+
         return Jwts.builder()
                 .subject(usuario.getEmail()) // Sequestro de sessão evitado atrelando Claims chave
                 .claim("id", usuario.getId())
                 .claim("cpf", usuario.getCpf())
                 .claim("nome_usuario", usuario.getNomeUsuario())
-                .claim("nome", usuario.getNomeCompleto())
-                .claim("horaExpiracao", horaExpiracaoToken) 
+                .claim("nome", usuario.getNome())
                 .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o token
-                .issuedAt(Date.from(agora))
-                .expiration(Date.from(expiracao))
+                .issuedAt(Date.from(agora)) //emitido em
+                .expiration(Date.from(expiracao)) //expira em
                 .signWith(getSigningKey()) // Usa JWS seguro padrão (HS256 ou melhor) e impede Alg None
                 .compact();
     }

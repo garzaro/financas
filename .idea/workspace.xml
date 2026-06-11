@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ae937a27-0bbc-4367-9828-9a2b7c27095a" name="Changes" comment="ADD: adicionando a parte de JWT" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="84" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;garzaro&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/garzaro/financas.git&quot;,
+    &quot;accountId&quot;: &quot;231218a8-eceb-4bbd-96d7-84edc154d41d&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+		&quot;associatedIndex&quot;: 1,
+		&quot;fromUser&quot;: false
+		}</component>
+  <component name="ProjectId" id="3E24zR8yWwQCwbhhv9pKJmi2ddA" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.FinancasApplication.executor": "Run",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "javascript.preferred.runtime.type.id": "node",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/cleber/desv/2-doing/financa-project/financas",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "Errors",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.cleber.financas.security" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="FinancasApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UnknownPolicyInFreeMode" />
+      <module name="financas" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.cleber.financas.FinancasApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.cleber.financas.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.FinancasApplication" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.23567.141" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ae937a27-0bbc-4367-9828-9a2b7c27095a" name="Changes" comment="" />
+      <created>1779363592660</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1779363592660</updated>
+      <workItem from="1779363593702" duration="1747000" />
+      <workItem from="1779819086013" duration="113000" />
+      <workItem from="1780073544288" duration="822000" />
+      <workItem from="1780082456924" duration="1000" />
+    </task>
+    <task id="LOCAL-00001" summary="comite inicial">
+      <option name="closed" value="true" />
+      <created>1779366038642</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1779366038642</updated>
+    </task>
+    <task id="LOCAL-00002" summary="ADD: fazendo adicao porque baixei novamente o projeto">
+      <option name="closed" value="true" />
+      <created>1780073701058</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1780073701058</updated>
+    </task>
+    <task id="LOCAL-00003" summary="ADD: adicionando a parte de JWT">
+      <option name="closed" value="true" />
+      <created>1780074143931</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1780074143931</updated>
+    </task>
+    <task id="LOCAL-00004" summary="ADD: adicionando a parte de JWT">
+      <option name="closed" value="true" />
+      <created>1780074285199</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1780074285199</updated>
+    </task>
+    <task id="LOCAL-00005" summary="ADD: adicionando a parte de JWT">
+      <option name="closed" value="true" />
+      <created>1780082520961</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1780082520961</updated>
+    </task>
+    <task id="LOCAL-00006" summary="ADD: adicionando a parte de JWT">
+      <option name="closed" value="true" />
+      <created>1780502759955</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1780502759955</updated>
+    </task>
+    <task id="LOCAL-00007" summary="ADD: adicionando a parte de JWT">
+      <option name="closed" value="true" />
+      <created>1780506374970</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1780506374970</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="comite inicial" />
+    <MESSAGE value="ADD: fazendo adicao porque baixei novamente o projeto" />
+    <MESSAGE value="ADD: adicionando a parte de JWT" />
+    <option name="LAST_COMMIT_MESSAGE" value="ADD: adicionando a parte de JWT" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

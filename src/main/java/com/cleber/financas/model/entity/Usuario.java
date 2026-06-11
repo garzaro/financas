@@ -28,8 +28,8 @@ public class Usuario{
     @Column(name = "id_usuario")
     private UUID id;
     
-    @Column(name = "nome_completo")
-    private String nomeCompleto;
+    @Column(name = "nome")
+    private String nome;
 
     @Column(name = "cpf")
     private String cpf;
