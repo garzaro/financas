@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,8 +18,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import com.cleber.financas.security.SecurityUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     @Autowired
-    private SecurityUserDetailsService securityUserDetailsService;
+    private UserDetailsService securityUserDetailsService;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -82,8 +81,11 @@ public class SecurityConfig {
          * através da injeção via construtor, pois o construtor vazio e o 
          * setUserDetailsService foram depreciados.
          **/
-        DaoAuthenticationProvider authProvider = 
-        new DaoAuthenticationProvider(securityUserDetailsService);
+        DaoAuthenticationProvider authProvider =
+                new DaoAuthenticationProvider(securityUserDetailsService);
+        /**deprecated**/
+//        authProvider.setUserDetailsService(securityUserDetailsService);
+
         /** Estou falando para o provedor como validar a senha criptograda (Argon2)**/
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;

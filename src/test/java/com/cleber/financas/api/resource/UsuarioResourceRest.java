@@ -2,6 +2,7 @@ package com.cleber.financas.api.resource;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +54,7 @@ public class UsuarioResourceRest {
                 .build();
         
         Usuario usuario = Usuario.builder() /*usuario autenticado*/
-                .id(1l)
+                .id(UUID.randomUUID())
                 .email(email)
                 .senha(senha)
                 .build();
@@ -116,7 +117,7 @@ public class UsuarioResourceRest {
                 .build();
         
         Usuario usuario = Usuario.builder() /*usuario autenticado*/
-                .id(1l)
+                .id(UUID.randomUUID())
                 .email(email)
                 .senha(senha)
                 .build();
@@ -172,7 +173,7 @@ public class UsuarioResourceRest {
         /*cenario*/
         String email = "cleber@gmail.com";
         String senha = "senha";
-        Long id = 1l;
+        UUID id = UUID.randomUUID();
         
         BigDecimal saldo = BigDecimal.valueOf(1500);
         Usuario usuario = Usuario.builder().id(id).email(email).senha(senha).build();
@@ -193,7 +194,7 @@ public class UsuarioResourceRest {
     @Test
     public void deveResourceNaoEncontradoNaoExistirUsuarioParaObterSaldo() throws Exception {
         /*cenario*/
-        Long id = 1l;
+        UUID id = UUID.randomUUID();
         /*simulação de autenticação*/
         Mockito.when(usuarioService.obterUsuarioPorId(id)).thenReturn(Optional.empty());
         /*ação e verificação*/

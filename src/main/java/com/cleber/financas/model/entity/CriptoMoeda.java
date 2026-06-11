@@ -3,6 +3,8 @@ package com.cleber.financas.model.entity;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
@@ -41,8 +43,8 @@ public class CriptoMoeda {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private Long id;
+	@Column(name = "id_criptomoeda")
+	private UUID uuid;
 	
 	@Column(name = "data_entrada")
 	private LocalDate dataEntrada;

@@ -3,6 +3,7 @@ package com.cleber.financas.service.impl;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,25 +129,21 @@ public class UsuarioServiceImpl implements UsuarioService {
         /**
          * validacao de dupliciadade
          * */
-        validarEmailCpf(usuario.getEmail(), usuario.getCpf(), usuario.getId());        
+        validarEmailCpf(usuario.getEmail(), usuario.getCpf());
     }
     
     /**
      * validação de existencia
      * */
-    public void validarEmailCpf(String email, String cpf, Long id) {
-        /**
-         * ver se o email existe
-         * */
+    public void validarEmailCpf(String email, String cpf) {
+        /** ver se o email existe**/
         Optional<Usuario> usuarioEmail = usuarioRepository.findByEmail(email);
-        if (usuarioEmail.isPresent() && !usuarioEmail.get().getId().equals(id)) {
+        if (usuarioEmail.isPresent()) {
             throw new RegraDeNegocioException("Esse email já está em uso");
         }
-        /**
-         * ver se o cpf existe
-         * */
+        /**ver se o cpf existe**/
         Optional<Usuario> usuarioCpf = usuarioRepository.findByCpf(cpf);
-        if (usuarioCpf.isPresent() && !usuarioCpf.get().getId().equals(id)) {
+        if (usuarioCpf.isPresent()) {
             throw new RegraDeNegocioException("Esse CPF já está em uso");
         }
     }
@@ -171,7 +168,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuario.getCpf() == null || usuario.getCpf().trim().equals("")) {
             throw new ErroValidacaoException("O CPF é obrigatório");
         }
-        
     }
    
     /**
@@ -218,7 +214,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }*/
 
     @Override
-    public Optional<Usuario> obterUsuarioPorId(Long id) {
+    public Optional<Usuario> obterUsuarioPorId(UUID id) {
         return usuarioRepository.findById(id);
     }
 

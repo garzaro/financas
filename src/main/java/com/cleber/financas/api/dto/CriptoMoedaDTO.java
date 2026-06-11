@@ -1,6 +1,7 @@
 package com.cleber.financas.api.dto;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -20,7 +21,7 @@ import lombok.Setter;
 @Builder
 public class CriptoMoedaDTO {
 		
-	private Long id;
+	private UUID uuid;
 	
 	@NotNull(message = "{data.obrigatoria}")
 	@FutureOrPresent(message = "{data.futura}")
@@ -56,10 +57,12 @@ public class CriptoMoedaDTO {
 	
 	/*passar só o id do usuario, nao como objeto*/
     @NotNull
-    private Long usuario;
+    private UUID usuario;
 	
 //	@NotNull(message = "{status.obrigatorio}")
 	private StatusTransacao statusTransacao;
 	
 	private TipoTransacao tipoTransacao;
+	
+	private Instant dataAtualizacao;
 }

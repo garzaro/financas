@@ -1,24 +1,32 @@
 package com.cleber.financas.service.impl;
 
-import com.cleber.financas.model.entity.Usuario;
-import com.cleber.financas.service.JwtService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.junit.jupiter.api.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.UUID;
+
+import javax.crypto.SecretKey;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.service.JwtService;
 
-import static org.assertj.core.api.Assertions.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 /**
  * Testes completos do JwtServiceImpl cobrindo:
@@ -74,7 +82,7 @@ class JwtServiceTest {
     @BeforeEach
     void setUp() {
         usuarioBase = Usuario.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .nomeCompleto("Cleber Teste")
                 .nomeUsuario("cleber")
                 .email("cleber@gmail.com")
@@ -224,7 +232,7 @@ class JwtServiceTest {
         void deveDiferenciarTokensDeUsuariosDistintos() {
             /**cenario**/
             Usuario usuarioDistinto = Usuario.builder()
-                    .id(2L)
+                    .id(UUID.randomUUID())
                     .nomeCompleto("Usuario Distinto")
                     .nomeUsuario("distinto")
                     .email("distinto@gmail.com")
@@ -259,7 +267,7 @@ class JwtServiceTest {
         @DisplayName("token válido de usuário diferente também deve retornar true")
         void tokenDeOutroUsuarioDeveSerValido() {
             Usuario outro = Usuario.builder()
-                    .id(99L)
+                    .id(UUID.randomUUID())
                     .nomeCompleto("usuario")
                     .nomeUsuario("usuario")
                     .email("usuario@gmail.com")
@@ -426,7 +434,7 @@ class JwtServiceTest {
         @DisplayName("ciclo completo com usuário de id máximo (Long)")
         void cicloCompletoComIdMaximo() {
             Usuario u = Usuario.builder()
-                    .id(Long.MAX_VALUE)
+                    .id(UUID.randomUUID())
                     .nomeCompleto("Max User")
                     .nomeUsuario("maxuser")
                     .email("max@gov.br")
@@ -446,7 +454,7 @@ class JwtServiceTest {
         @DisplayName("ciclo completo com caracteres especiais no nome")
         void cicloCompletoComCaracteresEspeciais() {
             Usuario u = Usuario.builder()
-                    .id(5L)
+                    .id(UUID.randomUUID())
                     .nomeCompleto("Álvaro Müller Ção")
                     .nomeUsuario("alvaro")
                     .email("alvaro@edu.br")

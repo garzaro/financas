@@ -3,48 +3,45 @@ package com.cleber.financas.service.impl;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cleber.financas.api.dto.CriptoMoedaDTO;
 import com.cleber.financas.model.entity.CriptoMoeda;
 import com.cleber.financas.model.enums.StatusTransacao;
-import com.cleber.financas.model.enums.TipoTransacao;
 import com.cleber.financas.model.mapper.CriptoMoedaMapper;
 import com.cleber.financas.model.repository.CriptoMoedaRepository;
 import com.cleber.financas.service.CriptoMoedaService;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CriptoMoedaServiceImpl implements CriptoMoedaService{
 	
-private final CriptoMoedaRepository criptoMoedaRepository;
-	
+	private final CriptoMoedaRepository criptoMoedaRepository;
 	private final CriptoMoedaMapper criptoMoedaMapper;
+	
+//	@Override
+//	@Transactional
+//	public CriptoMoedaDTO salvarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO) {
+//		CriptoMoeda entidadeConvertida = criptoMoedaMapper.entityToDto(criptoMoedaDTO);
+//		return criptoMoedaRepository.save(entidadeConvertida);
+//	}
 	
 	@Override
 	@Transactional
-	public CriptoMoeda salvarCriptomoeda(CriptoMoedaDTO dto) {
-		CriptoMoeda entidadeConvertida = criptoMoedaMapper.dtoToEntity(dto);
-		//valor sobreposto pelo mapper - deadcode	
-		dto.setStatusTransacao(StatusTransacao.ANALISAR);
-		dto.setTipoTransacao(TipoTransacao.DECIDIR);
+	public CriptoMoedaDTO salvarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO) {
 		
-		return criptoMoedaRepository.save(entidadeConvertida);
+		CriptoMoeda entidadeConvertida = criptoMoedaMapper.dtoToEntity(criptoMoedaDTO);
+		
+		CriptoMoeda salvarCriptomoeda = criptoMoedaRepository.save(entidadeConvertida);
+		
+		return criptoMoedaMapper.entityToDto(salvarCriptomoeda);
 	}
 	
-//	public CriptoMoeda salvarCriptomoeda(Criptomoeda criptomoeda) {
-//		/* chamando */
-//		validarCriptomoeda(criptomoeda);
-//		criptomoeda.setStatusTransacao(StatusTransacao.ANALISAR);
-//
-//		return CriptomoedaRepository.save(criptomoeda);
-//	}
-	
-
 	@Override
 	public CriptoMoeda atualizarCriptomoeda(CriptoMoedaDTO criptoMoeda) {
 		// TODO Auto-generated method stub
@@ -70,9 +67,9 @@ private final CriptoMoedaRepository criptoMoedaRepository;
 	}
 
 	@Override
-	public Optional<CriptoMoeda> obterCriptomoedaPorId(Long uuid) {
+	public Optional<CriptoMoeda> obterCriptomoedaPorId(UUID uuid) {
 		// TODO Auto-generated method stub
-		return Optional.empty();
+		return null;
 	}
 
 	@Override
@@ -80,5 +77,4 @@ private final CriptoMoedaRepository criptoMoedaRepository;
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

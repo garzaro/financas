@@ -4,11 +4,12 @@ package com.cleber.financas.api.dto;
 * resolvi criar na mão o codigo*/
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 public class UsuarioDTO {
-    private Long id;
+    private UUID id;
     @JsonAlias({"nome_completo", "nomeCompleto"})
     private String nomeCompleto;
     private String cpf;
@@ -34,7 +35,7 @@ public class UsuarioDTO {
         this.dataCadastro = builder.dataCadastro;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -63,7 +64,7 @@ public class UsuarioDTO {
     }
 
     public static class UsuarioBuilder {
-        private Long id;
+        private UUID id;
         private String nomeCompleto;
         private String cpf;
         private String nomeUsuario;
@@ -71,7 +72,7 @@ public class UsuarioDTO {
         private String senha;
         private Instant dataCadastro;
 
-        public UsuarioBuilder setId(Long id) {
+        public UsuarioBuilder setId(UUID id) {
             this.id = id;
             return this;
         }

@@ -1,5 +1,7 @@
 package com.cleber.financas.model.mapper;
 
+import java.util.UUID;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.stereotype.Component;
@@ -33,7 +35,7 @@ public interface CriptoMoedaMapper {
 	CriptoMoeda dtoToEntity (CriptoMoedaDTO dto);
 	
 	/**toEntity - O MapStruct usará este método para converter o Long usuario em Usuario entidade**/
-		default Usuario map(Long id) {
+		default Usuario map(UUID id) {
 		    if (id == null) {
 		        return null;
 		    }
@@ -49,11 +51,11 @@ public interface CriptoMoedaMapper {
 	@Mapping(source = "alavancagem", target = "alavancagem", defaultValue = "")
 	@Mapping(source = "statusTransacao", target = "statusTransacao", defaultValue = "ANALISAR")
 	@Mapping(source = "tipoTransacao", target = "tipoTransacao", defaultValue = "DECIDIR")
-	//	@Mapping(source = "usuario", target = "id")
+//	@Mapping(source = "usuario", target = "id")
 	CriptoMoedaDTO entityToDto (CriptoMoeda criptoMoeda);	
 	
 	/**toDto - O MapStruct chamará este método para converter o objeto Usuario em Long**/ 
-    default Long map(Usuario usuario) {
+    default UUID map(Usuario usuario) {
         if (usuario == null) {
             return null;
         }

@@ -2,6 +2,7 @@ package com.cleber.financas.api.resource;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,18 +28,16 @@ import com.cleber.financas.service.UsuarioService;
 @RestController
 /**
  * para mapeamento de todas as requisições
+ * http://localhost:8081/v1/auth/usuario
  * 
  * */
-@RequestMapping("/api/usuarios")
+@RequestMapping("/api/v1/usuario")
 //@CrossOrigin(origins = "http://localhost:3000")
 public class UsuarioController {
-
-    @Autowired
-    public UsuarioService usuarioService;
-	@Autowired
-	public LancamentoService lancamentoService;
-    @Autowired
-    public UsuarioConverter usuarioConverter;
+    
+    private final UsuarioService usuarioService;
+    private final LancamentoService lancamentoService;
+    private final UsuarioConverter usuarioConverter;
     
     public UsuarioController(
             UsuarioService usuarioService,
@@ -88,7 +87,7 @@ public class UsuarioController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<?> atualizar(@PathVariable("id") Long id, @RequestBody UsuarioDTO dto){
+    public ResponseEntity<?> atualizar(@PathVariable("id") UUID id, @RequestBody UsuarioDTO dto){
         return usuarioService.obterUsuarioPorId(id).map(entity ->{
             try{
                 Usuario usuario = usuarioConverter.dtoToEntity(dto);
@@ -104,7 +103,7 @@ public class UsuarioController {
     }
     
     @GetMapping("{id}/saldo")
-    public ResponseEntity<?> obterSaldo(@PathVariable("id") Long id) {
+    public ResponseEntity<?> obterSaldo(@PathVariable("id") UUID id) {
     	/*saldo por usuario*/
     	Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(id);
     	

@@ -3,6 +3,7 @@ package com.cleber.financas.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -27,8 +28,8 @@ public interface LancamentoService {
     /*ver se ja exite o lancamento na base de dados*/
     void validarLancamento(Lancamento lancamento);
     
-    Optional<Lancamento> obterLancamentoPorId(Long id);
+    Optional<Lancamento> obterLancamentoPorId(UUID id);
 
-	BigDecimal obterSaldoPorUsuario(Long id);
+	BigDecimal obterSaldoPorUsuario(UUID id);
 
 }

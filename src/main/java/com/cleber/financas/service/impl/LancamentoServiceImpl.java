@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -88,13 +89,13 @@ public class LancamentoServiceImpl implements LancamentoService {
 	}
 
 	@Override
-	public Optional<Lancamento> obterLancamentoPorId(Long id) {
+	public Optional<Lancamento> obterLancamentoPorId(UUID id) {
 		return lancamentoRepository.findById(id);
 	}
 
 	@Override
 	@Transactional
-	public BigDecimal obterSaldoPorUsuario(Long id) {
+	public BigDecimal obterSaldoPorUsuario(UUID id) {
 		BigDecimal receita = lancamentoRepository.obterSaldoPorTipoLancamentoEUsuarioEstatus(id, TipoLancamento.RECEITA,
 				StatusLancamento.EFETIVADO);
 		BigDecimal despesa = lancamentoRepository.obterSaldoPorTipoLancamentoEUsuarioEstatus(id, TipoLancamento.DESPESA,

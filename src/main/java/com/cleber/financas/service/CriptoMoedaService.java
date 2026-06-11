@@ -3,6 +3,7 @@ package com.cleber.financas.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -12,7 +13,8 @@ import com.cleber.financas.model.enums.StatusTransacao;
 
 @Service
 public interface CriptoMoedaService {
-CriptoMoeda salvarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO);
+	
+	CriptoMoedaDTO salvarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO);
 	
 	CriptoMoeda atualizarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO);
 	
@@ -22,7 +24,7 @@ CriptoMoeda salvarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO);
 	
 	void atualizarStatus(CriptoMoedaDTO criptoMoeda, StatusTransacao stuStatusTransacao);
 	
-	Optional<CriptoMoeda> obterCriptomoedaPorId(Long uuid);
+	Optional<CriptoMoeda> obterCriptomoedaPorId(UUID uuid);
 	
 	BigDecimal obterValorCriptomoedaPorUsuario(Long uuid);		
 }

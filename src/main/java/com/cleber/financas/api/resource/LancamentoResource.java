@@ -2,6 +2,7 @@ package com.cleber.financas.api.resource;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 //import java.util.List;
 //import java.util.Optional;
@@ -71,7 +72,7 @@ public class LancamentoResource {
     
     /* entity é o retorno do service quando é obtido por id */
     @PutMapping("{id}")
-    public ResponseEntity atualizarLancamento(@PathVariable("id") Long id, @RequestBody LancamentoDTO dto) {
+    public ResponseEntity atualizarLancamento(@PathVariable("id") UUID id, @RequestBody LancamentoDTO dto) {
         /* entity é resultado da busca pelo id */
         return lancamentoService.obterLancamentoPorId(id).map(entity -> {
             try {
@@ -88,14 +89,14 @@ public class LancamentoResource {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity obterLancamentoPorId(@PathVariable("id") Long id){
+    public ResponseEntity obterLancamentoPorId(@PathVariable("id") UUID id){
         return lancamentoService.obterLancamentoPorId(id)
                 .map( lancamento -> new ResponseEntity(lancamentoConverter.entityToDto( lancamento), HttpStatus.OK) )
                 .orElseGet( () -> new ResponseEntity(HttpStatus.NOT_FOUND) );
     }
 
     @PutMapping("{id}/atualizar-statusLancamento")
-    public ResponseEntity<?> atualizarStatus(@PathVariable("id") Long id, @Valid @RequestBody AtualizarStatusDTO dto) {        
+    public ResponseEntity<?> atualizarStatus(@PathVariable("id") UUID id, @Valid @RequestBody AtualizarStatusDTO dto) {        
     	return lancamentoService.obterLancamentoPorId(id).map(entity -> {
     		
             logger.info("Se imprimir null, o problema é o mapeamento do JSON (ponto 1 e 2). " + dto.getStatusLancamento());
@@ -116,7 +117,7 @@ public class LancamentoResource {
                                            @RequestParam(value = "mes", required = false) Integer mes,
                                            @RequestParam(value = "ano") Integer ano,
             /* Parametro obrigatorio para fazer o filtro */
-                                           @RequestParam("usuario") Long idUsuario
+                                           @RequestParam("usuario") UUID idUsuario
     ) {
         try {
             /* Verifica se o ID do usuário foi passado */
@@ -149,13 +150,13 @@ public class LancamentoResource {
     }
     
     @DeleteMapping("{id}")
-    public ResponseEntity deletar(@PathVariable("id") Long id) {
+    public ResponseEntity deletar(@PathVariable("id") UUID id) {
         return lancamentoService.obterLancamentoPorId(id)/* se tiver o id, invoca o map */.map(entity -> {
             lancamentoService.deletarLancamento(entity); /* o map permite executar uma operação na entidade encontrada */
             return new ResponseEntity("lancamento excluido com sucesso.", HttpStatus.NO_CONTENT);/*OK*/ /* e devolve o resultado */
         }).orElseGet(() ->
                 new ResponseEntity(
-                        "Lançamento com ID " + "_" + id + "_" + " não encontrado na base de dados." +
+                        "Lançamento com ID informado não foi encontrado." +
                                 " Verifique se o ID está correto e tente novamente.",
                         HttpStatus.BAD_REQUEST));
     }

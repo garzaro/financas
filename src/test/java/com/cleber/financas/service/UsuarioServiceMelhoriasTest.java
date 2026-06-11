@@ -2,6 +2,7 @@ package com.cleber.financas.service;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -61,7 +62,7 @@ public class UsuarioServiceMelhoriasTest {
     /*para criar instancias*/
     public static Usuario criarUsuario(){
         return Usuario.builder()
-                .id(1l)
+                .id(UUID.randomUUID())
                 .nomeCompleto("Cleber")
                 .nomeUsuario("garzaro")
                 .cpf("123.456.789-00")

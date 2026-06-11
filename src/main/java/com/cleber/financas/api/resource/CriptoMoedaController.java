@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cleber.financas.api.dto.CriptoMoedaDTO;
 import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.model.entity.CriptoMoeda;
 import com.cleber.financas.service.CriptoMoedaService;
 
 import jakarta.validation.Valid;
@@ -25,7 +24,7 @@ public class CriptoMoedaController {
 	@PostMapping
 	public ResponseEntity salvarCriptomoeda( @Valid @RequestBody CriptoMoedaDTO dto){
 		try {
-			CriptoMoeda salvarCriptomoeda = criptoMoedaService.salvarCriptomoeda(dto);
+			CriptoMoedaDTO salvarCriptomoeda = criptoMoedaService.salvarCriptomoeda(dto);
 			return ResponseEntity.status(HttpStatus.CREATED).body(salvarCriptomoeda);
 			
 		} catch (RegraDeNegocioException e) {

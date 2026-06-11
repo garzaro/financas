@@ -3,6 +3,8 @@ package com.cleber.financas.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +26,7 @@ public class Usuario{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id_usuario")
-    private Long id;
+    private UUID id;
     
     @Column(name = "nome_completo")
     private String nomeCompleto;

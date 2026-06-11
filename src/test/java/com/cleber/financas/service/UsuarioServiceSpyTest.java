@@ -1,5 +1,7 @@
 package com.cleber.financas.service;
 
+import java.util.UUID;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +28,7 @@ public class UsuarioServiceSpyTest {
     public void deveSalvarUmUsuario(){
         /*cenario*/
         Mockito.doNothing().when(usuarioServiceImpl)
-                .validarEmailCpf(Mockito.anyString(), Mockito.anyString(), Mockito.any());
+                .validarEmailCpf(Mockito.anyString(), Mockito.anyString());
 
         Usuario usuario = criarUsuario();
 
@@ -59,7 +61,7 @@ public class UsuarioServiceSpyTest {
 
         Mockito.doThrow(RegraDeNegocioException.class)
                 .when(usuarioServiceImpl)
-                .validarEmailCpf(Mockito.anyString(), Mockito.anyString(), Mockito.any());
+                .validarEmailCpf(Mockito.anyString(), Mockito.anyString());
         /*ação*/
         usuarioServiceImpl.salvarUsuario(persistirUsuario);
 
@@ -70,7 +72,7 @@ public class UsuarioServiceSpyTest {
     /*criar instacias*/
     public static Usuario criarUsuario() {
         return Usuario.builder()
-                .id(1l)
+                .id(UUID.randomUUID())
                 .nomeCompleto("Cleber Garzaro")
                 .cpf("12345678900")
                 .nomeUsuario("garzaro74")

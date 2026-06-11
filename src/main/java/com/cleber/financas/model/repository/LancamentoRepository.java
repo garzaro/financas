@@ -1,6 +1,7 @@
 package com.cleber.financas.model.repository;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,14 +13,14 @@ import com.cleber.financas.model.enums.StatusLancamento;
 import com.cleber.financas.model.enums.TipoLancamento;
 
 @Repository
-public interface LancamentoRepository extends JpaRepository<Lancamento, Long> {
+public interface LancamentoRepository extends JpaRepository<Lancamento, UUID> {
     
     @Query(value = "select sum(l.valor) "
             + " from Lancamento l join l.usuario u "
             + " where u.id = :idUsuario and l.tipoLancamento = :tipoLancamento and l.statusLancamento = :statusLancamento "
             + " group by u")
     BigDecimal obterSaldoPorTipoLancamentoEUsuarioEstatus(
-            @Param("idUsuario") Long idUsuario,
+            @Param("idUsuario") UUID id,
             @Param("tipoLancamento") TipoLancamento tipoLancamento,
             @Param("statusLancamento") StatusLancamento statusLancamento
     );
