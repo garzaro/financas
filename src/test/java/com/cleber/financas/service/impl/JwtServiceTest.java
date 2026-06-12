@@ -219,6 +219,19 @@ class JwtServiceTest {
             Claims claims = jwtService.obterClaims(token);
             assertThat(claims.getExpiration()).isAfter(new Date());
         }
+
+        @Test
+        @DisplayName("token com expiração em 30 segundos deve ser válido antes de expirar")
+        void tokenComExpiracaoEm30SegundosDeveSerValidoAntesDeExpirar() {
+            String token = criarTokenComExpiracaoEmSegundos(30);
+            assertThat(jwtService.isTokenValido(token, userDetails)).isTrue();
+            /**extrair e verificar**/
+            Claims claims = jwtService.obterClaims(token);
+            /**verificação de expiração, feita com 30 segundos a mais na hora de gerar o
+             * token, está ok!!!
+             * **/ 
+            assertThat(claims.getExpiration()).isAfter(new Date());
+        }
     }
 
     /**3. getUserLogin**/
@@ -404,9 +417,7 @@ class JwtServiceTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // 7. Proteção contra Alg None (ataque crítico de JWT)
-    // ════════════════════════════════════════════════════════════════════════
+    /**7. Proteção contra Alg None (ataque crítico de JWT)**/
 
     @Nested
     @DisplayName("7 — Proteção contra ataque 'Algorithm None'")
@@ -434,9 +445,7 @@ class JwtServiceTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // 8. Integridade do ciclo completo (round-trip)
-    // ════════════════════════════════════════════════════════════════════════
+    /**8. Integridade do ciclo completo (round-trip)**/
 
     @Nested
     @DisplayName("8 — Round-trip: gerar → parsear → validar")
@@ -507,6 +516,19 @@ class JwtServiceTest {
                 .issuer(ISSUER)
                 .issuedAt(Date.from(agora.minus(2, ChronoUnit.HOURS)))
                 .expiration(Date.from(agora.minus(1, ChronoUnit.HOURS))) // expirou há 1h
+                .signWith(key)
+                .compact();
+    }
+
+    /** Token válido apenas por alguns segundos a partir de agora */
+    private String criarTokenComExpiracaoEmSegundos(long segundos) {
+        SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+        Instant agora = Instant.now();
+        return Jwts.builder()
+                .subject(usuarioBase.getEmail())
+                .issuer(ISSUER)
+                .issuedAt(Date.from(agora))
+                .expiration(Date.from(agora.plus(segundos, ChronoUnit.SECONDS)))
                 .signWith(key)
                 .compact();
     }
