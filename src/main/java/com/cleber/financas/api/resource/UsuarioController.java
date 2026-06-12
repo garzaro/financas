@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,12 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cleber.financas.api.converter.UsuarioConverter;
+import com.cleber.financas.api.dto.TokenDTO;
 import com.cleber.financas.api.dto.UsuarioAutenticacaoDTO;
 import com.cleber.financas.api.dto.UsuarioDTO;
 import com.cleber.financas.exception.ErroDeAutenticacao;
 import com.cleber.financas.exception.ErroValidacaoException;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.service.JwtService;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
 
@@ -31,29 +32,38 @@ import com.cleber.financas.service.UsuarioService;
  * http://localhost:8081/v1/auth/usuario
  * 
  * */
-@RequestMapping("/api/v1/usuario")
+@RequestMapping("/api/join/sign-up/") //api/usuario
 //@CrossOrigin(origins = "http://localhost:3000")
 public class UsuarioController {
     
     private final UsuarioService usuarioService;
     private final LancamentoService lancamentoService;
     private final UsuarioConverter usuarioConverter;
+    private final JwtService jwtService;
     
     public UsuarioController(
             UsuarioService usuarioService,
             LancamentoService lancamentoService,
-            UsuarioConverter usuarioConverter
+            UsuarioConverter usuarioConverter,
+            JwtService jwtService
     ){
         this.usuarioService = usuarioService;
         this.lancamentoService = lancamentoService;
         this.usuarioConverter = usuarioConverter;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/autenticar")
     public ResponseEntity<?> autenticar(@RequestBody UsuarioAutenticacaoDTO dto) {
         try {
             Usuario usuarioAutenticado = usuarioService.autenticar(dto.getEmail(), dto.getSenha());
-            return ResponseEntity.ok(usuarioAutenticado);
+            String token = jwtService.gerarToken(usuarioAutenticado);
+            TokenDTO tokenDTO = TokenDTO.builder()
+                    .nome(usuarioAutenticado.getNomeCompleto())
+                    .email(usuarioAutenticado.getEmail())
+                    .token(token)
+                    .build();
+            return ResponseEntity.ok(tokenDTO);
         } catch (ErroDeAutenticacao e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

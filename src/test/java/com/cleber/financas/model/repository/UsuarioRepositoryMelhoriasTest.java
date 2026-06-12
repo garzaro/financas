@@ -1,6 +1,8 @@
 package com.cleber.financas.model.repository;
 
-import com.cleber.financas.model.entity.Usuario;
+import java.time.Instant;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,14 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Optional;
+import com.cleber.financas.model.entity.Usuario;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
@@ -99,7 +97,7 @@ public class UsuarioRepositoryMelhoriasTest {
 
     private static Usuario criarUsuario(){
         return Usuario.builder()
-                .nome("Madonna da Silva")
+                .nomeCompleto("Madonna da Silva")
                 .nomeUsuario("cricri")
                 .cpf("123.456.789.00")
                 .email("cricri@gmail.com")

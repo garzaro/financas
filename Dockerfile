@@ -1,5 +1,5 @@
 # Etapa 1: Build Otimizado
-FROM maven:3.9-eclipse-temurin-17-alpine AS builder
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
 
 # Otimização do cache de dependências: Baixar dependências antes de compilar
@@ -13,7 +13,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B -q
 
 # Etapa 2: Runtime Minimalista
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Criação de usuário não-root (Boas práticas de segurança)

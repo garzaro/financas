@@ -22,7 +22,7 @@ public class CriptoMoedaController {
 	private final CriptoMoedaService criptoMoedaService;
 	
 	@PostMapping
-	public ResponseEntity salvarCriptomoeda( @Valid @RequestBody CriptoMoedaDTO dto){
+	public ResponseEntity<Object> salvarCriptomoeda(@RequestBody @Valid CriptoMoedaDTO dto){
 		try {
 			CriptoMoedaDTO salvarCriptomoeda = criptoMoedaService.salvarCriptomoeda(dto);
 			return ResponseEntity.status(HttpStatus.CREATED).body(salvarCriptomoeda);

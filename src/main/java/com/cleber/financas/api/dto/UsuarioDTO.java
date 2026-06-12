@@ -1,23 +1,36 @@
 package com.cleber.financas.api.dto;
 
-/*Não usei @Builder, @Getter, @Setter
-* resolvi criar na mão o codigo*/
-
+/**
+ * Não usei @Builder, @Getter, @Setter
+ * resolvi criar na mão o codigo
+ * 
+ * Implementar Bean Validatation 
+ * */
 import java.time.Instant;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
+/**
+ * TODO-list
+ * [] - Não permitir usuario salvar senha com o proprio nome
+ * **/
+
 public class UsuarioDTO {
-    private UUID id;
-    @JsonAlias({"nome_completo", "nomeCompleto"})
-    private String nomeCompleto;
-    private String cpf;
+	private UUID id;
+    
+	@JsonAlias({"nome_completo", "nomeCompleto"})
+	private String nomeCompleto;
+    
+	private String cpf;
     
     @JsonAlias({"nome_usuario", "nomeUsuario"})
     private String nomeUsuario;
+    
     private String email;
+    
     private String senha;
+    
     private Instant dataCadastro;
 
     public UsuarioDTO() {

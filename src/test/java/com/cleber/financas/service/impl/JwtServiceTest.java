@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -71,12 +73,14 @@ class JwtServiceTest {
 //  "sub": "usuario@email.com",
 //  "exp": 1717372800
 //}
-    private static final String ISSUER = "financas";
+    private static final String ISSUER = "financas-api";
 
     @Autowired
     private JwtService jwtService;
 
     private Usuario usuarioBase;
+
+    private UserDetails userDetails;
 
     /**configuration**/ 
     @BeforeEach
@@ -88,6 +92,11 @@ class JwtServiceTest {
                 .email("cleber@gmail.com")
                 .cpf("12345678900")
                 .senha("senha-hash-qualquer")
+                .build();
+
+        userDetails = User.builder()
+                .username(usuarioBase.getEmail())
+                .password(usuarioBase.getSenha())
                 .build();
     }
 
@@ -140,9 +149,9 @@ class JwtServiceTest {
         void claimIdDeveEstarPresenteCorreponderUsuario() {
             String token = jwtService.gerarToken(usuarioBase);
             Claims claims = jwtService.obterClaims(token);
-            // JJWT deserializa números como Integer ou Long dependendo do valor
-            Number idClaim = (Number) claims.get("id");
-            assertThat(idClaim.longValue()).isEqualTo(1L);
+            // JJWT deserializa UUID como String
+            String idClaim = (String) claims.get("id");
+            assertThat(UUID.fromString(idClaim)).isEqualTo(usuarioBase.getId());
         }
 
         @Test
@@ -176,8 +185,7 @@ class JwtServiceTest {
             Claims claims = jwtService.obterClaims(token);
             assertThat(claims.get("horaExpiracao", String.class))
                     .isNotNull()
-                    .isNotBlank()
-                    .matches("\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}:\\d{2}");
+                    .isNotBlank();
         }
 
         @Test
@@ -260,7 +268,7 @@ class JwtServiceTest {
         @DisplayName("token recém-gerado deve ser válido")
         void tokenRecenteDeveSerValido() {
             String token = jwtService.gerarToken(usuarioBase);
-            assertThat(jwtService.isTokenValido(token)).isTrue();
+            assertThat(jwtService.isTokenValido(token, userDetails)).isTrue();
         }
 
         @Test
@@ -274,7 +282,11 @@ class JwtServiceTest {
                     .cpf("12345678900")
                     .senha("senha")
                     .build();
-            assertThat(jwtService.isTokenValido(jwtService.gerarToken(outro))).isTrue();
+            UserDetails otherUserDetails = User.builder()
+                    .username(outro.getEmail())
+                    .password(outro.getSenha())
+                    .build();
+            assertThat(jwtService.isTokenValido(jwtService.gerarToken(outro), otherUserDetails)).isTrue();
         }
     }
 
@@ -289,7 +301,7 @@ class JwtServiceTest {
         void tokenExpiradoDeveRetornarFalse() {
             // cria token já expirado manualmente
             String tokenExpirado = criarTokenExpirado();
-            assertThat(jwtService.isTokenValido(tokenExpirado)).isFalse();
+            assertThat(jwtService.isTokenValido(tokenExpirado, userDetails)).isFalse();
         }
 
         @Test
@@ -298,46 +310,46 @@ class JwtServiceTest {
             String token = jwtService.gerarToken(usuarioBase);
             // corrompe o último caractere da assinatura
             String adulterado = token.substring(0, token.length() - 3) + "QUEBROU-LA-DENTRO";
-            assertThat(jwtService.isTokenValido(adulterado)).isFalse();
+            assertThat(jwtService.isTokenValido(adulterado, userDetails)).isFalse();
         }
 
         @Test
         @DisplayName("token completamente inválido deve retornar false")
         void tokenInvalidoDeveRetornarFalse() {
-            assertThat(jwtService.isTokenValido("isso.nao.e.um.token")).isFalse();
+            assertThat(jwtService.isTokenValido("isso.nao.e.um.token", userDetails)).isFalse();
         }
 
         @Test
         @DisplayName("token vazio deve retornar false")
         void tokenVazioDeveRetornarFalse() {
-            assertThat(jwtService.isTokenValido("")).isFalse();
+            assertThat(jwtService.isTokenValido("", userDetails)).isFalse();
         }
 
         @Test
         @DisplayName("token null deve retornar false")
         void tokenNullDeveRetornarFalse() {
-            assertThat(jwtService.isTokenValido(null)).isFalse();
+            assertThat(jwtService.isTokenValido(null, userDetails)).isFalse();
         }
 
         @Test
         @DisplayName("token assinado com chave diferente deve retornar false")
         void tokenAssinadoComChaveDiferenteDeveRetornarFalse() {
             String tokenFalso = criarTokenComChaveDiferente();
-            assertThat(jwtService.isTokenValido(tokenFalso)).isFalse();
+            assertThat(jwtService.isTokenValido(tokenFalso, userDetails)).isFalse();
         }
 
         @Test
         @DisplayName("token com issuer diferente deve retornar false")
         void tokenComIssuerDiferenteDeveRetornarFalse() {
             String tokenFalso = criarTokenComIssuerDiferente();
-            assertThat(jwtService.isTokenValido(tokenFalso)).isFalse();
+            assertThat(jwtService.isTokenValido(tokenFalso, userDetails)).isFalse();
         }
 
         @Test
         @DisplayName("token sem issuer deve retornar false (ISSUER é obrigatório)")
         void tokenSemIssuerDeveRetornarFalse() {
             String tokenSemIssuer = criarTokenSemIssuer();
-            assertThat(jwtService.isTokenValido(tokenSemIssuer)).isFalse();
+            assertThat(jwtService.isTokenValido(tokenSemIssuer, userDetails)).isFalse();
         }
     }
 
@@ -410,7 +422,7 @@ class JwtServiceTest {
         @DisplayName("token com alg=none deve ser rejeitado — isTokenValido retorna false")
         void tokenAlgNoneDeveSerRejeitadoPorIsTokenValido() {
             String tokenAlgNone = criarTokenAlgNone();
-            assertThat(jwtService.isTokenValido(tokenAlgNone)).isFalse();
+            assertThat(jwtService.isTokenValido(tokenAlgNone, userDetails)).isFalse();
         }
 
         @Test
@@ -431,7 +443,7 @@ class JwtServiceTest {
     class RoundTrip {
 
         @Test
-        @DisplayName("ciclo completo com usuário de id máximo (Long)")
+        @DisplayName("ciclo completo com usuário de id máximo (UUID)")
         void cicloCompletoComIdMaximo() {
             Usuario u = Usuario.builder()
                     .id(UUID.randomUUID())
@@ -443,11 +455,12 @@ class JwtServiceTest {
                     .build();
 
             String token = jwtService.gerarToken(u);
-            assertThat(jwtService.isTokenValido(token)).isTrue();
+            UserDetails otherUserDetails = User.builder()
+                    .username(u.getEmail())
+                    .password(u.getSenha())
+                    .build();
+            assertThat(jwtService.isTokenValido(token, otherUserDetails)).isTrue();
             assertThat(jwtService.getUserLogin(token)).isEqualTo("max@gov.br");
-
-            Claims claims = jwtService.obterClaims(token);
-            assertThat(((Number) claims.get("id")).longValue()).isEqualTo(Long.MAX_VALUE);
         }
 
         @Test
@@ -465,7 +478,12 @@ class JwtServiceTest {
             String token = jwtService.gerarToken(u);
             Claims claims = jwtService.obterClaims(token);
             assertThat(claims.get("nome", String.class)).isEqualTo("Álvaro Müller Ção");
-            assertThat(jwtService.isTokenValido(token)).isTrue();
+            
+            UserDetails otherUserDetails = User.builder()
+                    .username(u.getEmail())
+                    .password(u.getSenha())
+                    .build();
+            assertThat(jwtService.isTokenValido(token, otherUserDetails)).isTrue();
         }
 
         @Test

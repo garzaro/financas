@@ -1,17 +1,24 @@
 package com.cleber.financas.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.envers.Audited;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.envers.Audited;
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 @Audited
 @Builder
@@ -23,13 +30,13 @@ import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 @Table(name= "usuario", schema = "financeiro")
 public class Usuario{
     
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "id_usuario")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id_usuario", updatable = false, nullable = false)
     private UUID id;
     
-    @Column(name = "nome")
-    private String nome;
+    @Column(name = "nome_completo")
+    private String nomeCompleto;
 
     @Column(name = "cpf")
     private String cpf;
