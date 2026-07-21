@@ -6,32 +6,42 @@ package com.cleber.financas.api.dto;
  * 
  * Implementar Bean Validatation 
  * */
-import java.time.Instant;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 /**
  * TODO-list
- * [] - Não permitir usuario salvar senha com o proprio nome
+ *
  * **/
 
 public class UsuarioDTO {
 	private UUID id;
     
+	@NotBlank(message = "{usuario.nome-completo.obrigatorio}")
+	@Pattern(regexp = "^[a-zA-ZÀ-ÿ\\s]+$", message = "{usuario.nome-completo.invalido}")
 	@JsonAlias({"nome_completo", "nomeCompleto"})
 	private String nomeCompleto;
     
+	@NotBlank(message = "{usuario.cpf.obrigatorio}")
 	private String cpf;
     
+	@NotBlank(message = "{usuario.nome-usuario.obrigatorio}")
     @JsonAlias({"nome_usuario", "nomeUsuario"})
     private String nomeUsuario;
     
+	@NotBlank(message = "{usuario.email.obrigatorio}")
+	@Email(message = "{usuario.email.invalido}")
     private String email;
     
+	@NotBlank(message = "{usuario.senha.obrigatoria}")
     private String senha;
     
-    private Instant dataCadastro;
+    private LocalDateTime dataCadastro;
 
     public UsuarioDTO() {
 
@@ -72,7 +82,7 @@ public class UsuarioDTO {
         return senha;
     }
 
-    public Instant getDataCadastro() {
+    public LocalDateTime getDataCadastro() {
         return dataCadastro;
     }
 
@@ -83,7 +93,7 @@ public class UsuarioDTO {
         private String nomeUsuario;
         private String email;
         private String senha;
-        private Instant dataCadastro;
+        private LocalDateTime dataCadastro;
 
         public UsuarioBuilder setId(UUID id) {
             this.id = id;
@@ -115,7 +125,7 @@ public class UsuarioDTO {
             return this;
         }
 
-        public UsuarioBuilder setDataCadastro(Instant dataCadastro) {
+        public UsuarioBuilder setDataCadastro(LocalDateTime dataCadastro) {
             this.dataCadastro = dataCadastro;
             return this;
         }

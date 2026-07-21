@@ -1,20 +1,30 @@
 package com.cleber.financas.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.servlet.http.HttpServletResponse;
+import com.cleber.financas.security.JwtAuthenticationFilter;
 
 /**
  * TODO-list
@@ -26,20 +36,31 @@ import jakarta.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final UsuarioDetailsService usuarioDetailsService;
+
+	public SecurityConfig(
+			JwtAuthenticationFilter jwtAuthenticationFilter,
+			UsuarioDetailsService usuarioDetailsService
+			) {
+			super();
+			this.usuarioDetailsService = usuarioDetailsService;
+			this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+	}   
 	
-	private final JwtFilter jwtFilter; // Seu filtro customizado de JWT
-
-    public SecurityConfig(JwtFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
+ @Bean
+    public PasswordEncoder passwordEncoder() {
+        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     }
-
-//    private UserDetailsService securityUserDetailsService;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
 				/**Desabilita CSRF (APIs baseadas em Token) - method reference**/
 				.csrf(AbstractHttpConfigurer::disable)
+				/** Habilita as configurações de CORS **/
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
 				/**Configura a política de sessão sem estado — nenhuma HttpSession criada. **/
 				.sessionManagement(session -> session
@@ -47,29 +68,17 @@ public class SecurityConfig {
 
 				/**regras de autorização de rotas - endpoint de login e cadastro **/
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(HttpMethod.POST, "/api/join/passwordless-auth/**").permitAll() //permite o inscrito fazer login
-						.requestMatchers(HttpMethod.POST, "/api/join/sign-up/**").permitAll() //permite qualquer um cadastrar
-						
+						.requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/auth/join/sign-up/**").permitAll() // caminho real do controlador
 						/** 👇 LIBERA AS ROTAS DO SWAGGER E OPENAPI 👇**/
 	                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 //	                    .requestMatchers("/actuator/**").hasRole("ADMIN")
 //	                    .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-	                    .requestMatchers("/api/**").hasRole("USER")
-						
+	                    .requestMatchers("/api/**").hasRole("USER")						
 	                    /**qualquer outra requisicao deve estar autenticado**/
 						.anyRequest().authenticated()	    			
 				)
-				
-				/** Configurei o provedor de autenticação personalizado. **/
-//        		.userDetailsService(securityUserDetailsService)
-				
-				/**Tratamento de excessao (Mostra 401, não redirecionar para tela de login) - VER JwtAuthenticationEntryPoint**/
-				.exceptionHandling(ex -> ex
-						.authenticationEntryPoint((request, response, authException) -> {
-							response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-							response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-							response.getWriter().write("{\"error\": \"Não autorizado Papai\"}");
-						}))
+				.authenticationProvider(authenticationProvider())
+
 				
 				/** 
 				 * Usuario não envia usuario e senha a cada requisião,
@@ -85,49 +94,39 @@ public class SecurityConfig {
 				 *  Autentica o usuário no contexto do Spring - SecurityContextHolder, o cofrinho
 				 *  
 				 *  **/
-				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) //UNPAF carrega os dados do usuário e suas Authorities/permissões) e injeta no cofrinho.
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) //UNPAF carrega os dados do usuário e suas Authorities/permissões) e injeta no cofrinho.
 				
 				/** pra uso do postman/Insomnia **/
 	    		.httpBasic(Customizer.withDefaults())			   			 
 				
-				.build();    	
+				.build();
+		
+	}
+					@Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(usuarioDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
-    
-    /**
-     * Define o algoritmo de criptografia que o Manager vai usar mano para testar a
-     * senha
-     **/
+
+    /** Expõe o gerenciador de autenticação para o Controller **/
     @Bean
-    PasswordEncoder passwordEncoder() {
-        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
-    
-      	
-    	
-//    /**injecao manual do passwordEncoder e userDetailsService - Vai aparecer warning na stacktrace**/
-//    @Bean
-//    AuthenticationProvider authenticationProvider() {
-//        /**
-//         * Estou falando para o provedor como buscar o usuario (banco de dados)
-//         * através da injeção via construtor, pois o construtor vazio e o 
-//         * setUserDetailsService foram depreciados.
-//         **/
-//        DaoAuthenticationProvider authProvider =
-//                new DaoAuthenticationProvider(securityUserDetailsService);
-//        /**deprecated**/
-////        authProvider.setUserDetailsService(securityUserDetailsService);
-//
-//        /** Estou falando para o provedor como validar a senha criptograda (Argon2)**/
-//        authProvider.setPasswordEncoder(passwordEncoder());
-//        return authProvider;
-//    }
-//
-//    /** Expõe o gerenciador de autenticação para o Controller **/
-//    @Bean
-//    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-//        return authConfig.getAuthenticationManager();
-//    }
-    
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // ajuste para o domínio real do front
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }    
 }
 
 /**
@@ -166,22 +165,4 @@ public class SecurityConfig {
  * Para receber autenticação via formulario de login ou postman
  * .httpBasic(Customizer.withDefaults())
  * 
- * 
- * { configurer -> configurer
- * .loginPage("/login")
- * .successForwardUrl("/home"))
- * }
- * 
- * Para paginas web, onde que renderiza a pafina é o navegador
- * 
- * .formLogin(configurer -> configurer
- * 	    				.loginPage("/login") 
- *      				.loginProcessingUrl("/login")
- *        				.successForwardUrl("/home")
- *         				.defaultSuccessUrl("/home", true)
- *         				.permitAll())
- *         	    		.logout(logout -> logout
- *         				.logoutUrl("/logout")
- *         				.logoutSuccessUrl("/public")
- *         				.permitAll())
  ***/

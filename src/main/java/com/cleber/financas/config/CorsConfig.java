@@ -11,25 +11,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * implementação (navegador)
+ * forma nativa do Spring MVC para configurar CORS globalmente
+ * sem Sring Security
  **/
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
-	@Bean
-	WebMvcConfigurer corsConfigurer() {
-		return new WebMvcConfigurer() {
-			@Override
-			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/api/**")
-						.allowedOrigins("http://localhost:3001")
-						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-						.allowedHeaders("*")
-						.allowCredentials(true)
-						/**
-						 * um cache de 60 minutos
-						 */
-						.maxAge(3600);
-			}
-		};
+
+	@Override
+	public void addCorsMappings(@NonNull CorsRegistry registry) {
+		registry.addMapping("/api/**")
+				.allowedOrigins("http://localhost:3000")
+				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+				.allowedHeaders("*")
+				.allowCredentials(true)
+				.maxAge(3600);
 	}
 }
 

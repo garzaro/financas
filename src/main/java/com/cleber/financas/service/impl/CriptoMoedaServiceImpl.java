@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.cleber.financas.exception.RegraDeNegocioException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,12 +35,15 @@ public class CriptoMoedaServiceImpl implements CriptoMoedaService{
 	@Override
 	@Transactional
 	public CriptoMoedaDTO salvarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO) {
+		if (criptoMoedaDTO.getAtivo() == null) {
+			throw new RegraDeNegocioException("A criptomoeda não pode ser nula");
+		}
 		
 		CriptoMoeda entidadeConvertida = criptoMoedaMapper.dtoToEntity(criptoMoedaDTO);
 		
-		CriptoMoeda salvarCriptomoeda = criptoMoedaRepository.save(entidadeConvertida);
+		CriptoMoeda criptoMoedaSalva = criptoMoedaRepository.save(entidadeConvertida);
 		
-		return criptoMoedaMapper.entityToDto(salvarCriptomoeda);
+		return criptoMoedaMapper.entityToDto(criptoMoedaSalva);
 	}
 	
 	@Override

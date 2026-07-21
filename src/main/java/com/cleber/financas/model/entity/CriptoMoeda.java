@@ -56,7 +56,7 @@ public class CriptoMoeda {
 	@Column(name = "corretora")
 	private String corretora;
 	
-	@Column(name = "criptomoeda")
+	@Column(name = "criptomoeda", nullable = false)
 	private String criptomoeda;
 	
 	@Column(name = "alavancagem")

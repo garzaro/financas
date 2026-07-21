@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ import com.cleber.financas.model.repository.CriptoMoedaRepository;
 import com.cleber.financas.model.repository.UsuarioRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
  * Testes de integração para a camada de Service relacionada a CriptoMoeda.
@@ -69,15 +71,7 @@ public class CriptoMoedaServiceTest {
     @Rollback(false)
     void deveCriarUmUsuarioEGarantirQueElePossuiUmId() {
         /**cenario**/
-        Usuario usuario = Usuario.builder()
-        		.id(UUID.randomUUID())
-                .nomeCompleto("Usuário Teste")
-                .cpf("12345678900")
-                .nomeUsuario("usuario_teste" + Instant.now().toEpochMilli())
-                .email("usuario_teste" + Instant.now().toEpochMilli() + "@gmail.com")
-                .senha("Senha@123")
-                .dataCadastro(Instant.now())
-                .build();
+        Usuario usuario = criarUsuario();
         /**execução**/
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
         /**verificação**/
@@ -132,12 +126,12 @@ public class CriptoMoedaServiceTest {
         assertThat(salvar.getUuid()).isNotNull();
     }
 
-    /**Objetivo 3: salvar e recuperar por ID com todos os campos corretos**/
+    /**Objetivo 3: salvar umam criptomoeda e recuperar por ID com todos os campos corretos**/
     @Test
-    @DisplayName("deve persistir e recuperar por ID com todos os campos corretos")
+    @DisplayName("deve persistir uma criptomoeda e recuperar por ID com todos os campos corretos")
     @Transactional
     @Rollback(false)
-    void devePersistirERetornarPorIdQuandoSalvar() {
+    void devePersistirCriptomoedaERetornarPorIdQuandoSalvar() {
         /**cenario**/
         CriptoMoedaDTO dto = criarCriptomoeda();
 
@@ -145,33 +139,19 @@ public class CriptoMoedaServiceTest {
         CriptoMoedaDTO salvar = criptoMoedaService.salvarCriptomoeda(dto);
 
         /**verificação**/
-        CriptoMoeda moedaEncontrada = criptoMoedaRepository.findById(salvar.getUsuario()).orElseThrow();
+        CriptoMoeda moedaEncontrada = criptoMoedaRepository.findById(salvar.getUuid()).orElseThrow();
         assertThat(moedaEncontrada).isNotNull();
+        assertThat(moedaEncontrada.getUuid()).isNotNull();
         assertThat(moedaEncontrada.getCriptomoeda()).isEqualTo(dto.getAtivo());
         assertThat(moedaEncontrada.getValorAtual()).isEqualByComparingTo(dto.getValorAtualAtivo());
         assertThat(moedaEncontrada.getValorInvestido()).isEqualByComparingTo(dto.getValorInvestido());
         assertThat(moedaEncontrada.getMes()).isEqualTo(dto.getMes());
     }
 
-    /**Objetivo 4: verificar que dataAtualizacao é preenchida automaticamente ao salvar**/
-    @Test
-    @DisplayName("deve preencher dataAtualizacao automaticamente ao salvar - JA SALVA MAS EU QUIS FAZER")
-    void devePreencherDataAtualizacaoQuandoSalvar() {
-        /**cenario**/
-        CriptoMoedaDTO dto = criarCriptomoeda();
-
-        /**ação**/
-        CriptoMoedaDTO salvo = criptoMoedaService.salvarCriptomoeda(dto);
-
-        /**verificação**/
-        assertThat(salvo).isNotNull();
-        assertThat(salvo.getDataAtualizacao()).isNotNull();
-        assertThat(salvo.getDataAtualizacao()).isInstanceOf(Instant.class);
-    }
-
-    /**Objetivo 5: deve lancar uma excessao quando tentar salvar criptomoeda com valor nulo**/
+    /**Objetivo 4: deve lancar uma excessao quando tentar salvar criptomoeda com valor nulo**/
     @Test
     @DisplayName("deve lançar exceção quando tentar salvar com criptomoeda nula")
+//    @Transactional
     void deveLancarExcecaoQuandoSalvarComCriptomoedaNula() {
         /**cenario**/
         CriptoMoedaDTO dto = criarCriptomoeda();
@@ -181,12 +161,13 @@ public class CriptoMoedaServiceTest {
         assertThatThrownBy(() -> {
             criptoMoedaService.salvarCriptomoeda(dto);
             entityManager.flush();
-        }).isInstanceOf(DataIntegrityViolationException.class);
+        }).isInstanceOf(RegraDeNegocioException.class);
     }
 
-    /**Objetivo 6: deve lancar uma excessao quando tentar salvar usuario com valor nulo**/
+    /**Objetivo 5: deve lancar uma excessao quando tentar salvar usuario com valor nulo**/
     @Test
     @DisplayName("deve lançar exceção quando tentar salvar com id de usuário nulo")
+    @Transactional
     void deveLancarExcecaoQuandoSalvarComUsuarioNulo() {
         /**cenario**/
         CriptoMoedaDTO dto = criarCriptomoeda();
@@ -196,10 +177,10 @@ public class CriptoMoedaServiceTest {
         assertThatThrownBy(() -> {
             criptoMoedaService.salvarCriptomoeda(dto);
             entityManager.flush();
-        }).isInstanceOf(DataIntegrityViolationException.class);
+        }).isInstanceOf(RegraDeNegocioException.class);
     }
 
-    /**Objetivo 7: lançar exceção ao salvar com valorAtual nulo**/
+    /**Objetivo 6: lançar exceção ao salvar com valorAtual nulo**/
     @Test
     @DisplayName("deve lançar exceção quando tentar salvar com valorAtual nulo")
     @Transactional
@@ -215,7 +196,7 @@ public class CriptoMoedaServiceTest {
         }).isInstanceOf(DataIntegrityViolationException.class);
     }
 
-    /**Objetivo 8: buscar por criptomoeda existente e retornar entidade correta**/
+    /**Objetivo 7: buscar por criptomoeda existente e retornar entidade correta**/
     @Test
     @DisplayName("deve retornar entidade correta ao buscar por criptomoeda existente")
     @Transactional
@@ -234,7 +215,7 @@ public class CriptoMoedaServiceTest {
         assertThat(opt.get().getUuid()).isEqualTo(salvo.getUuid());
     }
 
-    /**Objetivo 9: buscar por criptomoeda inexistente e retornar Optional.empty()**/
+    /**Objetivo 8: buscar por criptomoeda inexistente e retornar Optional.empty()**/
     @Test
     @DisplayName("deve retornar Optional.empty ao buscar por criptomoeda inexistente")
     void deveRetornarEmptyQuandoBuscarPorCriptomoedaInexistente() {
@@ -248,7 +229,7 @@ public class CriptoMoedaServiceTest {
         assertThat(optional).isEmpty();
     }
 
-    /**Objetivo 10: buscar por ID existente e retornar entidade correta**/
+    /**Objetivo 9: buscar por ID existente e retornar entidade correta**/
     @Test
     @DisplayName("deve retornar entidade correta ao buscar por ID existente")
     void deveRetornarEntidadeAoBuscarPorIdExistente() {
@@ -264,7 +245,7 @@ public class CriptoMoedaServiceTest {
         assertThat(optional.get().getCriptomoeda()).isEqualTo(dto.getAtivo());
     }
 
-    /**Objetivo 11: buscar por ID inexistente e retornar Optional.empty()**/
+    /**Objetivo 10: buscar por ID inexistente e retornar Optional.empty()**/
     @Test
     @DisplayName("deve retornar Optional.empty ao buscar por ID inexistente")
     void deveRetornarEmptyQuandoBuscarPorIdInexistente() {
@@ -277,7 +258,7 @@ public class CriptoMoedaServiceTest {
         assertThat(optional).isEmpty();
     }
 
-    /**Objetivo 12: retornar todos ao objetos marcados com enums específicos**/
+    /**Objetivo 11: retornar todos ao objetos marcados com enums específicos**/
     @Test
     @DisplayName("deve retornar apenas objetos do StatusTransacao/TipoTransacao especificados")
     @Transactional
@@ -308,7 +289,7 @@ public class CriptoMoedaServiceTest {
         assertThat(compra.get(0).getCriptomoeda()).isEqualTo("SOL");
     }
 
-    /**Objetivo 13: existsByCriptomoeda retorna true para existente**/
+    /**Objetivo 12: existsByCriptomoeda retorna true para existente**/
     @Test
     @DisplayName("deve retornar true para criptomoeda existente usando findByCriptomoeda como verificação")
     void deveRetornarTrueQuandoCriptomoedaExistir() {
@@ -324,7 +305,7 @@ public class CriptoMoedaServiceTest {
         assertThat(existe).isTrue();
     }
 
-    /**Objetivo 14: existsByCriptomoeda retorna false para inexistente**/
+    /**Objetivo 13: existsByCriptomoeda retorna false para inexistente**/
     @Test
     @DisplayName("deve retornar false para criptomoeda inexistente usando findByCriptomoeda como verificação")
     void deveRetornarFalseQuandoCriptomoedaNaoExistir() {
@@ -337,9 +318,9 @@ public class CriptoMoedaServiceTest {
         assertThat(existe).isFalse();
     }
 
-    /**Objetivo 15: atualizar preço do objeto existente e persistir corretamente**/
+    /**Objetivo 14: atualizar valor do objeto existente e persistir corretamente**/
     @Test
-    @DisplayName("deve atualizar preço e persistir corretamente quando o objeto existe")
+    @DisplayName("deve atualizar valor e persistir corretamente quando o objeto existe")
     @Transactional
     @Rollback(false)
     void deveAtualizarPrecoQuandoObjetoExistir() {
@@ -357,7 +338,7 @@ public class CriptoMoedaServiceTest {
         assertThat(atualizada.getValorAtual()).isEqualByComparingTo(BigDecimal.valueOf(5555));
     }
 
-    /**Objetivo 16: atualizar tipoTransacao e verificar persistência**/
+    /**Objetivo 15: atualizar tipoTransacao e verificar persistência**/
     @Test
     @DisplayName("deve atualizar tipoTransacao e persistir corretamente quando objeto existe")
     @Transactional
@@ -377,7 +358,7 @@ public class CriptoMoedaServiceTest {
         assertThat(atualizada.getTipoTransacao()).isEqualTo(TipoTransacao.COMPRA);
     }
 
-    /**Objetivo 17: lançar exceção ao tentar atualizar objeto com ID inexistente**/
+    /**Objetivo 16: lançar exceção ao tentar atualizar objeto com ID inexistente**/
     @Test
     @DisplayName("deve lançar exceção ao tentar atualizar objeto com ID inexistente")
     @Transactional
@@ -390,7 +371,7 @@ public class CriptoMoedaServiceTest {
                 .isInstanceOf(RegraDeNegocioException.class);
     }
 
-    /**Objetivo 18: deletar por ID existente e verificar ausência no banco**/
+    /**Objetivo 17: deletar por ID existente e verificar ausência no banco**/
     @Test
     @DisplayName("deve deletar por ID existente e verificar ausência")
     @Transactional
@@ -408,7 +389,7 @@ public class CriptoMoedaServiceTest {
         assertThat(criptoMoedaService.obterCriptomoedaPorId(salvo.getUuid())).isEmpty();
     }
 
-    /**Objetivo 19: lançar exceção ao tentar deletar ID inexistente**/
+    /**Objetivo 18: lançar exceção ao tentar deletar ID inexistente**/
     @Test
     @DisplayName("deve lançar exceção ao tentar deletar ID inexistente")
     @Transactional
@@ -439,7 +420,7 @@ public class CriptoMoedaServiceTest {
                 .dataSaida(null)
                 .usuario(usuario.getId())
                 .statusTransacao(null)
-                .tipoTransacao(null)
+                .tipoTransacao(null)                
                 .build();
     }
 
@@ -451,7 +432,7 @@ public class CriptoMoedaServiceTest {
                .nomeUsuario("usuario" + Instant.now().toEpochMilli()) // Evitar duplicidade se houver unique constraints
                .email("usuario" + Instant.now().toEpochMilli() + "@gmail.com")
                .senha("Senha@123")
-               .dataCadastro(Instant.now())
+               .dataCadastro(LocalDateTime.now())
                .build();
        return usuarioRepository.save(usuario);
    }
@@ -464,7 +445,7 @@ public class CriptoMoedaServiceTest {
                 .nomeUsuario("usuario")
                 .email("usuario@gmail.com")
                 .senha("Senha@123")
-                .dataCadastro(Instant.now())
+                .dataCadastro(LocalDateTime.now())
                 .build();
     }
 }

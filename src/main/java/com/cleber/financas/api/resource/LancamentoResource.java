@@ -37,7 +37,7 @@ import com.cleber.financas.service.UsuarioService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/lancamento")
+@RequestMapping("/api/Fp/lancamento")
 public class LancamentoResource {
     
     private final LancamentoService lancamentoService;

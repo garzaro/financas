@@ -3,6 +3,7 @@ package com.cleber.financas.api.dto;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.cleber.financas.model.enums.StatusTransacao;
@@ -63,6 +64,9 @@ public class CriptoMoedaDTO {
 	private StatusTransacao statusTransacao;
 	
 	private TipoTransacao tipoTransacao;
-	
+
+	private LocalDateTime dataCadastro;
+
 	private Instant dataAtualizacao;
+
 }

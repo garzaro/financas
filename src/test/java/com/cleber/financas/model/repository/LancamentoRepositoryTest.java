@@ -1,7 +1,9 @@
 package com.cleber.financas.model.repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -15,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.enums.StatusLancamento;
 
 @RunWith(SpringRunner.class)
@@ -39,7 +42,7 @@ public class LancamentoRepositoryTest {
     public void deveAtualizarUmLancamento(){
         Lancamento lancamento = persistirUmLancamento();
         /*atualizar*/
-        lancamento.setMes(7);
+        lancamento.setMes(10);
         lancamento.setStatusLancamento(StatusLancamento.EFETIVADO);
         
         lancamentoRepository.save(lancamento);
@@ -81,12 +84,26 @@ public class LancamentoRepositoryTest {
     }
     
     public static Lancamento criarLancamento() {
+        Usuario usuario = criarUsuario();
         return Lancamento.builder()
                 .descricao("Lancamento de teste para deletar")
                 .ano(2024)
+                .usuario(usuario)
                 .mes(11)
                 .valor(BigDecimal.valueOf(10.55))
                 .statusLancamento(StatusLancamento.PENDENTE)
+                .build();
+    }
+
+    public static Usuario criarUsuario() {
+        return Usuario.builder()
+                .id(UUID.randomUUID())
+                .nomeCompleto("Usuário")
+                .cpf("12345678900")
+                .nomeUsuario("usuario")
+                .email("usuario@gmail.com")
+                .senha("Senha@123")
+                .dataCadastro(LocalDateTime.now())
                 .build();
     }
 }

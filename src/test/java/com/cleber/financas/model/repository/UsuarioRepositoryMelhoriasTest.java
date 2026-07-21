@@ -1,6 +1,6 @@
 package com.cleber.financas.model.repository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -102,7 +102,7 @@ public class UsuarioRepositoryMelhoriasTest {
                 .cpf("123.456.789.00")
                 .email("cricri@gmail.com")
                 .senha("123456")
-                .dataCadastro(Instant.now())
+                .dataCadastro(LocalDateTime.now())
                 .build();
     }
 }

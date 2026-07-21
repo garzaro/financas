@@ -1,5 +1,6 @@
 package com.cleber.financas.service;
 
+import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
 import org.assertj.core.api.Assertions;
@@ -25,38 +26,43 @@ public class UsuarioServiceTest {
     public void deveValidarEmail(){
         /*cenario*/
         usuarioRepository.deleteAll();
-        /*ação, sem verificação, só olha se existe o email/
+        /*ação, sem verificação, só olha se existe o email**/
         usuarioService
-                .validarEmail("cleber@gmail.com");
+                .validarEmailCpf("12345678900", "cleber@gmail.com");
     }
     @Test(expected = RegraDeNegocioException.class)
     public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){
         /*cenario*/
         Usuario cadastrarEmail = Usuario.builder()
+                .nomeCompleto("Cleber Garzaro")
+                .cpf("12345678900")
                 .nomeUsuario("garzaro74")
                 .email("cleber@gmail.com")
+                .senha("Senha@123")
                 .build();
         usuarioRepository.save(cadastrarEmail);
-        /*ação
+        /*ação*/
         usuarioService
-                .validarEmail("cleber@gmail.com");
+                .validarEmailCpf("cleber@gmail.com", "12345678900");
     }
     @Test(expected = Test.None.class)
     public void deveAutenticarUmUsuarioComSucesso(){
         /*cenario*/
         Usuario usuario = Usuario.builder()
+                .nomeCompleto("Cleber Garzaro")
+                .cpf("12345678901")
+                .nomeUsuario("garzaro75")
                 .email("clebergarzaro@gmail.com")
                 .senha("senha123456")
                 .build();
         /*ação*/
-        Usuario salvarUsuario = usuarioRepository.save(usuario);
+        Usuario salvarUsuario = usuarioService.salvarUsuario(usuario);
 
-        // Verificar se o método autenticarUsuario retorna o usuário autenticado corretamente
-        Usuario usuarioAutenticado = usuarioService.autenticar(salvarUsuario.getEmail(), salvarUsuario.getSenha());
+        // Verificar se o metodo autenticarUsuario retorna o usuário autenticado corretamente
+        Usuario usuarioAutenticado = usuarioService.autenticar(salvarUsuario.getEmail(), "senha123456");
 
         /*verificação*/
         Assertions.assertThat(usuarioAutenticado).isNotNull();
         Assertions.assertThat(usuarioAutenticado.getEmail()).isEqualTo(salvarUsuario.getEmail());
-        Assertions.assertThat(usuarioAutenticado.getSenha()).isEqualTo(salvarUsuario.getSenha());
     }
 }

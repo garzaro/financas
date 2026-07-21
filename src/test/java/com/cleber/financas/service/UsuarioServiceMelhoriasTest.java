@@ -1,6 +1,6 @@
 package com.cleber.financas.service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -68,7 +68,7 @@ public class UsuarioServiceMelhoriasTest {
                 .cpf("123.456.789-00")
                 .email("cleber@gmail.com")
                 .senha("senha")
-                .dataCadastro(Instant.now())
+                .dataCadastro(LocalDateTime.now())
                 .build();
     
     }

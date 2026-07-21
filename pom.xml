@@ -19,6 +19,12 @@
         <maven.compiler.target>21</maven.compiler.target>
     </properties>
 	<dependencies>
+
+    	<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-actuator</artifactId>
+    	</dependency>
+
 <!--		    <version>6.2.1</version>-->
 		<dependency>
 		    <groupId>org.springframework.security</groupId>
@@ -51,15 +57,15 @@
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.flywaydb</groupId>-->
+<!--			<artifactId>flyway-core</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-database-postgresql</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.flywaydb</groupId>-->
+<!--			<artifactId>flyway-database-postgresql</artifactId>-->
+<!--		</dependency>-->
 
 		<!-- https://mvnrepository.com/artifact/de.mkammerer/argon2-jvm -->
 		<dependency>
@@ -146,23 +152,23 @@
         <artifactId>spring-boot-starter</artifactId>
     </dependency>
 		
-		<!-- Starter test configurado com as exclusions par o junit 5-->
+		<!-- Starter test configurado com suporte a JUnit 4 e JUnit 5 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/junit/junit [ <version>4.12</version>$NO-MVN-MAN-VER$]-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 
