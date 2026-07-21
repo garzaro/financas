@@ -25,7 +25,7 @@ public class UsuarioDetailsService implements UserDetailsService {
                         .username(usuario.getEmail())
                         .password(usuario.getSenha())
                         .disabled(!Boolean.TRUE.equals(usuario.getIsAtivo()))
-                        .roles("USER")
+                        .roles("ROLE_USER")
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "Usuário não encontrado: " + email

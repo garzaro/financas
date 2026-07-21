@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -36,7 +38,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     private static final Logger log = LoggerFactory.getLogger(UsuarioServiceImpl.class);
 
     private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
+//    private final PasswordEncoder passwordEncoder;
     private final Validator validator;
 
     public UsuarioServiceImpl(
@@ -44,8 +46,12 @@ public class UsuarioServiceImpl implements UsuarioService {
             PasswordEncoder passwordEncoder,
             Validator validator) {
         this.usuarioRepository = usuarioRepository;
-        this.passwordEncoder = passwordEncoder;
+//        this.passwordEncoder = passwordEncoder;
         this.validator = validator;
+    }
+
+    public PasswordEncoder passwordEncoder() {
+        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     }
 
     /**
@@ -69,7 +75,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (!usuario.isPresent()) {
             throw new ErroDeAutenticacao("Verifique seu email e tente novamente.");
         }
-        boolean senhaCorreta = passwordEncoder.matches(senha, usuario.get().getSenha());
+        boolean senhaCorreta = passwordEncoder().matches(senha, usuario.get().getSenha());
         if (!senhaCorreta) {
             throw new ErroDeAutenticacao("Credenciais inválidas.");
         }
@@ -96,7 +102,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario novoUsuario = Usuario.builder()
                 .nomeCompleto(request.nome())
                 .email(request.email())
-                .senha(passwordEncoder.encode(request.senha()))
+                .senha(passwordEncoder().encode(request.senha()))
                 // cpf e nomeUsuario ficam nulos neste fluxo; podem ser completados depois
                 .build();
 
@@ -115,7 +121,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         /* deve validar o email e o cpf, verificar se existe*/
         validarEmailCpf(usuario.getEmail(), usuario.getCpf());
         validarUsuario(usuario);
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /* hash da senha */
+        usuario.setSenha(passwordEncoder().encode(usuario.getSenha())); /* hash da senha */
         return usuarioRepository.save(usuario);
     }
 

@@ -73,7 +73,7 @@ public class SecurityConfig {
 	                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 //	                    .requestMatchers("/actuator/**").hasRole("ADMIN")
 //	                    .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-	                    .requestMatchers("/api/**").hasRole("USER")						
+	                    .requestMatchers("/api/**").hasRole("ROLE_USER")
 	                    /**qualquer outra requisicao deve estar autenticado**/
 						.anyRequest().authenticated()	    			
 				)
@@ -97,7 +97,7 @@ public class SecurityConfig {
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) //UNPAF carrega os dados do usuário e suas Authorities/permissões) e injeta no cofrinho.
 				
 				/** pra uso do postman/Insomnia **/
-	    		.httpBasic(Customizer.withDefaults())			   			 
+//	    		.httpBasic(Customizer.withDefaults())
 				
 				.build();
 		
