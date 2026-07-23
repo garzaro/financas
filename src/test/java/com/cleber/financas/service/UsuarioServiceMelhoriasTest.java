@@ -62,7 +62,7 @@ public class UsuarioServiceMelhoriasTest {
     /*para criar instancias*/
     public static Usuario criarUsuario(){
         return Usuario.builder()
-                .id(UUID.randomUUID())
+                .uuid(UUID.randomUUID())
                 .nomeCompleto("Cleber")
                 .nomeUsuario("garzaro")
                 .cpf("123.456.789-00")

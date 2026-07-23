@@ -40,7 +40,7 @@ public interface CriptoMoedaMapper {
 		        return null;
 		    }
 		    Usuario usuario = new Usuario();
-		    usuario.setId(id);
+		    usuario.setUuid(id);
 		    return usuario;
 		}	
 	
@@ -59,7 +59,7 @@ public interface CriptoMoedaMapper {
         if (usuario == null) {
             return null;
         }
-        return usuario.getId();
+        return usuario.getUuid();
     }
 }
 

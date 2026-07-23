@@ -37,14 +37,14 @@ public class UsuarioServiceSpyTest {
 
         /*ação*/
         Usuario persistir = criarUsuario();
-        persistir.setId(null);
+        persistir.setUuid(null);
         Usuario usuarioSalvo = usuarioServiceImpl
                 .salvarUsuario(persistir);
 
         /*verificação*/
         Assertions.assertThat(usuarioSalvo)
                 .isNotNull();
-        Assertions.assertThat(usuarioSalvo.getId())
+        Assertions.assertThat(usuarioSalvo.getUuid())
                 .isEqualTo(1l);
         Assertions.assertThat(usuarioSalvo.getNomeCompleto())
                 .isEqualTo("Cleber Garzaro");
@@ -72,7 +72,7 @@ public class UsuarioServiceSpyTest {
     /*criar instacias*/
     public static Usuario criarUsuario() {
         return Usuario.builder()
-                .id(UUID.randomUUID())
+                .uuid(UUID.randomUUID())
                 .nomeCompleto("Cleber Garzaro")
                 .cpf("12345678900")
                 .nomeUsuario("garzaro74")

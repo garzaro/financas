@@ -97,7 +97,7 @@ public class LancamentoRepositoryTest {
 
     public static Usuario criarUsuario() {
         return Usuario.builder()
-                .id(UUID.randomUUID())
+                .uuid(UUID.randomUUID())
                 .nomeCompleto("Usuário")
                 .cpf("12345678900")
                 .nomeUsuario("usuario")

@@ -193,7 +193,7 @@ public class LancamentoServiceTest {
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um Usuário.");
-        lancamento.getUsuario().setId(UUID.randomUUID());
+        lancamento.getUsuario().setUuid(UUID.randomUUID());
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real.");

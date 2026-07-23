@@ -18,13 +18,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cleber.financas.api.converter.UsuarioConverter;
 import com.cleber.financas.api.dto.AuthResponse;
 import com.cleber.financas.api.dto.LoginRequest;
-import com.cleber.financas.api.dto.RegisterRequest;
 import com.cleber.financas.api.dto.UsuarioDTO;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
@@ -37,22 +35,16 @@ import jakarta.validation.Valid;
 /**
  * Controlador responsável pelos endpoints de autenticação e gestão de usuários.
  *
- * <p>Mapeamento base: {@code /auth}
- * <ul>
- *   <li>POST /auth/register — registro de novo usuário (criação de conta; sem token)</li>
- *   <li>POST /auth/login    — autenticação e emissão de JWT</li>
- * </ul>
- *
- * <p>Tratamento de erros é delegado ao {@link com.cleber.financas.api.resource.common.GlobalExceptionHandler}:
+ * Mapeamento base: {@code /api/auth}
+ * 
+ * POST /auth/register — registro de novo usuário (criação de conta; sem token)
+ * POST /auth/login    — autenticação e emissão de JWT
+ * 
+ * Tratamento de erros é delegado ao {@link com.cleber.financas.api.resource.common.GlobalExceptionHandler}:
  * {@code BadCredentialsException} → 401, {@code EmailJaCadastradoException} → 409,
  * {@code MethodArgumentNotValidException} → 400.
  */
 @RestController
-/**
- * para mapeamento de todas as requisições
- * http://localhost:8081/v1/auth/usuario
- * 
- * */
 @RequestMapping("/api/auth") //api/usuario
 //@CrossOrigin(origins = "http://localhost:3000")
 public class UsuarioController {
@@ -80,40 +72,10 @@ public class UsuarioController {
 		this.usuarioService = usuarioService;
 		this.lancamentoService = lancamentoService;
 		this.usuarioConverter = usuarioConverter;
-	}
-
-	// -------------------------------------------------------------------------
-    // POST /auth/register
-    // -------------------------------------------------------------------------
+	}    
 
     /**
-     * Registra um novo usuário.
-     *
-     * Apenas cria a conta; o cliente deve chamar {@code /auth/login}
-     * separadamente para obter o token. Isso preserva espaço para
-     * confirmação de e-mail no futuro sem redesenho do endpoint.
-     *
-     * Regras:
-     * 
-     *   Valida os campos via {@code @Valid} (400 automático se inválido)
-     *   Verifica duplicidade de email → 409 via handler global
-     *   Encodifica a senha antes de persistir
-     * 
-     *
-     * @return 201 Created (sem corpo)
-     */
-//    @PostMapping("/register")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public void register(@RequestBody @Valid  UsuarioDTO dto) {
-//        usuarioService.salvarUsuario(request);
-//        log.info("Conta criada com sucesso — email: {}", request.email());
-//    }
-
-    // -------------------------------------------------------------------------
-    // POST /auth/login
-    // -------------------------------------------------------------------------
-
-    /**
+     * POST /auth/sign-in
      * Autentica o usuário e retorna um JWT.
      *
      * Caso as credenciais sejam inválidas, o {@code AuthenticationManager}
@@ -122,7 +84,7 @@ public class UsuarioController {
      *
      * @return 200 OK com {@link AuthResponse} contendo o token e o tipo "Bearer"
      */
-    @PostMapping("/login")
+    @PostMapping("/sign-in")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
         // Delega a validação ao AuthenticationManager; falha lança BadCredentialsException
         authenticationManager.authenticate(
@@ -138,15 +100,10 @@ public class UsuarioController {
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
-    // -------------------------------------------------------------------------
-    // Endpoints de gestão de usuário (mantidos sem alteração de comportamento)
-    // -------------------------------------------------------------------------
-
     /**
-     * Cadastro completo de usuário (fluxo legado com CPF, nome de usuário etc.).
-     * Mapeado em {@code /auth/join/sign-up/} para retrocompatibilidade.
-     */
-    @PostMapping("/join/sign-up/")
+     * Endpoints de gestão de usuário
+     * **/
+    @PostMapping("/join/sign-up")
     public ResponseEntity<Usuario> salvarUsuario(@RequestBody @Valid UsuarioDTO dto) {
         Usuario usuario = Usuario.builder()
                 .nomeCompleto(dto.getNomeCompleto())
@@ -167,7 +124,7 @@ public class UsuarioController {
         return usuarioService.obterUsuarioPorId(id)
                 .map(entity -> {
                     Usuario usuario = usuarioConverter.dtoToEntity(dto);
-                    usuario.setId(id);
+                    usuario.setUuid(id);
                     usuarioService.atualizarUsuario(usuario);
                     return ResponseEntity.ok(usuario);
                 })

@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AtualizarStatusDTO {
-	@NotNull(message = "Status do lançamento não pode ser nulo manoooooooooo")
+	@NotNull(message = "{status.obrigatorio}")
     private String statusLancamento;	
 }

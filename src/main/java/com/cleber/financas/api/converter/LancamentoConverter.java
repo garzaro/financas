@@ -52,7 +52,7 @@ public class LancamentoConverter {
                 .ano(lancamento.getAno())
                 .statusLancamento((lancamento.getStatusLancamento().name())) //tranforma em string - name() - ENUM é string *
                 .tipoLancamento(String.valueOf(lancamento.getTipoLancamento())) // ou fazerum wrap com valueOf*
-                .usuario(lancamento.getUsuario().getId())
+                .usuario(lancamento.getUsuario().getUuid())
                 .build();
     }
 }

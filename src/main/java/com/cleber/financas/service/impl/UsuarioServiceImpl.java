@@ -9,13 +9,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import com.cleber.financas.api.dto.RegisterRequest;
-import com.cleber.financas.exception.EmailJaCadastradoException;
 import com.cleber.financas.exception.ErroDeAutenticacao;
 import com.cleber.financas.exception.ErroValidacaoException;
 import com.cleber.financas.exception.RegraDeNegocioException;
@@ -61,12 +58,8 @@ public class UsuarioServiceImpl implements UsuarioService {
             "gmail.com", "edu.br", "gov.br"
     );
 
-    // -------------------------------------------------------------------------
-    // Fluxo de autenticação legado (usado pelo endpoint /api/auth/autenticar)
-    // -------------------------------------------------------------------------
-
     /**
-     * login, validação e autenticação
+     * fluxo de login 
      */
     @Override
     public Usuario autenticar(String email, String senha) {
@@ -81,40 +74,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         return usuario.get();
     }
-
-    // -------------------------------------------------------------------------
-    // Fluxo de registro JWT — POST /auth/register
-    // -------------------------------------------------------------------------
-
+    
     /**
-     * Registra um novo usuário a partir do DTO simplificado (nome + email + senha).
-     * Valida duplicidade de email antes de persistir; encodifica a senha com o
-     * PasswordEncoder exposto pelo SecurityConfig (Argon2).
-     * Não loga a senha em nenhum nível.
-     */
-    @Override
-    @Transactional
-    public Usuario registrar(RegisterRequest request) {
-        if (usuarioRepository.existsByEmail(request.email())) {
-            throw new EmailJaCadastradoException("E-mail já cadastrado: " + request.email());
-        }
-
-        Usuario novoUsuario = Usuario.builder()
-                .nomeCompleto(request.nome())
-                .email(request.email())
-                .senha(passwordEncoder().encode(request.senha()))
-                // cpf e nomeUsuario ficam nulos neste fluxo; podem ser completados depois
-                .build();
-
-        Usuario salvo = usuarioRepository.save(novoUsuario);
-        log.info("Novo usuário registrado com sucesso — email: {}", salvo.getEmail());
-        return salvo;
-    }
-
-    // -------------------------------------------------------------------------
-    // Fluxo completo (com CPF) — mantido para retrocompatibilidade
-    // -------------------------------------------------------------------------
-
+     * fluxo de registro
+     * **/
     @Override
     @Transactional
     public Usuario salvarUsuario(Usuario usuario) {
@@ -124,16 +87,19 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setSenha(passwordEncoder().encode(usuario.getSenha())); /* hash da senha */
         return usuarioRepository.save(usuario);
     }
-
+    
+    /**
+     * fluxo de atualização
+     * **/
     @Override
     public Usuario atualizarUsuario(Usuario usuario) {
-        Objects.requireNonNull(usuario.getId());
+        Objects.requireNonNull(usuario.getUuid());
         validarUsuario(usuario);
         return usuarioRepository.save(usuario);
     }
 
     /**
-     * VALIDAÇÃO para garantir a integridade dos dados — campos vazio
+     * fluxo de validação — garante a integridade dos dados - campos vazio
      */
     @Override
     public void validarUsuario(Usuario usuario) {
@@ -162,8 +128,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public Optional<Usuario> obterUsuarioPorId(UUID id) {
-        return usuarioRepository.findById(id);
+    public Optional<Usuario> obterUsuarioPorId(UUID uuid) {
+        return usuarioRepository.findById(uuid);
     }
 
     @Override
@@ -171,6 +137,37 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findByCpf(cpf);
     }
 }
+
+
+//-------------------------------------------------------------------------
+// Fluxo de registro JWT — POST /auth/register
+// -------------------------------------------------------------------------
+
+/**
+ * Registra um novo usuário a partir do DTO simplificado (nome + email + senha).
+ * Valida duplicidade de email antes de persistir; encodifica a senha com o
+ * PasswordEncoder exposto pelo SecurityConfig (Argon2).
+ * Não loga a senha em nenhum nível.
+ */
+//@Override
+//@Transactional
+//public Usuario registrar(RegisterRequest request) {
+//    if (usuarioRepository.existsByEmail(request.email())) {
+//        throw new EmailJaCadastradoException("E-mail já cadastrado: " + request.email());
+//    }
+//
+//    Usuario novoUsuario = Usuario.builder()
+//            .nomeCompleto(request.nome())
+//            .email(request.email())
+//            .senha(passwordEncoder().encode(request.senha()))
+//            // cpf e nomeUsuario ficam nulos neste fluxo; podem ser completados depois
+//            .build();
+//
+//    Usuario salvo = usuarioRepository.save(novoUsuario);
+//    log.info("Novo usuário registrado com sucesso — email: {}", salvo.getEmail());
+//    return salvo;
+//}
+
 
  /*
 

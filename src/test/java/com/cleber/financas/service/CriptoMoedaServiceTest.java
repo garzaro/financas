@@ -31,7 +31,6 @@ import com.cleber.financas.model.repository.CriptoMoedaRepository;
 import com.cleber.financas.model.repository.UsuarioRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 /**
  * Testes de integração para a camada de Service relacionada a CriptoMoeda.
@@ -75,7 +74,7 @@ public class CriptoMoedaServiceTest {
         /**execução**/
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
         /**verificação**/
-        assertThat(usuarioSalvo.getId()).isNotNull();
+        assertThat(usuarioSalvo.getUuid()).isNotNull();
     }
 
     /**Objetivo 1: salvar múltiplas entidades e verificar contagem total com findAll()**/
@@ -418,7 +417,7 @@ public class CriptoMoedaServiceTest {
                 .valorAtualAtivo(BigDecimal.valueOf(1100))
                 .fracaoAtivo(BigDecimal.valueOf(0.5))
                 .dataSaida(null)
-                .usuario(usuario.getId())
+                .usuario(usuario.getUuid())
                 .statusTransacao(null)
                 .tipoTransacao(null)                
                 .build();

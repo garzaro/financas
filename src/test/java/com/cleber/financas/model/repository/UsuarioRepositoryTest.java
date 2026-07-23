@@ -2,7 +2,6 @@ package com.cleber.financas.model.repository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -54,7 +53,7 @@ public class UsuarioRepositoryTest {
         Usuario usuarioPersistido = usuarioRepository.save(persistindoUsuario);
         
         /*verificação*/
-        Assertions.assertThat(usuarioPersistido.getId()).isNotNull();
+        Assertions.assertThat(usuarioPersistido.getUuid()).isNotNull();
     }
     
     @Test

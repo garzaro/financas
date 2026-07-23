@@ -15,11 +15,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsuarioAutenticacaoDTO {
-	@NotBlank(message = "Email não pode estar vazio")
-    @Email(message = "Email deve ser válido")
+	@NotBlank(message = "{usuario.email.obrigatorio}")
+    @Email(message = "{usuario.email.invalido}")
     private String email;
 	
-	@NotBlank(message = "Senha não pode estar vazia")
-    @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
+	@NotBlank(message = "{usuario.senha.obrigatoria}")
+    @Size(min = 6, message = "{usuario.senha.tamanho.minimo}")
     private String senha;
 }

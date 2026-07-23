@@ -8,15 +8,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -47,7 +44,7 @@ public class SecurityConfig {
 			super();
 			this.usuarioDetailsService = usuarioDetailsService;
 			this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-	}   
+	}
 	
  @Bean
     public PasswordEncoder passwordEncoder() {
@@ -68,12 +65,14 @@ public class SecurityConfig {
 
 				/**regras de autorização de rotas - endpoint de login e cadastro **/
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/auth/join/sign-up/**").permitAll() // caminho real do controlador
+						.requestMatchers(HttpMethod.POST, "/api/auth/sign-in", "/api/auth/join/sign-up").permitAll()
+//						.requestMatchers(HttpMethod.POST, "/api/auth/join/sign-up").permitAll()
+						
 						/** 👇 LIBERA AS ROTAS DO SWAGGER E OPENAPI 👇**/
 	                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 //	                    .requestMatchers("/actuator/**").hasRole("ADMIN")
 //	                    .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-	                    .requestMatchers("/api/**").hasRole("ROLE_USER")
+	                    .requestMatchers("/**").hasRole("USER")
 	                    /**qualquer outra requisicao deve estar autenticado**/
 						.anyRequest().authenticated()	    			
 				)
@@ -102,7 +101,7 @@ public class SecurityConfig {
 				.build();
 		
 	}
-					@Bean
+	@Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(usuarioDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
@@ -124,9 +123,9 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/api/**", configuration);
         return source;
-    }    
+    }
 }
 
 /**

@@ -139,7 +139,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 			throw new RegraDeNegocioException("Informar um ano válido!");
 		}
 
-		if (lancamento.getUsuario() == null || lancamento.getUsuario().getId() == null) {
+		if (lancamento.getUsuario() == null || lancamento.getUsuario().getUuid() == null) {
 			throw new RegraDeNegocioException("Informar um Usuário!");
 		}
 		/* compareTo para compara valor como BigDecimal */

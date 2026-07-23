@@ -95,7 +95,7 @@ class JwtServiceTest {
     @BeforeEach
     void setUp() {
         usuarioBase = Usuario.builder()
-                .id(UUID.randomUUID())
+                .uuid(UUID.randomUUID())
                 .nomeCompleto("Cleber Teste")
                 .nomeUsuario("cleber")
                 .email("cleber@gmail.com")
@@ -159,7 +159,7 @@ class JwtServiceTest {
             Claims claims = jwtService.obterClaims(jwtService.gerarToken(usuarioBase));
             // JJWT serializa UUID como String
             assertThat(UUID.fromString(claims.get("id", String.class)))
-                    .isEqualTo(usuarioBase.getId());
+                    .isEqualTo(usuarioBase.getUuid());
         }
 
         @Test
@@ -246,7 +246,7 @@ class JwtServiceTest {
         @DisplayName("tokens de usuários distintos devem retornar logins distintos")
         void deveDiferenciarTokensDeUsuariosDistintos() {
             Usuario distinto = Usuario.builder()
-                    .id(UUID.randomUUID())
+                    .uuid(UUID.randomUUID())
                     .nomeCompleto("Usuário Distinto")
                     .nomeUsuario("distinto")
                     .email("distinto@gmail.com")
@@ -280,7 +280,7 @@ class JwtServiceTest {
         @DisplayName("token de outro usuário também deve ser válido para aquele usuário")
         void tokenDeOutroUsuarioDeveSerValidoParaAqueleUsuario() {
             Usuario outro = Usuario.builder()
-                    .id(UUID.randomUUID())
+                    .uuid(UUID.randomUUID())
                     .nomeCompleto("Outro Usuário")
                     .nomeUsuario("outro")
                     .email("outro@gmail.com")
@@ -436,20 +436,20 @@ class JwtServiceTest {
         @Test
         @DisplayName("ciclo completo com UUID aleatório")
         void cicloCompletoComUuidAleatorio() {
-            Usuario u = Usuario.builder()
-                    .id(UUID.randomUUID())
+            Usuario usuario = Usuario.builder()
+                    .uuid(UUID.randomUUID())
                     .nomeCompleto("Max User")
                     .nomeUsuario("maxuser")
                     .email("max@gov.br")
                     .cpf("00000000000")
                     .senha("h")
                     .build();
-            UserDetails ud = User.builder().username(u.getEmail()).password(u.getSenha()).build();
+            UserDetails ud = User.builder().username(usuario.getEmail()).password(usuario.getSenha()).build();
 
-            String token = jwtService.gerarToken(u);
+            String token = jwtService.gerarToken(usuario);
             UserDetails otherUserDetails = User.builder()
-                    .username(u.getEmail())
-                    .password(u.getSenha())
+                    .username(usuario.getEmail())
+                    .password(usuario.getSenha())
                     .build();
             assertThat(jwtService.isTokenValido(token, otherUserDetails)).isTrue();
             assertThat(jwtService.getUserLogin(token)).isEqualTo("max@gov.br");
@@ -459,7 +459,7 @@ class JwtServiceTest {
         @DisplayName("ciclo completo com caracteres especiais no nome")
         void cicloCompletoComCaracteresEspeciais() {
             Usuario u = Usuario.builder()
-                    .id(UUID.randomUUID())
+                    .uuid(UUID.randomUUID())
                     .nomeCompleto("Álvaro Müller Ção")
                     .nomeUsuario("alvaro")
                     .email("alvaro@edu.br")

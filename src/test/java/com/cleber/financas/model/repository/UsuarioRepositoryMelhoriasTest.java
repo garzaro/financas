@@ -71,7 +71,7 @@ public class UsuarioRepositoryMelhoriasTest {
         Usuario usuarioPersistido = usuarioRepository.save(persistindoUsuario);
         
         /*verificação*/
-        Assertions.assertThat(usuarioPersistido.getId()).isNotNull();
+        Assertions.assertThat(usuarioPersistido.getUuid()).isNotNull();
     }
     @Test
     public void deveBuscarUmUsuarioPeloEmail(){

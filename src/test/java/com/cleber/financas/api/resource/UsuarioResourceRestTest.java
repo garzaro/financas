@@ -107,7 +107,7 @@ public class UsuarioResourceRestTest {
                 .build();
 
         Usuario usuario = Usuario.builder()
-                .id(id)
+                .uuid(id)
                 .nomeCompleto(dto.getNomeCompleto())
                 .cpf(dto.getCpf())
                 .nomeUsuario(dto.getNomeUsuario())
@@ -136,7 +136,7 @@ public class UsuarioResourceRestTest {
     public void deveRetornarOSaldoDeUmUsuario() throws Exception {
         UUID id = UUID.randomUUID();
         BigDecimal saldo = BigDecimal.valueOf(1500);
-        Usuario usuario = Usuario.builder().id(id).email("cleber@gmail.com").senha("senha123").build();
+        Usuario usuario = Usuario.builder().uuid(id).email("cleber@gmail.com").senha("senha123").build();
 
         Mockito.when(usuarioService.obterUsuarioPorId(id)).thenReturn(Optional.of(usuario));
         Mockito.when(lancamentoService.obterSaldoPorUsuario(id)).thenReturn(saldo);

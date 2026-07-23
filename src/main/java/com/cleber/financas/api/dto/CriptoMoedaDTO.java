@@ -51,7 +51,7 @@ public class CriptoMoedaDTO {
 	private BigDecimal valorAtualAtivo;
 	
 	@NotNull(message = "{fracao.ativo.obrigatorio}")
-	@PositiveOrZero(message = "fracao.ativo.acima.de.zero")
+	@PositiveOrZero(message = "{fracao.ativo.acima.de.zero}")
 	private BigDecimal fracaoAtivo;
 	
 	private LocalDate dataSaida;
