@@ -28,7 +28,7 @@ public class UsuarioDetailsService implements UserDetailsService {
                         .roles("USER")
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "Usuário não encontrado: " + email
+                        "Usuário não encontrado"
                 ));
     }
 }

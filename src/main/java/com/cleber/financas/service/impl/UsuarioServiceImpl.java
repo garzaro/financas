@@ -84,6 +84,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         /* deve validar o email e o cpf, verificar se existe*/
         validarEmailCpf(usuario.getEmail(), usuario.getCpf());
         validarUsuario(usuario);
+        usuario.setIsAtivo(true);
         usuario.setSenha(passwordEncoder().encode(usuario.getSenha())); /* hash da senha */
         return usuarioRepository.save(usuario);
     }

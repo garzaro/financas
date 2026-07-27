@@ -60,7 +60,8 @@ public class Usuario{
     @Column(nullable = false)
     private Instant dataAtualizacao;
 
-    @Column(name = "ativo")
+    // @Builder.Default //ja nasce ativo
+    @Column(name = "is_ativo")
     private Boolean isAtivo;
 
     /*GETTERS AND SETTERS*/

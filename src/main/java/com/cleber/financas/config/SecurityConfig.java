@@ -65,7 +65,7 @@ public class SecurityConfig {
 
 				/**regras de autorização de rotas - endpoint de login e cadastro **/
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(HttpMethod.POST, "/api/auth/sign-in", "/api/auth/join/sign-up").permitAll()
+						.requestMatchers("/api/auth/sign-in", "/api/auth/join/sign-up").permitAll()
 //						.requestMatchers(HttpMethod.POST, "/api/auth/join/sign-up").permitAll()
 						
 						/** 👇 LIBERA AS ROTAS DO SWAGGER E OPENAPI 👇**/
@@ -103,14 +103,17 @@ public class SecurityConfig {
 	}
 	@Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(usuarioDetailsService);
+        DaoAuthenticationProvider provider =
+        		new DaoAuthenticationProvider(usuarioDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
 
     /** Expõe o gerenciador de autenticação para o Controller **/
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    AuthenticationManager authenticationManager(
+    		AuthenticationConfiguration authConfig)
+    				throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
@@ -119,8 +122,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000")); // ajuste para o domínio real do front
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);

@@ -75,7 +75,6 @@ public class UsuarioController {
 	}    
 
     /**
-     * POST /auth/sign-in
      * Autentica o usuário e retorna um JWT.
      *
      * Caso as credenciais sejam inválidas, o {@code AuthenticationManager}
