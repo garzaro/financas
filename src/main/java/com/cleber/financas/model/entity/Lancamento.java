@@ -35,8 +35,8 @@ import lombok.NoArgsConstructor;
 public class Lancamento {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
-    private UUID id;
+    @Column(name = "uuid")
+    private UUID uuid;
     
     @Column(name = "descricao")
     private String descricao;
@@ -48,7 +48,7 @@ public class Lancamento {
     private Integer ano;
     
     @ManyToOne
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "usuario_uuid", referencedColumnName = "uuid", nullable = false)
     private Usuario usuario;
 
     @Column(name = "valor")

@@ -1,13 +1,11 @@
 package com.cleber.financas.service.impl;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,19 +45,33 @@ public class UsuarioServiceImpl implements UsuarioService {
         this.validator = validator;
     }
 
+    @Bean
     public PasswordEncoder passwordEncoder() {
-        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+        /**Argon2id nativo via Bouncy Castle**/
+        int saltLength = 16;         // 16 bytes (128 bits)
+        int hashLength = 32;         // 32 bytes (256 bits)
+        int parallelism = 1;         // 1 thread
+        int memory = 1 << 16;        // 64 MiB (65536 KiB)
+        int iterations = 3;          // 3 iterações
+
+        return new Argon2PasswordEncoder(
+                saltLength,
+                hashLength,
+                parallelism,
+                memory,
+                iterations
+        );
     }
 
     /**
      * lista de emails permitidos
      */
-    private static final java.util.List<String> dominiosEmailPermitidos = java.util.List.of(
+    private static final List<String> dominiosEmailPermitidos = List.of(
             "gmail.com", "edu.br", "gov.br"
     );
 
     /**
-     * fluxo de login 
+     * fluxo de login
      */
     @Override
     public Usuario autenticar(String email, String senha) {
@@ -74,7 +86,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         return usuario.get();
     }
-    
+
     /**
      * fluxo de registro
      * **/
@@ -88,7 +100,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setSenha(passwordEncoder().encode(usuario.getSenha())); /* hash da senha */
         return usuarioRepository.save(usuario);
     }
-    
+
     /**
      * fluxo de atualização
      * **/
@@ -188,5 +200,10 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new ErroDeAutenticacao("Credenciais inválidas.");
         }
         return usuario;
-    }*/
+    }
+    public PasswordEncoder passwordEncoder() {
+        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+    }
+
+  */
 

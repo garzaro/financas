@@ -33,7 +33,7 @@ import io.jsonwebtoken.security.Keys;
 /**
  * Testes de integração do {@link JwtServiceImpl}, cobrindo:
  * <ul>
- *   <li>Geração e estrutura do token</li>
+ *   <li>Geração e estrutura do accesstoken</li>
  *   <li>Extração e integridade das claims</li>
  *   <li>Validação completa (assinatura, ISSUER, expiração, subject)</li>
  *   <li>Cenários de falha e ataques conhecidos (Alg None, chave trocada)</li>
@@ -66,8 +66,8 @@ class JwtServiceTest {
 
 //  O ISSUER (que significa "emissor", em inglês) é um claim padrão do
 //  JWT que identifica qual sistema, aplicação ou serviço gerou aquele
-//  token específico.
-//  O JSON interno do token fica mais ou menos assim:
+//  accesstoken específico.
+//  O JSON interno do accesstoken fica mais ou menos assim:
 //  Payload
 //{
 //  "iss": "project",
@@ -110,7 +110,7 @@ class JwtServiceTest {
     }
 
     // =========================================================================
-    // 1. Geração do token
+    // 1. Geração do accesstoken
     // =========================================================================
 
     @Nested
@@ -125,7 +125,7 @@ class JwtServiceTest {
         }
 
         @Test
-        @DisplayName("deve gerar token com 3 partes separadas por ponto (header.payload.signature)")
+        @DisplayName("deve gerar accesstoken com 3 partes separadas por ponto (header.payload.signature)")
         void deveGerarTokenComTresPartes() {
             String token = jwtService.gerarToken(usuarioBase);
             assertThat(token.split("\\.")).hasSize(3);
@@ -221,7 +221,7 @@ class JwtServiceTest {
         }
 
         @Test
-        @DisplayName("token com expiração em 30 s deve ser válido antes de expirar")
+        @DisplayName("accesstoken com expiração em 30 s deve ser válido antes de expirar")
         void tokenCom30SegundosDeveSerValidoAntesDeExpirar() {
             String token = criarTokenComExpiracaoEmSegundos(30);
             assertThat(jwtService.isTokenValido(token, userDetailsBase)).isTrue();
@@ -236,7 +236,7 @@ class JwtServiceTest {
     class GetUserLogin {
 
         @Test
-        @DisplayName("deve retornar o e-mail do dono do token")
+        @DisplayName("deve retornar o e-mail do dono do accesstoken")
         void deveRetornarEmailDoDonoDoToken() {
             String token = jwtService.gerarToken(usuarioBase);
             assertThat(jwtService.getUserLogin(token)).isEqualTo("cleber@gmail.com");
@@ -266,18 +266,18 @@ class JwtServiceTest {
     /**4. isTokenValido — caminho feliz**/
 
     @Nested
-    @DisplayName("4 — isTokenValido() — token válido")
+    @DisplayName("4 — isTokenValido() — accesstoken válido")
     class IsTokenValidoCaminhoFeliz {
 
         @Test
-        @DisplayName("token recém-gerado deve ser válido")
+        @DisplayName("accesstoken recém-gerado deve ser válido")
         void tokenRecenteDeveSerValido() {
             String token = jwtService.gerarToken(usuarioBase);
             assertThat(jwtService.isTokenValido(token, userDetailsBase)).isTrue();
         }
 
         @Test
-        @DisplayName("token de outro usuário também deve ser válido para aquele usuário")
+        @DisplayName("accesstoken de outro usuário também deve ser válido para aquele usuário")
         void tokenDeOutroUsuarioDeveSerValidoParaAqueleUsuario() {
             Usuario outro = Usuario.builder()
                     .uuid(UUID.randomUUID())
@@ -303,13 +303,13 @@ class JwtServiceTest {
     class IsTokenValidoCenariosDeFalha {
 
         @Test
-        @DisplayName("token expirado deve retornar false")
+        @DisplayName("accesstoken expirado deve retornar false")
         void tokenExpiradoDeveRetornarFalse() {
             assertThat(jwtService.isTokenValido(criarTokenExpirado(), userDetailsBase)).isFalse();
         }
 
         @Test
-        @DisplayName("token com assinatura adulterada deve retornar false")
+        @DisplayName("accesstoken com assinatura adulterada deve retornar false")
         void tokenAdulteradoDeveRetornarFalse() {
             String token     = jwtService.gerarToken(usuarioBase);
             String adulterado = token.substring(0, token.length() - 3) + "XYZ";
@@ -317,37 +317,37 @@ class JwtServiceTest {
         }
 
         @Test
-        @DisplayName("token completamente malformado deve retornar false")
+        @DisplayName("accesstoken completamente malformado deve retornar false")
         void tokenMalformadoDeveRetornarFalse() {
-            assertThat(jwtService.isTokenValido("isso.nao.e.um.token", userDetailsBase)).isFalse();
+            assertThat(jwtService.isTokenValido("isso.nao.e.um.accesstoken", userDetailsBase)).isFalse();
         }
 
         @Test
-        @DisplayName("token vazio deve retornar false")
+        @DisplayName("accesstoken vazio deve retornar false")
         void tokenVazioDeveRetornarFalse() {
             assertThat(jwtService.isTokenValido("", userDetailsBase)).isFalse();
         }
 
         @Test
-        @DisplayName("token null deve retornar false")
+        @DisplayName("accesstoken null deve retornar false")
         void tokenNullDeveRetornarFalse() {
             assertThat(jwtService.isTokenValido(null, userDetailsBase)).isFalse();
         }
 
         @Test
-        @DisplayName("token assinado com chave diferente deve retornar false")
+        @DisplayName("accesstoken assinado com chave diferente deve retornar false")
         void tokenAssinadoComChaveDiferenteDeveRetornarFalse() {
             assertThat(jwtService.isTokenValido(criarTokenComChaveDiferente(), userDetailsBase)).isFalse();
         }
 
         @Test
-        @DisplayName("token com ISSUER diferente deve retornar false")
+        @DisplayName("accesstoken com ISSUER diferente deve retornar false")
         void tokenComIssuerDiferenteDeveRetornarFalse() {
             assertThat(jwtService.isTokenValido(criarTokenComIssuerDiferente(), userDetailsBase)).isFalse();
         }
 
         @Test
-        @DisplayName("token sem ISSUER deve retornar false (ISSUER é obrigatório)")
+        @DisplayName("accesstoken sem ISSUER deve retornar false (ISSUER é obrigatório)")
         void tokenSemIssuerDeveRetornarFalse() {
             assertThat(jwtService.isTokenValido(criarTokenSemIssuer(), userDetailsBase)).isFalse();
         }
@@ -360,14 +360,14 @@ class JwtServiceTest {
     class ObterClaimsCenariosDeExcecao {
 
         @Test
-        @DisplayName("token expirado deve lançar ExpiredJwtException")
+        @DisplayName("accesstoken expirado deve lançar ExpiredJwtException")
         void tokenExpiradoDeveLancarExpiredJwtException() {
             assertThatThrownBy(() -> jwtService.obterClaims(criarTokenExpirado()))
                     .isInstanceOf(ExpiredJwtException.class);
         }
 
         @Test
-        @DisplayName("token adulterado deve lançar RuntimeException com mensagem padronizada")
+        @DisplayName("accesstoken adulterado deve lançar RuntimeException com mensagem padronizada")
         void tokenAdulteradoDeveLancarRuntimeException() {
             String token     = jwtService.gerarToken(usuarioBase);
             String adulterado = token.substring(0, token.length() - 3) + "ZZZ";
@@ -377,7 +377,7 @@ class JwtServiceTest {
         }
 
         @Test
-        @DisplayName("token malformado deve lançar RuntimeException com mensagem padronizada")
+        @DisplayName("accesstoken malformado deve lançar RuntimeException com mensagem padronizada")
         void tokenMalformadoDeveLancarRuntimeException() {
             assertThatThrownBy(() -> jwtService.obterClaims("lixo.total.aqui"))
                     .isInstanceOf(RuntimeException.class)
@@ -385,7 +385,7 @@ class JwtServiceTest {
         }
 
         @Test
-        @DisplayName("token assinado com outra chave deve lançar RuntimeException")
+        @DisplayName("accesstoken assinado com outra chave deve lançar RuntimeException")
         void tokenDeOutraChaveDeveLancarRuntimeException() {
             assertThatThrownBy(() -> jwtService.obterClaims(criarTokenComChaveDiferente()))
                     .isInstanceOf(RuntimeException.class)
@@ -393,7 +393,7 @@ class JwtServiceTest {
         }
 
         @Test
-        @DisplayName("token com ISSUER errado deve lançar RuntimeException")
+        @DisplayName("accesstoken com ISSUER errado deve lançar RuntimeException")
         void tokenComIssuerErradoDeveLancarRuntimeException() {
             assertThatThrownBy(() -> jwtService.obterClaims(criarTokenComIssuerDiferente()))
                     .isInstanceOf(RuntimeException.class)
@@ -411,16 +411,16 @@ class JwtServiceTest {
          * O ataque "alg:none" consiste em enviar um JWT cujo header declara
          * algoritmo "none" e sem assinatura, tentando burlar a verificação.
          * O JJWT 0.12.x rejeita isso em parseSignedClaims() por exigir
-         * explicitamente um token assinado (JWS).
+         * explicitamente um accesstoken assinado (JWS).
          */
         @Test
-        @DisplayName("token com alg=none deve ser rejeitado — isTokenValido retorna false")
+        @DisplayName("accesstoken com alg=none deve ser rejeitado — isTokenValido retorna false")
         void tokenAlgNoneDeveSerRejeitadoPorIsTokenValido() {
             assertThat(jwtService.isTokenValido(criarTokenAlgNone(), userDetailsBase)).isFalse();
         }
 
         @Test
-        @DisplayName("token com alg=none deve lançar RuntimeException em obterClaims")
+        @DisplayName("accesstoken com alg=none deve lançar RuntimeException em obterClaims")
         void tokenAlgNoneDeveLancarExcecaoEmObterClaims() {
             assertThatThrownBy(() -> jwtService.obterClaims(criarTokenAlgNone()))
                     .isInstanceOf(RuntimeException.class);
@@ -471,7 +471,7 @@ class JwtServiceTest {
             String token  = jwtService.gerarToken(u);
             Claims claims = jwtService.obterClaims(token);
             assertThat(claims.get("nomeCompleto", String.class)).isEqualTo("Álvaro Müller Ção");
-            
+
             UserDetails otherUserDetails = User.builder()
                     .username(usuarioBase.getEmail())
                     .password(usuarioBase.getSenha())
@@ -563,7 +563,7 @@ class JwtServiceTest {
      * Formato: base64(header).base64(payload).  (sem assinatura)
      */
     private String criarTokenAlgNone() {
-        // Gera um token real e extrai o payload (parte 2)
+        // Gera um accesstoken real e extrai o payload (parte 2)
         String tokenReal = jwtService.gerarToken(usuarioBase);
         String payloadBase64 = tokenReal.split("\\.")[1];
 
@@ -577,10 +577,10 @@ class JwtServiceTest {
     }
 
 //1. Claims Padrão (Registered Claims)
-//São informações recomendadas pela especificação do JWT para garantir a segurança do token. O objeto Claims possui métodos nativos para buscá-las:
+//São informações recomendadas pela especificação do JWT para garantir a segurança do accesstoken. O objeto Claims possui métodos nativos para buscá-las:
 //
 //        claims.getSubject(): Retorna a identidade do usuário (geralmente o e-mail, username ou ID).
 //
-//        claims.getExpiration(): Retorna a data e hora em que o token expira.
+//        claims.getExpiration(): Retorna a data e hora em que o accesstoken expira.
 //
-//        claims.getIssuedAt(): Retorna o momento exato em que o token foi criado.
+//        claims.getIssuedAt(): Retorna o momento exato em que o accesstoken foi criado.

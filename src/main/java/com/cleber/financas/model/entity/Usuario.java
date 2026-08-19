@@ -33,7 +33,7 @@ public class Usuario{
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id_usuario")
+    @Column(name = "uuid")
     private UUID uuid;
     
     @Column(name = "nome_completo", nullable = false, length = 150)
@@ -53,7 +53,7 @@ public class Usuario{
     private String senha;
 
     @CreationTimestamp
-    @Column(name = "data_cadastro", updatable = false) /**, columnDefinition = "DATE DEFAULT CURRENT_DATA"*/
+    @Column(name = "data_cadastro", updatable = false)
     private LocalDateTime dataCadastro;
 
     @UpdateTimestamp

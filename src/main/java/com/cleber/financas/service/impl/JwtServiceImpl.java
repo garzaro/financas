@@ -31,17 +31,20 @@ public class JwtServiceImpl implements JwtService {
 
     private final SecretKey signingKey;
     private final long expirationMs;
+    private final long expirationRefeshToken;
 
     public JwtServiceImpl(
-        @Value("${spring.app.jwtSecretKey:}") String secret,
-        @Value("${spring.app.jwtExpirationMs:3600000}") long expirationMs
+            @Value("${spring.app.jwtSecretKey}") String secret,
+            @Value("${spring.app.jwtExpirationMs}") long expirationMs,
+            @Value("${spring.app.jwtRefreshExpirationMs}") Integer expirationRefeshToken
     ) {
-        if (secret == null || secret.isBlank()) {
-            throw new IllegalArgumentException("JWT Secret Key não configurada. Verifique as variáveis de ambiente ou o arquivo .env.");
-        }
+//        if (secret == null || secret.isBlank()) {
+//            throw new IllegalArgumentException("JWT Secret Key não configurada. Verifique as variáveis de ambiente ou o arquivo .env.");
+//        }
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes());
         this.expirationMs = expirationMs;
-    }   
+        this.expirationRefeshToken = expirationRefeshToken;
+    }
 
     @Override
     public String extrairUsernameToken(String token) {
@@ -54,11 +57,11 @@ public class JwtServiceImpl implements JwtService {
     }
 
     /**ver a possibilidade de pegar o localdatetime do SISTEMA e converter para date
-     * a logica seria: 
-     * 
+     * a logica seria:
+     *
      * LocalDate localDate = LocalDate.now();
      * Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-     * 
+     *
      */
 
     @Override
@@ -74,10 +77,8 @@ public class JwtServiceImpl implements JwtService {
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername()) // Sequestro de sessão evitado atrelando Claims chave
-                .claim("nomeCompleto", userDetails.getUsername()) //?
-                .claim("senha", userDetails.getPassword()) //?
                 .claim("horaExpiracao", expiracao.toString()) //?
-                .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o token
+                .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o accesstoken
                 .issuedAt(agora) //emitido em
                 .expiration(expiracao) //expira em
                 .signWith(signingKey) // Usa JWS seguro padrão (HS256 ou melhor) e impede Alg None
@@ -86,7 +87,7 @@ public class JwtServiceImpl implements JwtService {
 
     public boolean isTokenValido(String token, UserDetails userDetails) {
         try {
-        	/**O email no token deve bater com o carregado pelo banco e nao expirado**/
+        	/**O email no accesstoken deve bater com o carregado pelo banco e nao expirado**/
             final String username = extrairUsernameToken(token);
             return (username.equals(userDetails.getUsername()) && !isTokenExpirado(token));
         } catch (ExpiredJwtException ex) {
@@ -98,7 +99,7 @@ public class JwtServiceImpl implements JwtService {
     private boolean isTokenExpirado(String token) {
         return extrairExpiracao(token).before(new Date());
     }
-    
+
     private Date extrairExpiracao(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -129,36 +130,36 @@ public class JwtServiceImpl implements JwtService {
 		return null;
 	}
 
-	
+
 
 //	@Override
-//	public String getUserLogin(String token) {
+//	public String getUserLogin(String accesstoken) {
 //		// TODO Auto-generated method stub
 //		return null;
 //	}
 }
 
-    
-    
-    
-    
-    /**O Parseamento (abertura do token) acontece aqui:**
-    public Claims obterClaims(String token) throws ExpiredJwtException {
-        return extractAllClaims(token);
+
+
+
+
+    /**O Parseamento (abertura do accesstoken) acontece aqui:**
+    public Claims obterClaims(String accesstoken) throws ExpiredJwtException {
+        return extractAllClaims(accesstoken);
     }
 
     @Override
-    public String getUserLogin(String token) {
-        Claims claims = obterClaims(token);
+    public String getUserLogin(String accesstoken) {
+        Claims claims = obterClaims(accesstoken);
         return claims.getSubject();
     }
 }
 
 /**
- * VER A POSSIBLIDADE DE MESMO USANDO USERDETAILS CHAMAR MAI DE UMA CLAIMS NAO SO O EMAIL E VER 
+ * VER A POSSIBLIDADE DE MESMO USANDO USERDETAILS CHAMAR MAI DE UMA CLAIMS NAO SO O EMAIL E VER
  * VIABILIDADE TECNICA TAMBEM
 public String gerarTokenComClaims(Map<String, Object> extraClaims, Usuario usuario) {
-        
+
         Date agora = new Date();
         //Date expiracao = Date.from(agora.plus(expirationMs, ChronoUnit.MILLIS));
         Date expiracao = new Date(agora.getTime() + expirationMs);
@@ -170,7 +171,7 @@ public String gerarTokenComClaims(Map<String, Object> extraClaims, Usuario usuar
                 .claim("nome_usuario", usuario.getNomeUsuario())
                 .claim("nome", usuario.getNomeCompleto())
                 .claim("horaExpiracao", expiracao.toString())
-                .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o token
+                .issuer(ISSUER) // Adiciona ISSUER para garantir de onde vem o accesstoken
                 .issuedAt(Date.from(agora)) //emitido em
                 .expiration(Date.from(expiracao)) //expira em
                 .signWith(getSigningKey()) // Usa JWS seguro padrão (HS256 ou melhor) e impede Alg None
@@ -189,9 +190,9 @@ public String gerarTokenComClaims(Map<String, Object> extraClaims, Usuario usuar
 
 /**
  * @Override
-    public boolean isTokenValido(String token, UserDetails userDetails) { //vinculo duplo de seguranca
+    public boolean isTokenValido(String accesstoken, UserDetails userDetails) { //vinculo duplo de seguranca
         try {
-            Claims claims = obterClaims(token);
+            Claims claims = obterClaims(accesstoken);
             /**validação do tempo**
             Date dataExpiracao = claims.getExpiration();
             /**Validação rigorosa do timestamp**
@@ -207,7 +208,7 @@ public String gerarTokenComClaims(Map<String, Object> extraClaims, Usuario usuar
 
             /**Nao expirou e pertence ao usuario entao é valido**
             return tokenNaoExpirado && tokenValido;
-        } catch (RuntimeException e) { // JwtException | IllegalArgumentException | 
+        } catch (RuntimeException e) { // JwtException | IllegalArgumentException |
             return false;
     }
 }

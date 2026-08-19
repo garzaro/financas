@@ -20,12 +20,15 @@ import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import com.cleber.financas.api.dto.ErroResposta;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * [] ignorar validacao de token em rotas publicas
- * [] 
+ * [] ignorar validacao de accesstoken em rotas publicas
+ * []
  * **/
 
 @Component
@@ -37,6 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+
+    private final ObjectMapper objectMapper;
 
 	@SuppressWarnings("null")
 	@Override
@@ -52,51 +57,71 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 			return;
 		}
-		
+
 		// Verificar se o header existe e começa com "Bearer "
-		String jwt;
-		jwt = authHeader.substring(BEARER_PREFIX.length());
+		String jwt = authHeader.substring(BEARER_PREFIX.length());
 
 		String pegaEmailDoUsuario;
 		try {
-			/**Extrai o username/email embutido no token JWT -jwt**/
-			pegaEmailDoUsuario = jwtService.extrairUsernameToken(jwt);			
-		
+			/**Extrai o username/email embutido no accesstoken JWT -jwt**/
+			pegaEmailDoUsuario = jwtService.extrairUsernameToken(jwt);
+
 		} catch (ExpiredJwtException | MalformedJwtException ex) {
-			/**Log crítico: token malformado/expirado é um evento de segurança relevante**/
+			/**Log crítico: accesstoken malformado/expirado é um evento de segurança relevante**/
 			logger.error("Token expirado ou inválido: {}", ex.getMessage());
-			/**Continua a execução para o próximo filtro na cadeia de filtros do Spring Security**/
-			filterChain.doFilter(request, response);
-			//ide
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			handleAuthenticationError(response, "Token expirado ou inválido", HttpServletResponse.SC_UNAUTHORIZED);
 			return;
 		} catch (Exception ex) {
-			logger.error("Erro ao extrair email do token: {}", ex.getMessage());
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			logger.error("Erro ao extrair email do accesstoken: {}", ex.getMessage());
+			handleAuthenticationError(response, "Erro de autenticação", HttpServletResponse.SC_UNAUTHORIZED);
 			return;
 		}
 
 		/**Só autentica se houver email e o contexto ainda não tiver autenticação**/
         SecurityContext context = SecurityContextHolder.getContext();
         if(pegaEmailDoUsuario != null && context.getAuthentication() == null) {
-        	/**Carrega os dados do usuário a partir da base (garante que ele existe e está ativo)**/ 
-        	UserDetails userDetails = userDetailsService.loadUserByUsername(pegaEmailDoUsuario);
-        	/**o que ta na base e o extraido deve ser igual**/
-        	if (jwtService.isTokenValido(jwt, userDetails)) {
-        		UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                        		null, // credentials nulas: já autenticado via token, não via senha
-                                userDetails.getAuthorities()
-        	        	);
+        	/**Carrega os dados do usuário a partir da base (garante que ele existe e está ativo)**/
+            try {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(pegaEmailDoUsuario);
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
-                /**Popula o contexto — daqui pra frente a requisição é tratada como autenticada**/
-        		context.setAuthentication(authToken);        		
-        	}        	
+                if (!userDetails.isEnabled()) {
+                    handleAuthenticationError(response, "Usuário desativado", HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+
+                /**o que ta na base e o extraido deve ser igual**/
+                if (jwtService.isTokenValido(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null, // credentials nulas: já autenticado via accesstoken, não via senha
+                                    userDetails.getAuthorities()
+                            );
+
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
+                    /**Popula o contexto — daqui pra frente a requisição é tratada como autenticada**/
+                    context.setAuthentication(authToken);
+                }
+            } catch (Exception ex) {
+                logger.error("Erro ao carregar usuário: {}", ex.getMessage());
+                handleAuthenticationError(response, "Usuário não encontrado ou inativo", HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private void handleAuthenticationError(HttpServletResponse response, String message, int status) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ErroResposta<Object> erro = new ErroResposta<>(message, status, java.util.List.of());
+
+        PrintWriter writer = response.getWriter();
+        writer.print(objectMapper.writeValueAsString(erro));
+        writer.flush();
     }
 }
 

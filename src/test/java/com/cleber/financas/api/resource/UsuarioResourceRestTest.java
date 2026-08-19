@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.cleber.financas.api.common.RefreshTokenCookieFactory;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -23,7 +27,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.cleber.financas.api.converter.UsuarioConverter;
-import com.cleber.financas.api.dto.LoginRequest;
+import com.cleber.financas.api.dto.AuthLoginDTO;
 import com.cleber.financas.api.dto.UsuarioDTO;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.JwtService;
@@ -61,12 +65,17 @@ public class UsuarioResourceRestTest {
     @MockBean
     private UsuarioConverter usuarioConverter;
 
+
+    @MockBean
+    private RefreshTokenCookieFactory cookieFactory;
+
     @Test
     public void deveAutenticarUmUsuario() throws Exception {
         String email = "cleber@gmail.com";
         String senha = "senha123";
-        LoginRequest request = new LoginRequest(email, senha);
+        AuthLoginDTO request = new AuthLoginDTO(email, senha);
 
+        Usuario usuario = Usuario.builder().uuid(UUID.randomUUID()).email(email).build();
         org.springframework.security.core.userdetails.UserDetails userDetails =
                 new org.springframework.security.core.userdetails.User(
                         email,
@@ -75,21 +84,59 @@ public class UsuarioResourceRestTest {
 
         Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(new UsernamePasswordAuthenticationToken(userDetails, null));
-        Mockito.when(userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
-        Mockito.when(jwtService.gerarToken(userDetails)).thenReturn("jwt-token");
+        Mockito.when(usuarioService.autenticar(email, senha)).thenReturn(usuario);
+        Mockito.when(jwtService.gerarToken(userDetails)).thenReturn("jwt-accesstoken");
+       
+        Mockito.when(cookieFactory.buildSet("refresh-token"))
+                .thenReturn(org.springframework.http.ResponseCookie.from("refresh_token", "refresh-token")
+                        .httpOnly(true).path("/api/auth").maxAge(604800).build());
 
         String json = new ObjectMapper().writeValueAsString(request);
 
         MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders
-                .post(API + "/login")
+                .post(API + "/sign-in")
                 .accept(JSON)
                 .contentType(JSON)
                 .content(json);
 
         mvc.perform(requisicao)
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("token").value("jwt-token"))
-                .andExpect(MockMvcResultMatchers.jsonPath("tokenType").value("Bearer"));
+                .andExpect(MockMvcResultMatchers.jsonPath("accessToken").value("jwt-accesstoken"))
+                .andExpect(MockMvcResultMatchers.jsonPath("tokenType").value("Bearer"))
+                .andExpect(MockMvcResultMatchers.header().string("Set-Cookie",
+                        org.hamcrest.Matchers.containsString("refresh_token=refresh-token")));
+    }
+
+    @Test
+    public void deveRotacionarToken() throws Exception {
+        String oldRefreshToken = "old-refresh-token";
+        String newRefreshToken = "new-refresh-token";
+        String newAccessToken = "new-access-token";
+
+        Usuario usuario = Usuario.builder().uuid(UUID.randomUUID()).email("cleber@gmail.com").build();
+        org.springframework.security.core.userdetails.UserDetails userDetails =
+                new org.springframework.security.core.userdetails.User(
+                        usuario.getEmail(),
+                        "",
+                        java.util.Collections.emptyList());
+
+       
+        Mockito.when(userDetailsService.loadUserByUsername(usuario.getEmail())).thenReturn(userDetails);
+        Mockito.when(jwtService.gerarToken(userDetails)).thenReturn(newAccessToken);
+        Mockito.when(cookieFactory.buildSet(newRefreshToken))
+                .thenReturn(org.springframework.http.ResponseCookie.from("refresh_token", newRefreshToken)
+                        .httpOnly(true).path("/api/auth").maxAge(604800).build());
+
+        MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders
+                .post(API + "/refresh")
+                .accept(JSON)
+                .cookie(new jakarta.servlet.http.Cookie("refresh_token", oldRefreshToken));
+
+        mvc.perform(requisicao)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("accessToken").value(newAccessToken))
+                .andExpect(MockMvcResultMatchers.header().string("Set-Cookie",
+                        org.hamcrest.Matchers.containsString("refresh_token=" + newRefreshToken)));
     }
 
     @Test
@@ -100,7 +147,7 @@ public class UsuarioResourceRestTest {
 
         UsuarioDTO dto = new UsuarioDTO.UsuarioBuilder()
                 .setNomeCompleto("Cleber Silva")
-                .setCpf("123.456.789-00")
+                .setCpf("529.982.247-25")
                 .setNomeUsuario("cleber")
                 .setEmail(email)
                 .setSenha(senha)
@@ -119,14 +166,14 @@ public class UsuarioResourceRestTest {
         String json = new ObjectMapper().writeValueAsString(dto);
 
         MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders
-                .post(API + "/join/sign-up/")
+                .post(API + "/join/sign-up")
                 .accept(JSON)
                 .contentType(JSON)
                 .content(json);
 
         mvc.perform(requisicao)
                 .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("id").value(id.toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("uuid").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("nomeCompleto").value(dto.getNomeCompleto()))
                 .andExpect(MockMvcResultMatchers.jsonPath("nomeUsuario").value(dto.getNomeUsuario()))
                 .andExpect(MockMvcResultMatchers.jsonPath("email").value(email));

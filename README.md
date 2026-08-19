@@ -1,213 +1,160 @@
-# Sistema de finança pessoal - React + Spring Boot
+# Financas API
 
-Este projeto implementa um sistema completo de financas pessoais com frontend em React usando PrimeReact e backend em Spring Boot com PostgreSQL.
+API de finanças pessoais responsável por autenticação, cadastro de usuários,
+gestão de lançamentos financeiros e registro de criptoativos.
 
-## 🏗️ Estrutura do Projeto
+## 1. Visão Geral do Projeto
 
-```
-├── financas-backend/           # Backend Spring Boot
-│   ├── src/main/java/com/financas/
-│   │   ├── model/              # Entidades JPA
-│   │   ├── repository/         # Repositórios Spring Data
-│   │   ├── service/            # Interfaces de serviço
-│   │   ├── implementação)      # Implementação de serviço
-│   │   ├── controller/         # Controllers REST
-│   │   └── config/             # Configurações
-│   ├── src/main/resources/     # Arquivos de configuração
-│   └── pom.xml                 # Dependências Maven
-└── formulario-frontend/         # Frontend React
-    ├── src/
-    │   ├── components/         # Componentes React
-    │   ├── services/           # Serviços de API
-    │   ├── views/              # Telas
-    │   └── assets/             # Recursos estáticos
-    └── package.json            # Dependências npm , yarn
-```
+O backend atende o domínio de finanças pessoais com foco em:
 
-## 🚀 Tecnologias Utilizadas
+- autenticação e autorização via JWT;
+- cadastro e manutenção de usuários;
+- controle de lançamentos (receitas e despesas), incluindo status;
+- cálculo de saldo por usuário;
+- persistência auditável de entidades de negócio.
 
-### Backend
-- **Spring Boot 3.3.0** - Framework principal
-- **Spring Data JPA** - Persistência de dados
-- **PostgreSQL** - Banco de dados
-- **Maven** - Gerenciamento de dependências
-- **Spring Boot Validation** - Validação de dados
+A aplicação foi estruturada para operar como serviço stateless, com regras de
+negócio centralizadas na camada de serviço e exposição via API REST.
 
-### Frontend
-- **React 18** - Biblioteca de interface
-- **PrimeReact** - Componentes de UI
-- **Axios** - Cliente HTTP
-- **Tailwind CSS** - Estilização
-- **CRA** - Build tool
+## 2. Tecnologias & Stack
 
-## 📋 Funcionalidades
+- Java 21
+- Spring Boot 3.5.x
+- Spring Web (API REST)
+- Spring Security (JWT + policy stateless)
+- Spring Data JPA / Hibernate
+- PostgreSQL (principal)
+- Flyway (migrações)
+- Hibernate Envers (auditoria)
+- MapStruct (mapeamento DTO <-> entidade)
+- Lombok
+- Maven
+- H2 (suporte a testes)
+- JUnit 5 / Spring Boot Test / MockMvc
 
-### Formulário com campos para criação de usuario:
-1. **Nome** (obrigatório) - Texto até 100 caracteres
-2. **Email** (obrigatório) - Email válido até 150 caracteres
-3. **CPF** (obrigatório) - Texto até 14 caracteres
-4. **Usuario** (obrigatório) - Texto até 100 caracteres
-5. **Senha** (obrigatório) - Texto até 100 caracteres
+## 3. Arquitetura & Estrutura de Pastas
 
-### Formulário com campos para criação de lancamentos:
-1. **Descrição** (obrigatório) - Texto até 150 caracteres
-2. **Mes** (obrigatório) - Select
-3. **Ano** (obrigatório) - Select
-4. **Valor** (obrigatório) - Decimal
-5. **Data Criacao** (automatico) - Padrao Date
-5. **Tipo Lancamento** (obrigatório) - Enum - DESPESA - RECEITA
-5. **Status Lancamento** (obrigatório) - Enum - CANCELADO - EFETIVADO - PENDENTE
+Organização principal em `src/main/java/com/cleber/financas`:
 
+- `api/resource`: controladores REST (endpoints HTTP)
+- `api/dto`: contratos de entrada/saída da API
+- `api/converter`: conversão entre DTOs e entidades
+- `service`: interfaces de regras de negócio
+- `service/impl`: implementações dos casos de uso
+- `model/entity`: entidades JPA
+- `model/repository`: repositórios Spring Data
+- `model/enums`: enums de domínio
+- `model/mapper`: mappers MapStruct
+- `security`: filtro JWT e contexto de autenticação
+- `config`: segurança, validação e beans de infraestrutura
+- `exception`: exceções de domínio e respostas de erro
 
-### Formulário para login:
-1. **Nome** (obrigatório) - Texto criado na inscrição
-2. **Email** (obrigatório) - Email criado nao inscrição
+Recursos e configuração em `src/main/resources`:
 
+- `application.properties`
+- `application-test.properties`
+- `db/migration` (scripts Flyway)
 
-### Funcionalidades:
-- ✅ Validação completa de campos
-- ✅ Botões Salvar e Cancelar
-- ✅ Integração com backend via API REST
-- ✅ Mensagens de sucesso e erro
-- ✅ Interface responsiva
-- ✅ Verificação de email duplicado
-- ✅ Verificação de CPF duplicado
-
-
-## 🛠️ Configuração e Execução
+## 4. Pré-requisitos & Instalação
 
 ### Pré-requisitos
-- Java 17+
-- Node.js 18+
-- PostgreSQL 12+
-- Maven 3.6+
 
-### 1. Configuração do Banco de Dados
+- JDK 21
+- Maven 3.9+
+- PostgreSQL 14+ (ou compatível)
+- Docker (opcional)
 
-```sql
--- Criar banco de dados
-CREATE DATABASE financa_db;
+### 4.1 Banco de dados local (PostgreSQL)
 
--- Criar usuário (opcional)
-CREATE USER postgres WITH PASSWORD 'postgres';
-GRANT ALL PRIVILEGES ON DATABASE financa_db TO postgres;
-```
-
-### 2. Executar o Backend
+Exemplo usando Docker:
 
 ```bash
-cd financa
-
-# Compilar o projeto
-mvn clean compile
-
-# Executar a aplicação
-mvn spring-boot:run
+docker run --name financas-postgres \
+  -e POSTGRES_USER=user \
+  -e POSTGRES_PASSWORD=user \
+  -e POSTGRES_DB=db \
+  -p 5432:5432 \
+  -d postgres:16
 ```
 
-O backend estará disponível em: `http://localhost:8080`
+### 4.2 Variáveis de ambiente
 
-### 3. Executar o Frontend
+O projeto lê `.env` via `spring.config.import`. Configure no mínimo:
+
+```env
+JWT_SECRET=<segredo_forte_para_assinatura_jwt>
+JWT_EXPIRATION=3600000
+FLYWAY_LOCATIONS=classpath:db/migration
+```
+
+Observação: as credenciais de datasource padrão estão em
+`src/main/resources/application.properties` (localhost:5432, banco `banco`,
+usuário `user`, senha `senha`).
+
+### 4.3 Executar a aplicação
 
 ```bash
-cd financa-app
-
-# Instalar dependências
-yarn add
-
-# Executar em modo desenvolvimento
-yarn start
+mvn clean spring-boot:run
 ```
 
-O frontend estará disponível em: `http://localhost:3000`
+API disponível em:
 
-## 📡 API Endpoints
+- `http://localhost:8080`
 
-### Formulários
-- `POST /api/usuarios` - Criar novo usuario
-- `GET /api/usuarios/{id}` - Buscar usuarios por ID
-- `GET /api/usuarios` - Buscar por email
-- `GET /api/usuarios` - Verificar se email existe
-- `POST /api/lancamentos` - Criar novo lancamento
-- `GET /api/lancamentos/{id}` - Buscar lancamento por ID
-- `PUT /api/lancamentos/{id}` - Atualizar lancamentos
-- `DELETE /api/lancamentos/{id}` - Deletar lancamentos
-- `Busca por múltiplos critérios` - ()
+### 4.4 Build e execução via Docker
 
-## 🏛️ Arquitetura do Backend
-
-### Camadas Implementadas:
-1. **Model** - Entidade JPA com validações
-2. **Repository** - Interface Spring Data JPA
-3. **Service** - Interface de serviço
-4. **ServiceImpl** - Implementação dos serviços
-5. **Controller** - Endpoints REST com CORS
-
-### Validações:
-- Campos obrigatórios
-- Formato de email
-- Formato de senha
-- Tamanho máximo dos campos
-- Email único no sistema
-- CPF único no sistema
-
-## 🎨 Interface do Usuário
-
-- Design responsivo com PrimeReact
-- Validação em tempo real
-- Mensagens de feedback
-- Calendário para seleção de data
-- Contador de caracteres
-- Loading states
-
-## Controle de versionamento
-- Migration - flayway
-
-## Auditria de dados
-- Historico de entidade - Envers 
-
-## 🔧 Configurações
-
-
-### Backend (application.properties)
-```properties
-# Banco de dados
-spring.datasource.url=jdbc:postgresql://localhost:5432/financa_db
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-
-# JPA/Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-
-# CORS
-spring.web.cors.allowed-origins=*
-spring.web.cors.allowed-methods=GET,POST,PUT,DELETE,OPTIONS
-spring.web.cors.allowed-headers=*
+```bash
+docker build -t financas-api .
+docker run --rm -p 8080:8080 --env-file .env financas-api
 ```
 
-### Frontend (src/services/api.js)
-```javascript
-const API_BASE_URL = 'http://localhost:8080/api';
+## 5. Documentação da API
+
+Rotas de referência (principais):
+
+- `POST /api/auth/sign-in` - autenticação e emissão de JWT
+- `POST /api/auth/join/sign-up` - cadastro de usuário
+- `PUT /api/auth/{id}` - atualização de usuário
+- `GET /api/auth/{id}/saldo` - saldo consolidado do usuário
+- `POST /api/Fp/lancamento` - criação de lançamento
+- `PUT /api/Fp/lancamento/{id}` - atualização de lançamento
+- `PUT /api/Fp/lancamento/{id}/atualizar-statusLancamento` - mudança de status
+- `GET /api/Fp/lancamento/{id}` - detalhe de lançamento
+- `GET /api/Fp/lancamento` - busca por filtros
+- `DELETE /api/Fp/lancamento/{id}` - remoção de lançamento
+- `POST /api/criptomoeda` - cadastro de criptoativo
+
+Swagger/OpenAPI (conforme `application.properties`):
+
+- UI: `http://localhost:8080/swagger-ui/index.html`
+- JSON OpenAPI: `http://localhost:8080/v3/api-docs`
+
+## 6. Testes Automatizados
+
+Executar toda a suíte:
+
+```bash
+mvn clean test -Dspring.profiles.active=test
 ```
 
-## 📝 Exemplo de Uso
+Executar uma classe específica:
 
-1. Acesse `http://localhost:3000`
-2. Preencha todos os campos obrigatórios
-3. Clique em "Salvar" para enviar os dados
-4. Use "Cancelar" para limpar formulário
+```bash
+mvn -Dtest=UsuarioResourceRestTest test -Dspring.profiles.active=test
+```
 
-## 🚀 Deploy
+O perfil `test` utiliza configuração dedicada em
+`src/main/resources/application-test.properties` (H2 em memória), útil para
+testes de integração sem dependência externa de banco.
 
-Para deploy em produção:
+## 7. Padrões de Código e Diretrizes
 
-1. **Backend**: Gerar JAR com `mvn clean package`
-2. **Frontend**: Build com `pnpm run build`
-3. Configurar variáveis de ambiente para produção
-4. Configurar banco PostgreSQL em produção
-
-## 📄 Licença
-
-Este projeto foi desenvolvido com integração React + Spring Boot.
+- Tratamento global de erros centralizado em
+  `api/resource/common/GlobalExceptionHandler`.
+- Regras de negócio devem residir na camada `service`, não nos controllers.
+- DTOs e conversores devem isolar contratos HTTP do modelo de persistência.
+- Segurança com JWT stateless: rotas públicas mínimas; demais rotas protegidas.
+- Logs com SLF4J/Logback, priorizando mensagens objetivas e contexto técnico.
+- Migrações de banco devem ser versionadas via Flyway em `db/migration`.
+- Mudanças em entidades críticas devem preservar rastreabilidade de auditoria.
 

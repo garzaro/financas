@@ -25,44 +25,44 @@ import io.jsonwebtoken.ExpiredJwtException;
 public interface JwtService {
 
     /**
-     * Gera um token JWT com apenas o {@code username} do {@link UserDetails} como subject.
+     * Gera um accesstoken JWT com apenas o {@code username} do {@link UserDetails} como subject.
      * Usado internamente pelo filtro de autenticação e pelo endpoint de login.
      */
     String gerarToken(UserDetails userDetails);
 
     /**
-     * Gera um token JWT enriquecido para um {@link Usuario}, incluindo claims extras:
+     * Gera um accesstoken JWT enriquecido para um {@link Usuario}, incluindo claims extras:
      * {@code id}, {@code cpf}, {@code nome_usuario} e {@code nome}.
      */
     String gerarToken(Usuario usuario);
 
-    /** Gera um token com claims extras adicionais ao payload. */
+    /** Gera um accesstoken com claims extras adicionais ao payload. */
     String gerarTokenComClaims(Map<String, Object> extraClaims, UserDetails userDetails);
 
     /**
-     * Retorna o login (e-mail / username) armazenado no subject do token.
+     * Retorna o login (e-mail / username) armazenado no subject do accesstoken.
      *
-     * @throws RuntimeException se o token for inválido ou expirado
+     * @throws RuntimeException se o accesstoken for inválido ou expirado
      */
     String extrairUsernameToken(String token);
 
     /**
      * Alias de {@link #extrairUsernameToken}, preservado para compatibilidade.
      *
-     * @throws RuntimeException se o token for inválido ou expirado
+     * @throws RuntimeException se o accesstoken for inválido ou expirado
      */
     String getUserLogin(String token);
 
     /**
-     * Retorna {@code true} se o token for válido, não expirado e pertencer ao
+     * Retorna {@code true} se o accesstoken for válido, não expirado e pertencer ao
      * {@code userDetails} informado.
      */
     boolean isTokenValido(String token, UserDetails userDetails);
 
     /**
-     * Parseia e retorna todas as claims do token.
+     * Parseia e retorna todas as claims do accesstoken.
      *
-     * @throws ExpiredJwtException se o token estiver expirado
+     * @throws ExpiredJwtException se o accesstoken estiver expirado
      * @throws RuntimeException    com mensagem "Token JWT inválido — …" para demais erros
      */
     Claims obterClaims(String token);

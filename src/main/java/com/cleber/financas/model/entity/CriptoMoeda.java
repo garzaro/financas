@@ -41,50 +41,50 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(name = "criptomoeda", schema = "financeiro")
 public class CriptoMoeda {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	@Column(name = "id_criptomoeda")
+	@Column(name = "uuid")
 	private UUID uuid;
-	
+
 	@Column(name = "data_entrada")
 	private LocalDate dataEntrada;
-	
+
 	@Column(name = "mes")
 	private Integer mes;
-	
+
 	@Column(name = "corretora")
 	private String corretora;
-	
+
 	@Column(name = "criptomoeda", nullable = false)
 	private String criptomoeda;
-	
+
 	@Column(name = "alavancagem")
 	private String alavancagem;
-	
+
 	@Column(name = "moeda_corrente")
 	private String moedaCorrente;
-	
+
 	@Column(name = "valor_investido")
 	private BigDecimal valorInvestido;
-	
+
 	@Column(name = "valor_atual")
 	private BigDecimal valorAtual;
-	
+
 	@Column(name = "fracao")
 	private BigDecimal fracao;
-	
+
 	@Column(name = "data_saida")
 	private LocalDate dataSaida;
-	
+
 	@ManyToOne
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "usuario_uuid", referencedColumnName = "uuid", nullable = false)
     private Usuario usuario;
-	
+
 	@CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant dataCriacao;
-	
+
 	@UpdateTimestamp
     @Column(nullable = false)
     private Instant dataAtualizacao;
@@ -92,7 +92,7 @@ public class CriptoMoeda {
 	@Column(name = "status_transacao")
 	@Enumerated(value = EnumType.STRING)
 	private StatusTransacao statusTransacao;
-	
+
 	@Column(name = "tipo_transacao")
 	@Enumerated(value = EnumType.STRING)
 	private TipoTransacao tipoTransacao;

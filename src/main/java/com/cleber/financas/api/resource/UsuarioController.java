@@ -4,14 +4,18 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.cleber.financas.api.common.GlobalExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,9 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cleber.financas.api.converter.UsuarioConverter;
-import com.cleber.financas.api.dto.AuthResponse;
-import com.cleber.financas.api.dto.LoginRequest;
-import com.cleber.financas.api.dto.UsuarioDTO;
+import com.cleber.financas.api.dto.*;
+import com.cleber.financas.api.common.RefreshTokenCookieFactory;
+import com.cleber.financas.service.token.RefreshTokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.JwtService;
@@ -36,11 +41,11 @@ import jakarta.validation.Valid;
  * Controlador responsável pelos endpoints de autenticação e gestão de usuários.
  *
  * Mapeamento base: {@code /api/auth}
- * 
- * POST /auth/register — registro de novo usuário (criação de conta; sem token)
+ *
+ * POST /auth/register — registro de novo usuário (criação de conta; sem accesstoken)
  * POST /auth/login    — autenticação e emissão de JWT
- * 
- * Tratamento de erros é delegado ao {@link com.cleber.financas.api.resource.common.GlobalExceptionHandler}:
+ *
+ * Tratamento de erros é delegado ao {@link GlobalExceptionHandler}:
  * {@code BadCredentialsException} → 401, {@code EmailJaCadastradoException} → 409,
  * {@code MethodArgumentNotValidException} → 400.
  */
@@ -56,23 +61,29 @@ public class UsuarioController {
     private final UserDetailsService userDetailsService;
     private final UsuarioService usuarioService;
     private final LancamentoService lancamentoService;
-    private final UsuarioConverter usuarioConverter;    
+    private final UsuarioConverter usuarioConverter;
+    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenCookieFactory cookieFactory;
 
     public UsuarioController(
-    		AuthenticationManager authenticationManager, 
-    		JwtService jwtService,
-			UserDetailsService userDetailsService, 
-			UsuarioService usuarioService, 
-			LancamentoService lancamentoService,
-			UsuarioConverter usuarioConverter) {
-		super();
-		this.authenticationManager = authenticationManager;
-		this.jwtService = jwtService;
-		this.userDetailsService = userDetailsService;
-		this.usuarioService = usuarioService;
-		this.lancamentoService = lancamentoService;
-		this.usuarioConverter = usuarioConverter;
-	}    
+            AuthenticationManager authenticationManager,
+            JwtService jwtService,
+            UserDetailsService userDetailsService,
+            UsuarioService usuarioService,
+            LancamentoService lancamentoService,
+            UsuarioConverter usuarioConverter,
+            RefreshTokenService refreshTokenService,
+            RefreshTokenCookieFactory cookieFactory) {
+        super();
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+        this.usuarioService = usuarioService;
+        this.lancamentoService = lancamentoService;
+        this.usuarioConverter = usuarioConverter;
+        this.refreshTokenService = refreshTokenService;
+        this.cookieFactory = cookieFactory;
+    }
 
     /**
      * Autentica o usuário e retorna um JWT.
@@ -81,22 +92,57 @@ public class UsuarioController {
      * lança {@code BadCredentialsException}, que é capturada pelo handler global
      * e respondida com 401 — nunca revelando se foi o email ou a senha que errou.
      *
-     * @return 200 OK com {@link AuthResponse} contendo o token e o tipo "Bearer"
+     * @return 200 OK com {@link TokenResponseDTO} contendo o accesstoken e o tipo "Bearer"
      */
     @PostMapping("/sign-in")
-    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
-        // Delega a validação ao AuthenticationManager; falha lança BadCredentialsException
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.senha())
-        );
+    public ResponseEntity<TokenResponseDTO> login(@RequestBody @Valid AuthLoginDTO authDto, HttpServletRequest request) {
+        var authenticationToken =
+                new UsernamePasswordAuthenticationToken(authDto.email(), authDto.senha());
+        var authenticate = authenticationManager.authenticate(authenticationToken);
+        var userDetails = (UserDetails) authenticate.getPrincipal();
 
-        // Autenticação bem-sucedida: carrega detalhes e gera token
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.email());
-        String token = jwtService.gerarToken(userDetails);
+        Usuario usuario = usuarioService.autenticar(authDto.email(), authDto.senha());
 
-        log.info("Login bem-sucedido — email: {}", request.email());
+        String accessToken = jwtService.gerarToken(userDetails);
+        String refreshToken = refreshTokenService.gerar(usuario, request);
 
-        return ResponseEntity.ok(new AuthResponse(token));
+        ResponseCookie cookie = cookieFactory.buildSet(refreshToken);
+
+        log.info("Login bem-sucedido — email: {}", authDto.email());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new TokenResponseDTO(accessToken));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponseDTO> refresh(
+            @CookieValue(name = RefreshTokenCookieFactory.COOKIE_NAME) String oldRefreshToken,
+            HttpServletRequest request) {
+        String newRefreshToken = refreshTokenService.rotate(oldRefreshToken, request);
+        Usuario usuario = refreshTokenService.validar(newRefreshToken);
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getEmail());
+        String newAccessToken = jwtService.gerarToken(userDetails);
+
+        ResponseCookie cookie = cookieFactory.buildSet(newRefreshToken);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new TokenResponseDTO(newAccessToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @CookieValue(name = RefreshTokenCookieFactory.COOKIE_NAME) String refreshToken) {
+        Usuario usuario = refreshTokenService.validar(refreshToken);
+        refreshTokenService.revogarAllByUser(usuario.getUuid());
+
+        ResponseCookie cleared = cookieFactory.buildClear();
+
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cleared.toString())
+                .build();
     }
 
     /**
