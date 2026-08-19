@@ -30,24 +30,24 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name= "usuario", schema = "financeiro")
 public class Usuario{
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "uuid")
     private UUID uuid;
-    
-    @Column(name = "nome_completo", nullable = false, length = 150)
+
+    @Column(name = "nome_completo", nullable = false, length = 255)
     private String nomeCompleto;
-    
+
     @Column(name = "cpf", nullable = false, length = 11)
     private String cpf;
-    
+
     @Column(name = "nome_usuario", nullable = false, length = 50)
-    private String nomeUsuario;    
-   
+    private String nomeUsuario;
+
     @Column(name = "email", nullable = false, length = 255)
-    private String email;	
-   
+    private String email;
+
     @Column(name = "senha", nullable = false, length = 255)
     @JsonIgnore
     private String senha;
@@ -67,7 +67,7 @@ public class Usuario{
     /*GETTERS AND SETTERS*/
     /*HASHCODE AND EQUALS*/
     /*TO STRING*/
-    
-    
-    
+
+
+
 }
