@@ -9,16 +9,18 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UsuarioService {
     /*verificar se o usuario existe na base, validação*/
-    Usuario autenticarUsuario(String email, String senha);
-    
-    /*salvar o usuario na base*/
-    Usuario persistirUsuarioNabaseDeDados(Usuario usuario);
-    
-    /*verifica o email na base de dados, unique */
-    void validarEmailNaBaseDedados(String email);
+    Usuario autenticar(String email, String senha);
 
-    /*verficar o cpf na base de dados*/
-    void validarCadastroPessoaFisica(String cadastroPessoaFisica);
+    /*salvar o usuario na base*/
+    Usuario salvarUsuario(Usuario usuario);
+    
+    /*unique*/
+    void validarEmail(String email);
+    
+    /*unique */
+    void validarCpf(String cpf);
     
     Optional<Usuario> obterUsuarioPorId(Long id);
+    
+    Optional<Usuario> obterUsuarioPorCpf(String cpf);   
 }

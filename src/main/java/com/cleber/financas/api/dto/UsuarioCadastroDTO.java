@@ -1,24 +1,16 @@
 package com.cleber.financas.api.dto;
 
-
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.LocalDate;
-
 /*Não usei @Builder, @Getter, @Setter
 * resolvi criar na mão o codigo*/
 
 public class UsuarioCadastroDTO {
     
-    private String nomeCompleto;
-    private String cadastroPessoaFisica;
-    private String nomeUsuario;
+    private String nome;
+    private String cpf;
+    private String usuario;
     private String email;
     private String senha;
-    private LocalDate dataCadastro;
-    
+
     public UsuarioCadastroDTO() {
 		
 	}
@@ -26,24 +18,23 @@ public class UsuarioCadastroDTO {
     /*BUILDER*/
     private UsuarioCadastroDTO(UsuarioBuilder builder) {
         
-        this.nomeCompleto = builder.nomeCompleto;
-        this.cadastroPessoaFisica = builder.cadastroPessoaFisica;
-        this.nomeUsuario = builder.nomeUsuario;
+        this.nome = builder.nome;
+        this.cpf = builder.cpf;
+        this.usuario = builder.usuario;
         this.email = builder.email;
         this.senha = builder.senha;
-        this.dataCadastro = builder.dataCadastro;
     }
 
-    public String getNomeCompleto() {
-        return nomeCompleto;
+    public String getNome() {
+        return nome;
     }
 
-    public String getCadastroPessoaFisica(){
-        return cadastroPessoaFisica;
+    public String getCpf(){
+        return cpf;
     }
 
-    public String getNomeUsuario(){
-        return nomeUsuario;
+    public String getUsuario(){
+        return usuario;
     }
 
     public String getEmail() {
@@ -54,30 +45,25 @@ public class UsuarioCadastroDTO {
         return senha;
     }
 
-    public LocalDate getDataCadastro() {
-        return dataCadastro;
-    }
-
     public static class UsuarioBuilder{
-        private String nomeCompleto;
-        private String cadastroPessoaFisica;
-        private String nomeUsuario;
+        private String nome;
+        private String cpf;
+        private String usuario;
         private String email;
         private String senha;
-        private LocalDate dataCadastro;
-        
-        public UsuarioBuilder setNomeCompleto(String nomeCompleto) {
-        this.nomeCompleto = nomeCompleto;
+
+        public UsuarioBuilder setNome(String nome) {
+        this.nome = nome;
         return this;
         }
 
-        public UsuarioBuilder setCadastroPessoaFisica(String cadastroPessoaFisica) {
-            this.cadastroPessoaFisica = cadastroPessoaFisica;
+        public UsuarioBuilder setCpf(String cpf) {
+            this.cpf = cpf;
             return this;
         }
 
-        public UsuarioBuilder setNomeUsuario(String nomeUsuario) {
-            this.nomeUsuario = nomeUsuario;
+        public UsuarioBuilder setUsuario(String usuario) {
+            this.usuario = usuario;
             return this;
         }
 
@@ -88,11 +74,6 @@ public class UsuarioCadastroDTO {
 
         public UsuarioBuilder setSenha(String senha){
             this.senha = senha;
-            return this;
-        }
-
-        public UsuarioBuilder setDataCadastro(LocalDate dataCadastro) {
-            this.dataCadastro = dataCadastro;
             return this;
         }
 

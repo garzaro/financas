@@ -20,46 +20,46 @@ public class UsuarioServiceSpyTest {
     UsuarioServiceImpl usuarioServiceImpl;
     @MockBean
     UsuarioRepository usuarioRepository;
-    
+
     @Test(expected = Test.None.class)
     public void deveSalvarUmUsuario(){
         /*cenario*/
         Mockito.doNothing().when(usuarioServiceImpl)
-                .validarEmailNaBaseDedados(Mockito.anyString());
-        
+                .validarEmailAndCpf("email@gmail.com",Mockito.anyString());
+
         Usuario usuario = criarUsuario();
-        
+
         Mockito.when(usuarioRepository.save(Mockito.any(Usuario.class)))
                 .thenReturn(usuario);
-        
+
         /*ação*/
         Usuario usuarioSalvo = usuarioServiceImpl
-                .persistirUsuarioNabaseDeDados(new Usuario());
-        
+                .salvar(new Usuario());
+
         /*verificação*/
         Assertions.assertThat(usuarioSalvo)
                 .isNotNull();
         Assertions.assertThat(usuarioSalvo.getId())
                 .isEqualTo(1l);
-        Assertions.assertThat(usuarioSalvo.getNomeUsuario())
+        Assertions.assertThat(usuarioSalvo.getNome())
                 .isEqualTo("garzaro74");
         Assertions.assertThat(usuarioSalvo.getEmail())
                 .isEqualTo("email@gmail.com");
         Assertions.assertThat(usuarioSalvo.getSenha())
                 .isEqualTo("senha");
-        
+
     }
     @Test(expected = RegraDeNegocioException.class)
     public void naoDeveSalvarUmUsuarioComEmailJaCadastrado(){
-        
+
         Usuario persistirUsuario = criarUsuario();
-        
+
         Mockito.doThrow(RegraDeNegocioException.class)
                 .when(usuarioServiceImpl)
-                .validarEmailNaBaseDedados("email@gmail.com");
+                .validarEmailAndCpf("email@gmail.com","123456789-00");
         /*ação*/
-        usuarioServiceImpl.persistirUsuarioNabaseDeDados(persistirUsuario);
-        
+        usuarioServiceImpl.salvar(persistirUsuario);
+
         /*verificação*/
         Mockito.verify(usuarioRepository, Mockito.never())
                 .save(persistirUsuario);
@@ -68,10 +68,10 @@ public class UsuarioServiceSpyTest {
     public static Usuario criarUsuario() {
         return Usuario.builder()
                 .id(1l)
-                .nomeUsuario("garzaro74")
+                .usuario("garzaro74")
                 .email("email@gmail.com")
                 .senha("senha")
                 .build();
-        
+
     }
 }

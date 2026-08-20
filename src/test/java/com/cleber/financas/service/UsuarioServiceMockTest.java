@@ -45,7 +45,8 @@ public class UsuarioServiceMockTest {
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(false);
 
         /*ação, sem verificação, só olha se existe o email*/
-        usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
+        usuarioService.
+                validarEmail("cleber@gmail.com");
     }
 
     @Test(expected = RegraDeNegocioException.class)
@@ -54,7 +55,7 @@ public class UsuarioServiceMockTest {
         Mockito.when(usuarioRepository.existsByEmail(Mockito.anyString())).thenReturn(true);
 
         /*ação*/
-        usuarioService.validarEmailNaBaseDedados("cleber@gmail.com");
+        usuarioService.validarEmail("cleber@gmail.com");
     }
 
     @Test(expected = Test.None.class)
@@ -76,7 +77,7 @@ public class UsuarioServiceMockTest {
         Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(criarUsuario));
 
         /*ação*/ /*deve retornar uma instancia de usuario autenticado*/
-        Usuario resultadoAutenticacao = usuarioService.autenticarUsuario(email, senha);
+        Usuario resultadoAutenticacao = usuarioService.autenticar(email, senha);
 
         /*verificacao*/
         Assertions.assertThat(resultadoAutenticacao).isNotNull();
@@ -98,7 +99,7 @@ public class UsuarioServiceMockTest {
         String senha = "senha123";
 
         /*ação*/
-        usuarioService.autenticarUsuario(email, senha);
+        usuarioService.autenticar(email, senha);
     }
     /*sem o expected*/
     @Test
@@ -112,7 +113,7 @@ public class UsuarioServiceMockTest {
         Mockito.when(usuarioRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(usuario));
         /*ação*/
         Throwable exception = Assertions.catchThrowable(() -> usuarioService
-                .autenticarUsuario("cleber@gmail.com", "123"));
+                .autenticar("cleber@gmail.com", "123"));
         Assertions.assertThat(exception).isInstanceOf(ErroDeAutenticacao.class).hasMessage("Senha inválida");
     }
 }

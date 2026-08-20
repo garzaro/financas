@@ -2,14 +2,12 @@ package com.cleber.financas.service;
 
 import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.StatusLancamento;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-
+@Service
 public interface LancamentoService {
     
     /*vai receber um lancamento e vai salvar*/
@@ -25,14 +23,13 @@ public interface LancamentoService {
     /*recebe o status e o lancamento
     void atualizarStatus(Lancamento lancamento, StatusLancamento status);*/
     
-    void atualizarStatus(Lancamento lancamento, String status);
+    void atualizarStatus(Lancamento lancamento, StatusLancamento status);
     
     /*ver se ja exite o lancamento na base de dados*/
     void validarLancamento(Lancamento lancamento);
     
     Optional<Lancamento> obterLancamentoPorId(Long id);
 
-   
+	BigDecimal obterSaldoPorUsuario(Long id);
 
-    /*BigDecimal obterSaldoPorUsuario(Long id);*/
 }
