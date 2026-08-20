@@ -1,30 +1,37 @@
 package com.cleber.financas.api.dto;
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.UUID;
 
-@Data
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LancamentoDTO {
-    private Long id;
+    private UUID id;
     private String descricao;
     private Integer mes;
     private Integer ano;
-	private LocalDate dataCadastro;
 	private BigDecimal valor;
     /*passar só o id do usuario, nao como objeto*/
-    private Long usuario;
-    private String tipo;
-    private String status;
+    @NotNull
+    private UUID usuario;
+    private String tipoLancamento;
+    private String statusLancamento;
+	private LocalDate dataCadastro;
 
-
-	public Long getId() {
+/**DEIXEI PRA CASO AS ANOTATION DE PROBLEMA MAS NAO PRECISA**/
+	public UUID getId() {
 		return id;
 	}
-	public void setId(Long id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 	public String getDescricao() {
@@ -51,24 +58,57 @@ public class LancamentoDTO {
 	public void setValor(BigDecimal valor) {
 		this.valor = valor;
 	}
-	public Long getUsuario() {
+	public UUID getUsuario() {
 		return usuario;
 	}
-	public void setUsuario(Long usuario) {
+	public void setUsuario(@NotNull UUID usuario) {
 		this.usuario = usuario;
 	}
-	public String getTipo() {
-		return tipo;
+	public String getTipoLancamento() {
+		return tipoLancamento;
 	}
-	public void setTipo(String tipo) {
-		this.tipo = tipo;
+	public void setTipoLancamento(String tipoLancamento) {
+		this.tipoLancamento = tipoLancamento;
 	}
-	public String getStatus() {
-		return status;
+	public String getStatusLancamento() {
+		return statusLancamento;
 	}
-	public void setStatus(String status) {
-		this.status = status;
+	public void setStatusLancamento(String statusLancamento) {
+		this.statusLancamento = statusLancamento;
 	}
-    
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        LancamentoDTO that = (LancamentoDTO) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(descricao, that.descricao) &&
+                Objects.equals(mes, that.mes) &&
+                Objects.equals(ano, that.ano) &&
+                Objects.equals(valor, that.valor) &&
+                Objects.equals(usuario, that.usuario) &&
+                Objects.equals(tipoLancamento, that.tipoLancamento) &&
+                Objects.equals(statusLancamento, that.statusLancamento) &&
+                Objects.equals(dataCadastro, that.dataCadastro);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, descricao, mes, ano, valor, usuario, tipoLancamento, statusLancamento, dataCadastro);
+    }
+
+    @Override
+    public String toString() {
+        return "LancamentoDTO{" +
+                "id=" + id +
+                ", descricao='" + descricao + '\'' +
+                ", mes=" + mes +
+                ", ano=" + ano +
+                ", valor=" + valor +
+                ", usuario=" + usuario +
+                ", tipoLancamento='" + tipoLancamento + '\'' +
+                ", statusLancamento='" + statusLancamento + '\'' +
+                ", dataCadastro=" + dataCadastro +
+                '}';
+    }
 }

@@ -1,12 +1,14 @@
 package com.cleber.financas.service;
 
-import com.cleber.financas.model.entity.Lancamento;
-import com.cleber.financas.model.entity.StatusLancamento;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.enums.StatusLancamento;
 @Service
 public interface LancamentoService {
     
@@ -20,16 +22,14 @@ public interface LancamentoService {
     /*as propriedades que vierem preenchidas no lancamento recebido sera usado como filtro*/
     List<Lancamento> buscarLancamento(Lancamento lancamentoFiltro);
     
-    /*recebe o status e o lancamento
-    void atualizarStatus(Lancamento lancamento, StatusLancamento status);*/
-    
-    void atualizarStatus(Lancamento lancamento, StatusLancamento status);
+    /*recebe o statusLancamento e o lancamento*/
+    void atualizarStatus(Lancamento lancamento, StatusLancamento statusLancamento);
     
     /*ver se ja exite o lancamento na base de dados*/
     void validarLancamento(Lancamento lancamento);
     
-    Optional<Lancamento> obterLancamentoPorId(Long id);
+    Optional<Lancamento> obterLancamentoPorId(UUID id);
 
-	BigDecimal obterSaldoPorUsuario(Long id);
+	BigDecimal obterSaldoPorUsuario(UUID id);
 
 }

@@ -1,6 +1,8 @@
 package com.cleber.financas.model.repository;
 
-import com.cleber.financas.model.entity.Usuario;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,12 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.LocalDate;
-import java.util.Optional;
+import com.cleber.financas.model.entity.Usuario;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
@@ -71,7 +71,7 @@ public class UsuarioRepositoryMelhoriasTest {
         Usuario usuarioPersistido = usuarioRepository.save(persistindoUsuario);
         
         /*verificação*/
-        Assertions.assertThat(usuarioPersistido.getId()).isNotNull();
+        Assertions.assertThat(usuarioPersistido.getUuid()).isNotNull();
     }
     @Test
     public void deveBuscarUmUsuarioPeloEmail(){
@@ -97,12 +97,12 @@ public class UsuarioRepositoryMelhoriasTest {
 
     private static Usuario criarUsuario(){
         return Usuario.builder()
-                .nome("Madonna da Silva")
-                .usuario("cricri")
+                .nomeCompleto("Madonna da Silva")
+                .nomeUsuario("cricri")
                 .cpf("123.456.789.00")
                 .email("cricri@gmail.com")
                 .senha("123456")
-                .dataCadastro(LocalDate.now())
+                .dataCadastro(LocalDateTime.now())
                 .build();
     }
 }

@@ -1,13 +1,14 @@
 package com.cleber.financas.api.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class AtualizarStatusDTO {
-    
-    private String status;
+	@NotNull(message = "{status.obrigatorio}")
+    private String statusLancamento;	
 }

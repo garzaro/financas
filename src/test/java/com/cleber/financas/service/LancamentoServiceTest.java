@@ -1,13 +1,18 @@
 package com.cleber.financas.service;
 
-import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.model.entity.Lancamento;
-import com.cleber.financas.model.entity.StatusLancamento;
-import com.cleber.financas.model.entity.TipoLancamento;
-import com.cleber.financas.model.entity.Usuario;
-import com.cleber.financas.model.repository.LancamentoRepository;
-import com.cleber.financas.model.repository.LancamentoRepositoryTest;
-import com.cleber.financas.service.impl.LancamentoServiceImpl;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,15 +23,14 @@ import org.springframework.data.domain.Example;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
-import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.mockito.Mockito.*;
+import com.cleber.financas.exception.RegraDeNegocioException;
+import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.enums.StatusLancamento;
+import com.cleber.financas.model.enums.TipoLancamento;
+import com.cleber.financas.model.repository.LancamentoRepository;
+import com.cleber.financas.model.repository.LancamentoRepositoryTest;
+import com.cleber.financas.service.impl.LancamentoServiceImpl;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
@@ -46,7 +50,7 @@ public class LancamentoServiceTest {
         doNothing().when(serviceImpl).validarLancamento(lancamentoASerSalvo);
         /*outro lancamento com o id definido, simulação do que vai ser salvo*/
         Lancamento salvandoLancamento = LancamentoRepositoryTest.criarLancamento();
-        salvandoLancamento.setId(1L);
+        salvandoLancamento.setId(UUID.randomUUID());
         //salvandoLancamento.setStatusLancamento(StatusLancamento.PENDENTE);
         /*ao chamar lancamento a ser salvo, retorna, salvando lancamento - simulação*/
         Mockito.when(lancamentoRepository.save(lancamentoASerSalvo)).thenReturn(salvandoLancamento);
@@ -64,7 +68,7 @@ public class LancamentoServiceTest {
         /*cenario*/
         /*esse lancamento já esta salvo*/
         Lancamento lancamentoSalvo = LancamentoRepositoryTest.criarLancamento();
-        lancamentoSalvo.setId(1L);
+        lancamentoSalvo.setId(UUID.randomUUID());
         /*impedir a validação ao salvar o lancamento*/
         doNothing().when(serviceImpl).validarLancamento(lancamentoSalvo);
         /*retorna ele mesmo atualizado*/
@@ -81,9 +85,9 @@ public class LancamentoServiceTest {
     public void deveAtualizarOStatusDoLancamento() {
         /*cenario*/
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
-        lancamento.setId(1l);
+        lancamento.setId(UUID.randomUUID());
         lancamento.setStatusLancamento(StatusLancamento.PENDENTE);
-        /*criar o novo status para o lancamento*/
+        /*criar o novo statusLancamento para o lancamento*/
         StatusLancamento statusAtualizado = StatusLancamento.EFETIVADO;
         /*nao e necessario chamar o metodo atualizar de fato*/
         Mockito.doReturn(lancamento).when(serviceImpl).atualizarLancamento(lancamento);
@@ -101,7 +105,7 @@ public class LancamentoServiceTest {
     public void deveDeletarUmLancamento() {
         /*cenário*/
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
-        lancamento.setId(1L);
+        lancamento.setId(UUID.randomUUID());
         /*ação*/
         //doNothing().when(lancamentoRepository).delete(lancamento);
         serviceImpl.deletarLancamento(lancamento);
@@ -113,7 +117,7 @@ public class LancamentoServiceTest {
     public void deveBuscarUmLancamento() { /*filtro*/
         /*cenario*/
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
-        lancamento.setId(1L);
+        lancamento.setId(UUID.randomUUID());
         /*criar uma lista de lancamentos*/
         List<Lancamento> listaDeLancamento = Arrays.asList(lancamento);
         Mockito.when(lancamentoRepository.findAll(Mockito.any(Example.class))).thenReturn(listaDeLancamento);
@@ -129,13 +133,13 @@ public class LancamentoServiceTest {
     @Test
     public void deveObterUmLancamentoPeloId() {
         /*cenario*/
-        Long id = 1l;
+        UUID id = UUID.randomUUID();
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
         lancamento.setId(id);
 
-        Mockito.when(lancamentoRepository.findById(1l)).thenReturn(Optional.of(lancamento));
+        Mockito.when(lancamentoRepository.findById(UUID.randomUUID())).thenReturn(Optional.of(lancamento));
         /*ação*/
-        Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(1l);
+        Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(UUID.randomUUID());
         /*verificação*/
         Assertions.assertThat(resultado.isPresent()).isTrue();
     }
@@ -189,7 +193,7 @@ public class LancamentoServiceTest {
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um Usuário.");
-        lancamento.getUsuario().setId(1l);
+        lancamento.getUsuario().setUuid(UUID.randomUUID());
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real.");
@@ -207,10 +211,10 @@ public class LancamentoServiceTest {
     @Test
     public void deveObterSaldoPorUsuario() {
         /*cenario*/
-        Long idUsuario = 1l;
+        UUID idUsuario = UUID.randomUUID();
 
         Mockito.when(lancamentoRepository
-                .obterSaldoPorTipoLancamentoEUsuarioEstatus(1l, TipoLancamento.RECEITA, StatusLancamento.EFETIVADO))
+                .obterSaldoPorTipoLancamentoEUsuarioEstatus(idUsuario, TipoLancamento.RECEITA, StatusLancamento.EFETIVADO))
                 .thenReturn(BigDecimal.valueOf(1500));
         Mockito.when(lancamentoRepository
                 .obterSaldoPorTipoLancamentoEUsuarioEstatus(idUsuario, TipoLancamento.DESPESA, StatusLancamento.EFETIVADO))
@@ -224,17 +228,17 @@ public class LancamentoServiceTest {
     @Test
     public void deveRetornarVazioQuandoNaoExistirOLancamento() {
         /*cenario*/
-        Long id = 1l;
+        UUID id = UUID.randomUUID();
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
         lancamento.setId(id);
 
-        Mockito.when(lancamentoRepository.findById(1l)).thenReturn(Optional.empty());
+        Mockito.when(lancamentoRepository.findById(id)).thenReturn(Optional.empty());
         /*ação*/
-        Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(1l);
+        Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(id);
         /*verificação*/
         Assertions.assertThat(resultado.isPresent()).isFalse();
     }
-
+  
     @Test
     public void deveLancarErroAoTentarDeletarUmLancamentoNaoSalvo() {
         /*cenário*/

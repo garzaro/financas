@@ -1,8 +1,9 @@
 package com.cleber.financas.service;
 
-import com.cleber.financas.exception.RegraDeNegocioException;
-import com.cleber.financas.model.entity.Usuario;
-import com.cleber.financas.model.repository.UsuarioRepository;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.LocalDate;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.repository.UsuarioRepository;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -28,9 +30,8 @@ public class UsuarioServiceMelhoriasTest {
     public void deveValidarEmail(){
         /*cenario*/
         usuarioRepository.deleteAll();
-        /*ação, sem verificação, só olha se existe o email*/
-        usuarioService.
-                validarEmail("cleber@gmail.com");
+        /*ação, sem verificação, só olha se existe o email
+        usuarioService.validarUsuario("cleber@gmail.com");
     }
     @Test(expected = RegraDeNegocioException.class)
     public void deveLancarErroAoValidarQuandoExistirEmaiLCadastrado(){
@@ -39,8 +40,7 @@ public class UsuarioServiceMelhoriasTest {
         /*salvar*/
         usuarioRepository.save(cadastrarEmail);
         /*ação*/
-        usuarioService.
-                validarCpf("123456789-00");
+        usuarioService.validarUsuario(cadastrarEmail);
     }
     @Test(expected = Test.None.class)
     public void deveAutenticarUmUsuarioComSucesso(){
@@ -51,24 +51,24 @@ public class UsuarioServiceMelhoriasTest {
         Usuario usuarioSalvo = usuarioRepository.save(persistirUsuario);
 
         /*verificar se o metodo autenticarUsuario funciona corretamente*/
-        Usuario usuarioAutenticado = usuarioService.autenticar(usuarioSalvo.getEmail(), usuarioSalvo.getSenha());
+        Optional<Usuario> usuarioAutenticado = Optional.ofNullable(usuarioService.autenticar(usuarioSalvo.getEmail(), usuarioSalvo.getSenha()));
 
         /*verificação*/
         Assertions.assertThat(usuarioAutenticado).isNotNull();
-        Assertions.assertThat(usuarioAutenticado.getEmail()).isEqualTo("cleber@gmail.com");
-        Assertions.assertThat(usuarioAutenticado.getSenha()).isEqualTo("senha");
+        Assertions.assertThat(usuarioAutenticado.get()).isEqualTo("cleber@gmail.com");
+        Assertions.assertThat(usuarioAutenticado.get()).isEqualTo("senha");
     }
 
     /*para criar instancias*/
     public static Usuario criarUsuario(){
         return Usuario.builder()
-                .id(1l)
-                .nome("Cleber")
-                .usuario("garzaro")
+                .uuid(UUID.randomUUID())
+                .nomeCompleto("Cleber")
+                .nomeUsuario("garzaro")
                 .cpf("123.456.789-00")
                 .email("cleber@gmail.com")
                 .senha("senha")
-                .dataCadastro(LocalDate.now())
+                .dataCadastro(LocalDateTime.now())
                 .build();
     
     }

@@ -1,8 +1,10 @@
 package com.cleber.financas.model.repository;
 
-import com.cleber.financas.model.entity.Lancamento;
-import com.cleber.financas.model.entity.StatusLancamento;
-import com.cleber.financas.model.entity.TipoLancamento;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,12 +13,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+import com.cleber.financas.model.entity.Lancamento;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.enums.StatusLancamento;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -82,12 +84,26 @@ public class LancamentoRepositoryTest {
     }
     
     public static Lancamento criarLancamento() {
+        Usuario usuario = criarUsuario();
         return Lancamento.builder()
                 .descricao("Lancamento de teste para deletar")
                 .ano(2024)
+                .usuario(usuario)
                 .mes(11)
                 .valor(BigDecimal.valueOf(10.55))
                 .statusLancamento(StatusLancamento.PENDENTE)
+                .build();
+    }
+
+    public static Usuario criarUsuario() {
+        return Usuario.builder()
+                .uuid(UUID.randomUUID())
+                .nomeCompleto("Usuário")
+                .cpf("12345678900")
+                .nomeUsuario("usuario")
+                .email("usuario@gmail.com")
+                .senha("Senha@123")
+                .dataCadastro(LocalDateTime.now())
                 .build();
     }
 }
