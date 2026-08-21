@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae937a27-0bbc-4367-9828-9a2b7c27095a" name="Changes" comment="Add: adicionando TOkenDTO e ErroReposnse" />
+    <list default="true" id="ae937a27-0bbc-4367-9828-9a2b7c27095a" name="Changes" comment="Add: adicionando" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -315,7 +315,15 @@
       <option name="project" value="LOCAL" />
       <updated>1781232310839</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Add: adicionando">
+      <option name="closed" value="true" />
+      <created>1787336389971</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1787336389971</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -341,7 +349,8 @@
     <MESSAGE value="ADD: fazendo adicao porque baixei novamente o projeto" />
     <MESSAGE value="ADD: adicionando a parte de JWT" />
     <MESSAGE value="Add: adicionando TOkenDTO e ErroReposnse" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add: adicionando TOkenDTO e ErroReposnse" />
+    <MESSAGE value="Add: adicionando" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add: adicionando" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
