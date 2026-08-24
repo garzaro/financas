@@ -1,7 +1,9 @@
 package com.cleber.financas.service.impl.tokenImpl;
 
 import com.cleber.financas.exception.InvalidRefreshTokenException;
-import com.cleber.financas.service.token.RefreshDadosToken;
+import com.cleber.financas.api.dto.RefreshDadosToken;
+import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.token.RefreshTokenEmitido;
 import com.cleber.financas.service.token.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +12,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.KeyGenerator;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,38 +38,40 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RedisTemplate<String, RefreshDadosToken> tokenTemplate;
     private final StringRedisTemplate setTemplate;
+    private final UsuarioRepository usuarioRepository;
     private final Duration tokenTtl;
     /**periodo de tolerancia**/
-    private final Duration rotatedGrace;
+    private final Duration graceRotacionado;
 
     public RefreshTokenServiceImpl(
             RedisTemplate<String, RefreshDadosToken> refreshTokenRedisTemplate,
             StringRedisTemplate stringRedisTemplate,
+            UsuarioRepository usuarioRepository,
             @Value("${spring.app.jwtRefreshExpirationMs}") long tokenTtlMs,
-            @Value("${spring.app.refreshRotatedGraceMs:30000}") long rotatedGraceMs
+            @Value("${spring.app.refreshRotatedGraceMs}") long graceRotacionadoMs
     ) {
         this.tokenTemplate = refreshTokenRedisTemplate;
         this.setTemplate = stringRedisTemplate;
+        this.usuarioRepository = usuarioRepository;
         this.tokenTtl = Duration.ofMillis(tokenTtlMs);
-        this.rotatedGrace = Duration.ofMillis(rotatedGraceMs);
+        this.graceRotacionado = Duration.ofMillis(graceRotacionadoMs);
     }
 
-
     @Override
-    public RefreshTokenEmitido gerar(UUID usuarioId, String ip, String agenteUsuario) {
+    public RefreshTokenEmitido gerar(UUID usuarioId, String clientIp, String agenteUsuario) {
         UUID familiaId = UUID.randomUUID();
-        return issue(usuarioId, familiaId, ip, agenteUsuario);
+        return emissao(usuarioId, familiaId, clientIp, agenteUsuario);
     }
 
     @Override
-    public RefreshTokenEmitido rotacionar(String rawToken, String ip, String agenteUsuario) {
-        String hash = hash(rawToken);
+    public RefreshTokenEmitido rotacionar(String tokenAntigo, String ip, String agenteUsuario) {
+        String hash = hash(tokenAntigo);
         String chave = TOKEN_PREFIX + hash;
         RefreshDadosToken dadosToken = tokenTemplate.opsForValue().get(chave);
         if (dadosToken == null) {
             throw new InvalidRefreshTokenException("Refresh token não encontrado ou expirado");
         }
-        if (dadosToken.status() ==RefreshDadosToken.Status.ROTACIONADO){
+        if (dadosToken.status() == RefreshDadosToken.Status.ROTACIONADO){
             /** Reuse detectado: token já rotacionado sendo reapresentado -> sessão comprometida**/
             revogarFamiliaById(dadosToken.familiaId(), dadosToken.usuarioId());
             throw new InvalidRefreshTokenException("Reuse de refresh token detectado - familia inteira revogada");
@@ -78,20 +81,31 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
          * **/
         tokenTemplate.opsForValue()
                 .set(chave, dadosToken.comStatus(
-                        RefreshDadosToken.Status.ROTACIONADO), rotatedGrace
+                        RefreshDadosToken.Status.ROTACIONADO), graceRotacionado
                 );
-        return issue(dadosToken.usuarioId(), dadosToken.familiaId(), ip, agenteUsuario);
+        /**criar um token**/
+        return emissao(dadosToken.usuarioId(), dadosToken.familiaId(), ip, agenteUsuario);
     }
 
+//    @Override
+//    public RefreshDadosToken validar(String rawToken) {
+//        String chave = TOKEN_PREFIX + hash(rawToken);
+//        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().get(chave);
+//        if (dadosToken == null || dadosToken.status() != RefreshDadosToken.Status. ATIVO) {
+//            throw new InvalidRefreshTokenException("Refresh token inválido");
+//        }
+//
+//        return dadosToken;
+//    }
     @Override
-    public RefreshDadosToken validar(String rawToken) {
-        String chave = TOKEN_PREFIX + hash(rawToken);
-        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().get(chave);
-        if (dadosToken == null || dadosToken.status() != RefreshDadosToken.Status.ATIVO) {
+    public Usuario validar(String rawToken) {
+        String chave = TOKEN_PREFIX + hash(rawToken); //token bruto
+        RefreshDadosToken dados = tokenTemplate.opsForValue().get(chave);
+        if (dados == null || dados.status() != RefreshDadosToken.Status.ATIVO) {
             throw new InvalidRefreshTokenException("Refresh token inválido");
         }
-
-        return dadosToken;
+        return usuarioRepository.findById(dados.usuarioId())
+                .orElseThrow(() -> new InvalidRefreshTokenException("Usuário do token não encontrado"));
     }
 
     @Override
@@ -106,18 +120,19 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public void revogarAllByUser(UUID usuarioId) {
         String chaveUsuario = USUARIO_PREFIX + usuarioId;
-        Set<String> familia = setTemplate.opsForSet().members(chaveUsuario);
-        if (familia != null){
-            for (String familiaId : familia){
-                revogarSomenteTokenFamilia(familiaId);
+        Set<String> familias = setTemplate.opsForSet().members(chaveUsuario);
+        if (familias != null){
+            for (String familiaId : familias){
+                revogarSomenteTokenDaFamilia(familiaId);
             }
         }
         setTemplate.delete(chaveUsuario);
     }
 
     /**metodos auxiliares internos**/
-    private RefreshTokenEmitido issue( UUID usuarioId, UUID familiaId, String ip, String agenteUsuario ){
-        String rawToken = randomToken();
+
+    private RefreshTokenEmitido emissao(UUID usuarioId, UUID familiaId, String ip, String agenteUsuario ){
+        String rawToken = tokenAleatorio();
         String hash = hash(rawToken);
 
         RefreshDadosToken dadosToken = new RefreshDadosToken(
@@ -135,12 +150,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     private void revogarFamiliaById(UUID familiaId, UUID usuarioId){
-        revogarSomenteTokenFamilia(familiaId.toString());
+        revogarSomenteTokenDaFamilia(familiaId.toString());
         setTemplate.opsForSet().remove(USUARIO_PREFIX, usuarioId, familiaId.toString());
 
     }
 
-    private void revogarSomenteTokenFamilia(String familiaId){
+    private void revogarSomenteTokenDaFamilia(String familiaId){
         String chaveFamilia = FAMILIA_PREFIX + familiaId;
         Set<String> hashes = setTemplate.opsForSet().members(chaveFamilia);
         if (hashes != null){
@@ -151,7 +166,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         setTemplate.delete(chaveFamilia);
     }
 
-    private String randomToken() {
+    private String tokenAleatorio() {
         /**256 bits de entropia via SecureRandom do próprio Spring Security — nada reinventado**/
         byte[] bytes = KeyGenerators.secureRandom(32).generateKey();
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
@@ -162,8 +177,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] bytes = md.digest(rawToken.getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Algoritmo de Resumo indisponível na JVM", e);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("Algoritmo de Resumo indisponível na JVM", ex);
         }
     }
 }

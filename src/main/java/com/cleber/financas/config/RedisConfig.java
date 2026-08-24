@@ -1,13 +1,12 @@
 package com.cleber.financas.config;
 
-import com.cleber.financas.service.token.RefreshDadosToken;
+import com.cleber.financas.api.dto.RefreshDadosToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -25,7 +24,7 @@ public class RedisConfig {
      * RefreshDadosToken e quebraria ao tentar serializar uma String.
      */
 
-    public RedisTemplate<String, RefreshDadosToken> redisTemplate(
+    public RedisTemplate<String, RefreshDadosToken> refreshTOkenRedisTemplate(
             RedisConnectionFactory connectionFactory
     ) {
         RedisTemplate<String, RefreshDadosToken> template = new RedisTemplate<>();

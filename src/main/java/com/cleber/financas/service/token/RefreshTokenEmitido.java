@@ -6,6 +6,6 @@ import java.time.Duration;
  * o hash é o que fica armazenado no Redis — nunca o valor bruto.
  */
 public record RefreshTokenEmitido(
-        String rawToken,
-        Duration ttl
+        String rawToken, // token bruto
+        Duration ttl //tempo de vida do token
 ) {}

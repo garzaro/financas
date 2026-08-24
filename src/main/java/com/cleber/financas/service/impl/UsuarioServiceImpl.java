@@ -33,7 +33,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     private static final Logger log = LoggerFactory.getLogger(UsuarioServiceImpl.class);
 
     private final UsuarioRepository usuarioRepository;
-//    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final Validator validator;
 
     public UsuarioServiceImpl(
@@ -41,26 +41,8 @@ public class UsuarioServiceImpl implements UsuarioService {
             PasswordEncoder passwordEncoder,
             Validator validator) {
         this.usuarioRepository = usuarioRepository;
-//        this.passwordEncoder = passwordEncoder;
+        this.passwordEncoder = passwordEncoder;
         this.validator = validator;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        /**Argon2id nativo via Bouncy Castle**/
-        int saltLength = 16;         // 16 bytes (128 bits)
-        int hashLength = 32;         // 32 bytes (256 bits)
-        int parallelism = 1;         // 1 thread
-        int memory = 1 << 16;        // 64 MiB (65536 KiB)
-        int iterations = 3;          // 3 iterações
-
-        return new Argon2PasswordEncoder(
-                saltLength,
-                hashLength,
-                parallelism,
-                memory,
-                iterations
-        );
     }
 
     /**
@@ -80,7 +62,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (!usuario.isPresent()) {
             throw new ErroDeAutenticacao("Verifique seu email e tente novamente.");
         }
-        boolean senhaCorreta = passwordEncoder().matches(senha, usuario.get().getSenha());
+        boolean senhaCorreta = passwordEncoder.matches(senha, usuario.get().getSenha());
         if (!senhaCorreta) {
             throw new ErroDeAutenticacao("Credenciais inválidas.");
         }
@@ -97,7 +79,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         validarEmailCpf(usuario.getEmail(), usuario.getCpf());
         validarUsuario(usuario);
         usuario.setIsAtivo(true);
-        usuario.setSenha(passwordEncoder().encode(usuario.getSenha())); /* hash da senha */
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /* hash da senha */
         return usuarioRepository.save(usuario);
     }
 

@@ -35,7 +35,7 @@ public class LancamentoRepositoryTest {
     public void deveSalvarUmLancamento(){
         Lancamento lancamento = criarLancamento();
         lancamento = lancamentoRepository.save(lancamento);
-        Assertions.assertThat(lancamento.getId()).isNotNull();
+        Assertions.assertThat(lancamento.getUuid()).isNotNull();
     }
     
     @Test
@@ -48,7 +48,7 @@ public class LancamentoRepositoryTest {
         lancamentoRepository.save(lancamento);
         
         /*comparar com o lancamento ja salvo na base de dados*/
-        Lancamento lancamentoAtualizado = testEntityManager.find(Lancamento.class, lancamento.getId());
+        Lancamento lancamentoAtualizado = testEntityManager.find(Lancamento.class, lancamento.getUuid());
         
         Assertions.assertThat(lancamentoAtualizado.getMes()).isEqualTo(10);
         Assertions.assertThat(lancamentoAtualizado.getStatusLancamento()).isEqualTo(StatusLancamento.EFETIVADO);
@@ -58,7 +58,7 @@ public class LancamentoRepositoryTest {
     public void deveBuscarUmLancamentoPorId(){
         Lancamento lancamento = persistirUmLancamento();
         
-        Optional<Lancamento> lancamentoEncontrado = lancamentoRepository.findById(lancamento.getId());
+        Optional<Lancamento> lancamentoEncontrado = lancamentoRepository.findById(lancamento.getUuid());
         
         Assertions.assertThat(lancamentoEncontrado.isPresent()).isTrue();
     }
@@ -68,11 +68,11 @@ public class LancamentoRepositoryTest {
         Lancamento lancamento = persistirUmLancamento();
         testEntityManager.persist(lancamento);
         
-        lancamento = testEntityManager.find(Lancamento.class, lancamento.getId());
+        lancamento = testEntityManager.find(Lancamento.class, lancamento.getUuid());
         
         lancamentoRepository.delete(lancamento);
         
-        Lancamento lancamentoInxistente = testEntityManager.find(Lancamento.class, lancamento.getId());
+        Lancamento lancamentoInxistente = testEntityManager.find(Lancamento.class, lancamento.getUuid());
         
         Assertions.assertThat(lancamentoInxistente).isNull();
     }

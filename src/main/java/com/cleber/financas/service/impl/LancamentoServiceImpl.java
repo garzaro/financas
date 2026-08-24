@@ -54,7 +54,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 		 * Checagem: se não existir um id de lancamento salvo ele persiste e lança um
 		 * novo id...
 		 */
-		Objects.requireNonNull(lancamento.getId()); /* ...garantindo que será passado o lancamento com id */
+		Objects.requireNonNull(lancamento.getUuid()); /* ...garantindo que será passado o lancamento com id */
 		validarLancamento(lancamento);
 		return lancamentoRepository.save(lancamento); /* ...se nao passar da nullPointerException */
 	}
@@ -63,7 +63,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 	@Transactional
 	public void deletarLancamento(Lancamento lancamento) {
 		/* so deleta se existir um lancamento salvo */
-		Objects.requireNonNull(lancamento.getId()); /*
+		Objects.requireNonNull(lancamento.getUuid()); /*
 													 * Checagem: para garantir que esteja passando o lancamento salvo,
 													 * id nao pode ser nulo
 													 */

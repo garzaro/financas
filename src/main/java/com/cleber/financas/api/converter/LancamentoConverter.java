@@ -20,7 +20,7 @@ public class LancamentoConverter {
     /* converter o dto em uma entidade de lancamento */
     public Lancamento dtoToEntity(LancamentoDTO dto) {
         Lancamento lancamento = new Lancamento();
-        lancamento.setId(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
+        lancamento.setUuid(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
         lancamento.setDescricao(dto.getDescricao());
         lancamento.setMes(dto.getMes());
         lancamento.setAno(dto.getAno());
@@ -45,7 +45,7 @@ public class LancamentoConverter {
     /* converter uma entidade de lancamento para dto - PARA ATUALIZAÇÃO */
     public LancamentoDTO entityToDto(Lancamento lancamento) {
         return LancamentoDTO.builder()
-                .id(lancamento.getId())
+                .id(lancamento.getUuid())
                 .descricao(lancamento.getDescricao())
                 .valor(lancamento.getValor())
                 .mes(lancamento.getMes())

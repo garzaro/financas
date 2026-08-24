@@ -50,7 +50,7 @@ public class LancamentoServiceTest {
         doNothing().when(serviceImpl).validarLancamento(lancamentoASerSalvo);
         /*outro lancamento com o id definido, simulação do que vai ser salvo*/
         Lancamento salvandoLancamento = LancamentoRepositoryTest.criarLancamento();
-        salvandoLancamento.setId(UUID.randomUUID());
+        salvandoLancamento.setUuid(UUID.randomUUID());
         //salvandoLancamento.setStatusLancamento(StatusLancamento.PENDENTE);
         /*ao chamar lancamento a ser salvo, retorna, salvando lancamento - simulação*/
         Mockito.when(lancamentoRepository.save(lancamentoASerSalvo)).thenReturn(salvandoLancamento);
@@ -59,7 +59,7 @@ public class LancamentoServiceTest {
         Lancamento lancamento = serviceImpl.salvarLancamento(lancamentoASerSalvo);
 
         /*verificação*/
-        assertThat(lancamento.getId()).isEqualTo(salvandoLancamento.getId());
+        assertThat(lancamento.getUuid()).isEqualTo(salvandoLancamento.getUuid());
         assertThat(lancamento.getStatusLancamento()).isEqualTo(StatusLancamento.PENDENTE);
     }
 
@@ -68,7 +68,7 @@ public class LancamentoServiceTest {
         /*cenario*/
         /*esse lancamento já esta salvo*/
         Lancamento lancamentoSalvo = LancamentoRepositoryTest.criarLancamento();
-        lancamentoSalvo.setId(UUID.randomUUID());
+        lancamentoSalvo.setUuid(UUID.randomUUID());
         /*impedir a validação ao salvar o lancamento*/
         doNothing().when(serviceImpl).validarLancamento(lancamentoSalvo);
         /*retorna ele mesmo atualizado*/
@@ -85,7 +85,7 @@ public class LancamentoServiceTest {
     public void deveAtualizarOStatusDoLancamento() {
         /*cenario*/
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
-        lancamento.setId(UUID.randomUUID());
+        lancamento.setUuid(UUID.randomUUID());
         lancamento.setStatusLancamento(StatusLancamento.PENDENTE);
         /*criar o novo statusLancamento para o lancamento*/
         StatusLancamento statusAtualizado = StatusLancamento.EFETIVADO;
@@ -105,7 +105,7 @@ public class LancamentoServiceTest {
     public void deveDeletarUmLancamento() {
         /*cenário*/
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
-        lancamento.setId(UUID.randomUUID());
+        lancamento.setUuid(UUID.randomUUID());
         /*ação*/
         //doNothing().when(lancamentoRepository).delete(lancamento);
         serviceImpl.deletarLancamento(lancamento);
@@ -117,7 +117,7 @@ public class LancamentoServiceTest {
     public void deveBuscarUmLancamento() { /*filtro*/
         /*cenario*/
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
-        lancamento.setId(UUID.randomUUID());
+        lancamento.setUuid(UUID.randomUUID());
         /*criar uma lista de lancamentos*/
         List<Lancamento> listaDeLancamento = Arrays.asList(lancamento);
         Mockito.when(lancamentoRepository.findAll(Mockito.any(Example.class))).thenReturn(listaDeLancamento);
@@ -135,7 +135,7 @@ public class LancamentoServiceTest {
         /*cenario*/
         UUID id = UUID.randomUUID();
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
-        lancamento.setId(id);
+        lancamento.setUuid(id);
 
         Mockito.when(lancamentoRepository.findById(UUID.randomUUID())).thenReturn(Optional.of(lancamento));
         /*ação*/
@@ -230,7 +230,7 @@ public class LancamentoServiceTest {
         /*cenario*/
         UUID id = UUID.randomUUID();
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
-        lancamento.setId(id);
+        lancamento.setUuid(id);
 
         Mockito.when(lancamentoRepository.findById(id)).thenReturn(Optional.empty());
         /*ação*/

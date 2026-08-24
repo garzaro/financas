@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.cleber.financas.api.common.GlobalExceptionHandler;
+import com.cleber.financas.exception.ErroDeAutenticacao;
+import com.cleber.financas.model.repository.UsuarioRepository;
+import com.cleber.financas.service.token.RefreshTokenEmitido;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -24,17 +26,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cleber.financas.api.converter.UsuarioConverter;
-import com.cleber.financas.api.dto.*;
+import com.cleber.financas.api.common.GlobalExceptionHandler;
 import com.cleber.financas.api.common.RefreshTokenCookieFactory;
-import com.cleber.financas.service.token.RefreshTokenService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.cleber.financas.api.converter.UsuarioConverter;
+import com.cleber.financas.api.dto.AuthLoginDTO;
+import com.cleber.financas.api.dto.TokenResponseDTO;
+import com.cleber.financas.api.dto.UsuarioDTO;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.service.JwtService;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
+import com.cleber.financas.service.token.RefreshTokenService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 /**
@@ -58,18 +63,20 @@ public class UsuarioController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
-    private final UsuarioService usuarioService;
-    private final LancamentoService lancamentoService;
-    private final UsuarioConverter usuarioConverter;
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenCookieFactory cookieFactory;
+    private final UsuarioService usuarioService;
+    private final UserDetailsService userDetailsService;
+    private final UsuarioRepository usuarioRepository;
+    private final LancamentoService lancamentoService;
+    private final UsuarioConverter usuarioConverter;
 
     public UsuarioController(
             AuthenticationManager authenticationManager,
             JwtService jwtService,
             UserDetailsService userDetailsService,
             UsuarioService usuarioService,
+            UsuarioRepository usuarioRepository,
             LancamentoService lancamentoService,
             UsuarioConverter usuarioConverter,
             RefreshTokenService refreshTokenService,
@@ -78,6 +85,7 @@ public class UsuarioController {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.usuarioRepository = usuarioRepository;
         this.usuarioService = usuarioService;
         this.lancamentoService = lancamentoService;
         this.usuarioConverter = usuarioConverter;
@@ -85,7 +93,7 @@ public class UsuarioController {
         this.cookieFactory = cookieFactory;
     }
 
-    /**
+    /**LoginRequest
      * Autentica o usuário e retorna um JWT.
      *
      * Caso as credenciais sejam inválidas, o {@code AuthenticationManager}
@@ -95,31 +103,37 @@ public class UsuarioController {
      * @return 200 OK com {@link TokenResponseDTO} contendo o accesstoken e o tipo "Bearer"
      */
     @PostMapping("/sign-in")
-    public ResponseEntity<TokenResponseDTO> login(@RequestBody @Valid AuthLoginDTO authDto, HttpServletRequest request) {
+    public ResponseEntity<TokenResponseDTO> login(
+            @RequestBody @Valid AuthLoginDTO authDto,
+            HttpServletRequest request) {
+
         var authenticationToken =
                 new UsernamePasswordAuthenticationToken(authDto.email(), authDto.senha());
-        var authenticate = authenticationManager.authenticate(authenticationToken);
-        var userDetails = (UserDetails) authenticate.getPrincipal();
+        authenticationManager.authenticate(authenticationToken); //validação da senha
 
-        Usuario usuario = usuarioService.autenticar(authDto.email(), authDto.senha());
+        Usuario usuario = usuarioRepository.findByEmail(authDto.email())
+                .orElseThrow(() -> new ErroDeAutenticacao("Credenciais inválidas."));
 
-        String accessToken = jwtService.gerarToken(userDetails);
-        String refreshToken = refreshTokenService.gerar(usuario, request);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getEmail());
+        String tokenAcesso = jwtService.gerarToken(userDetails);
 
-        ResponseCookie cookie = cookieFactory.buildSet(refreshToken);
+        RefreshTokenEmitido emitido = refreshTokenService.gerar(
+                usuario.getUuid(), clientIp(request), request.getHeader("User-Agent"));
+//    VERIFICAR O ERRO DO CLIENTIP
+        ResponseCookie cookie = cookieFactory.buildSet(emitido.rawToken(), emitido.ttl());
 
         log.info("Login bem-sucedido — email: {}", authDto.email());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new TokenResponseDTO(accessToken));
+                .body(new TokenResponseDTO(tokenAcesso));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponseDTO> refresh(
             @CookieValue(name = RefreshTokenCookieFactory.COOKIE_NAME) String oldRefreshToken,
             HttpServletRequest request) {
-        String newRefreshToken = refreshTokenService.rotate(oldRefreshToken, request);
+        String newRefreshToken = refreshTokenService.rotacionar(oldRefreshToken, request);
         Usuario usuario = refreshTokenService.validar(newRefreshToken);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getEmail());

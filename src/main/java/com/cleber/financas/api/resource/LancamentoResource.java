@@ -36,6 +36,11 @@ import com.cleber.financas.service.UsuarioService;
 
 import jakarta.validation.Valid;
 
+/**
+ * TODO-list
+ * [] - Verificar o metodo atualizar lancamento - id e uuid
+ * **/
+
 @RestController
 @RequestMapping("/api/Fp/lancamento")
 public class LancamentoResource {
@@ -77,7 +82,7 @@ public class LancamentoResource {
         return lancamentoService.obterLancamentoPorId(id).map(entity -> {
             try {
                 Lancamento lancamento = lancamentoConverter.dtoToEntity(dto);
-                lancamento.setId(entity.getId()); //id
+                lancamento.setUuid(entity.getUuid()); //id
                 lancamentoService.atualizarLancamento(lancamento);
                 return ResponseEntity.ok(lancamento);
             } catch (RegraDeNegocioException e) {

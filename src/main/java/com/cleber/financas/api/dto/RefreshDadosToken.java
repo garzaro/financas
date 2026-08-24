@@ -1,11 +1,11 @@
-package com.cleber.financas.service.token;
+package com.cleber.financas.api.dto;
 
 import java.time.Instant;
 import java.util.UUID;
 /**token data
  * Dados de um refresh token ativo, persistidos no Redis.
- * status ACTIVE  -> token válido, pode ser apresentado para rotação.
- * status ROTATED -> token já foi trocado; se apresentado novamente,
+ * novoStatus ACTIVE  -> token válido, pode ser apresentado para rotação.
+ * novoStatus ROTATED -> token já foi trocado; se apresentado novamente,
  *                   é sinal de reuse (token roubado) -> revoga a família inteira.
  */
 public record RefreshDadosToken(
@@ -22,7 +22,7 @@ public record RefreshDadosToken(
         return new RefreshDadosToken(
                 usuarioId,
                 familiaId,
-                status,
+                novoStatus,
                 ip,
                 agenteUsuario,
                 emitidoEm

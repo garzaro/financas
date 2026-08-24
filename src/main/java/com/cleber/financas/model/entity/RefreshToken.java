@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "refresh_tokens", schema = "financeiro")
+@Table(name = "refresh_token", schema = "financeiro")
 public class RefreshToken {
 
     @Id
@@ -38,7 +38,7 @@ public class RefreshToken {
     private Instant expiresAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 10)
+    @Column(name = "novoStatus", nullable = false, length = 10)
     private TokenStatus status;
 
     @Column(name = "ip", length = 45)
