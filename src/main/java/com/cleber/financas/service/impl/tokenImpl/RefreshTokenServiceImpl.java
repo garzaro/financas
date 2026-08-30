@@ -58,16 +58,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public RefreshTokenEmitido gerar(UUID usuarioId, String clientIp, String agenteUsuario) {
+    public RefreshTokenEmitido gerar(UUID usuarioId, String clienteIp, String agenteUsuario) {
         UUID familiaId = UUID.randomUUID();
-        return emissao(usuarioId, familiaId, clientIp, agenteUsuario);
+        return emissao(usuarioId, familiaId, clienteIp, agenteUsuario);
     }
 
     @Override
     public RefreshTokenEmitido rotacionar(String tokenAntigo, String ip, String agenteUsuario) {
         String hash = hash(tokenAntigo);
         String chave = TOKEN_PREFIX + hash;
-        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().get(chave);
+        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().getAndDelete(chave); //.get()
         if (dadosToken == null) {
             throw new InvalidRefreshTokenException("Refresh token não encontrado ou expirado");
         }
@@ -79,10 +79,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         /** Marca o token atual como ROTATED com TTL curto (grace period), não deleta:
          * precisa continuar existindo pra detectar reuse se for reapresentado.
          * **/
-        tokenTemplate.opsForValue()
-                .set(chave, dadosToken.comStatus(
-                        RefreshDadosToken.Status.ROTACIONADO), graceRotacionado
-                );
+        tokenTemplate.opsForValue().set(
+            chave,
+            dadosToken.comStatus(RefreshDadosToken.Status.ROTACIONADO), 
+            graceRotacionado
+        );
         /**criar um token**/
         return emissao(dadosToken.usuarioId(), dadosToken.familiaId(), ip, agenteUsuario);
     }
@@ -151,7 +152,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private void revogarFamiliaById(UUID familiaId, UUID usuarioId){
         revogarSomenteTokenDaFamilia(familiaId.toString());
-        setTemplate.opsForSet().remove(USUARIO_PREFIX, usuarioId, familiaId.toString());
+        setTemplate.opsForSet().remove(USUARIO_PREFIX + usuarioId, familiaId.toString());
 
     }
 

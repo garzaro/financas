@@ -118,11 +118,11 @@ public class UsuarioController {
         String tokenAcesso = jwtService.gerarToken(userDetails);
 
         RefreshTokenEmitido emitido = refreshTokenService.gerar(
-                usuario.getUuid(), clientIp(request), request.getHeader("User-Agent"));
-//    VERIFICAR O ERRO DO CLIENTIP
+                usuario.getUuid(), clienteIp(request), request.getHeader("User-Agent"));
+
         ResponseCookie cookie = cookieFactory.buildSet(emitido.rawToken(), emitido.ttl());
 
-        log.info("Login bem-sucedido — email: {}", authDto.email());
+        // log.info("Login bem-sucedido — email: {} | Token: {}", authDto.email(), tokenAcesso);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -131,19 +131,33 @@ public class UsuarioController {
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponseDTO> refresh(
-            @CookieValue(name = RefreshTokenCookieFactory.COOKIE_NAME) String oldRefreshToken,
-            HttpServletRequest request) {
-        String newRefreshToken = refreshTokenService.rotacionar(oldRefreshToken, request);
-        Usuario usuario = refreshTokenService.validar(newRefreshToken);
+            @CookieValue(
+                    name = RefreshTokenCookieFactory
+                            .COOKIE_NAME, required = false)
+            String refreshTokenAntigo,
+            HttpServletRequest request)
+    {
+        if (refreshTokenAntigo == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getEmail());
-        String newAccessToken = jwtService.gerarToken(userDetails);
+        RefreshTokenEmitido emitido = refreshTokenService.rotacionar(
+                refreshTokenAntigo, clienteIp(request),
+                request.getHeader("User-Agent"));
 
-        ResponseCookie cookie = cookieFactory.buildSet(newRefreshToken);
+        Usuario usuario = refreshTokenService.validar(emitido.rawToken());
+
+        UserDetails userDetails = userDetailsService
+                .loadUserByUsername(usuario.getEmail());
+
+        String accessTokenNovo = jwtService.gerarToken(userDetails);
+
+        ResponseCookie cookie = cookieFactory
+                .buildSet(emitido.rawToken(), emitido.ttl());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new TokenResponseDTO(newAccessToken));
+                .body(new TokenResponseDTO(accessTokenNovo));
     }
 
     @PostMapping("/logout")
@@ -199,5 +213,12 @@ public class UsuarioController {
         }
         BigDecimal saldo = lancamentoService.obterSaldoPorUsuario(id);
         return ResponseEntity.ok(saldo);
+    }
+
+    private String clienteIp(HttpServletRequest request) {
+        String encaminhado = request.getHeader("X-Forwarded-For");
+        return (encaminhado != null && !encaminhado.isBlank())
+                ? encaminhado.split(",")[0].trim()
+                : request.getRemoteAddr();
     }
 }

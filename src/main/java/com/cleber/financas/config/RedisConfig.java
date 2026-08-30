@@ -4,6 +4,8 @@ import com.cleber.financas.api.dto.RefreshDadosToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,8 +25,8 @@ public class RedisConfig {
      * template pros Sets: o valueSerializer aqui é específico pra
      * RefreshDadosToken e quebraria ao tentar serializar uma String.
      */
-
-    public RedisTemplate<String, RefreshDadosToken> refreshTOkenRedisTemplate(
+    @Bean
+    public RedisTemplate<String, RefreshDadosToken> refreshTokenRedisTemplate(
             RedisConnectionFactory connectionFactory
     ) {
         RedisTemplate<String, RefreshDadosToken> template = new RedisTemplate<>();

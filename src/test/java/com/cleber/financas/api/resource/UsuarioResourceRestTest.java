@@ -1,11 +1,13 @@
 package com.cleber.financas.api.resource;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.cleber.financas.api.common.RefreshTokenCookieFactory;
 
+import com.cleber.financas.service.token.RefreshTokenEmitido;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
@@ -30,10 +32,14 @@ import com.cleber.financas.api.converter.UsuarioConverter;
 import com.cleber.financas.api.dto.AuthLoginDTO;
 import com.cleber.financas.api.dto.UsuarioDTO;
 import com.cleber.financas.model.entity.Usuario;
+import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.JwtService;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
+import com.cleber.financas.service.token.RefreshTokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static java.util.Collections.emptyList;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -65,6 +71,11 @@ public class UsuarioResourceRestTest {
     @MockBean
     private UsuarioConverter usuarioConverter;
 
+    @MockBean
+    private UsuarioRepository usuarioRepository;
+
+    @MockBean
+    private RefreshTokenService refreshTokenService;
 
     @MockBean
     private RefreshTokenCookieFactory cookieFactory;
@@ -73,25 +84,33 @@ public class UsuarioResourceRestTest {
     public void deveAutenticarUmUsuario() throws Exception {
         String email = "cleber@gmail.com";
         String senha = "senha123";
-        AuthLoginDTO request = new AuthLoginDTO(email, senha);
+        String rawToken = "refresh-token";
+        Duration ttl = Duration.ofDays(7);
+        AuthLoginDTO loginRequest = new AuthLoginDTO(email, senha);
 
         Usuario usuario = Usuario.builder().uuid(UUID.randomUUID()).email(email).build();
         org.springframework.security.core.userdetails.UserDetails userDetails =
                 new org.springframework.security.core.userdetails.User(
                         email,
                         senha,
-                        java.util.Collections.emptyList());
+                        emptyList());
 
         Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(new UsernamePasswordAuthenticationToken(userDetails, null));
-        Mockito.when(usuarioService.autenticar(email, senha)).thenReturn(usuario);
+        Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(usuario));
+        Mockito.when(userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
         Mockito.when(jwtService.gerarToken(userDetails)).thenReturn("jwt-accesstoken");
-       
-        Mockito.when(cookieFactory.buildSet("refresh-token"))
-                .thenReturn(org.springframework.http.ResponseCookie.from("refresh_token", "refresh-token")
-                        .httpOnly(true).path("/api/auth").maxAge(604800).build());
 
-        String json = new ObjectMapper().writeValueAsString(request);
+        RefreshTokenEmitido emitido = new RefreshTokenEmitido(rawToken, ttl);
+
+        Mockito.when(refreshTokenService.gerar(Mockito.any(UUID.class), Mockito.anyString(), Mockito.any()))
+                .thenReturn(emitido);
+
+        Mockito.when(cookieFactory.buildSet(rawToken, ttl))
+                .thenReturn(org.springframework.http.ResponseCookie.from("refresh_token", rawToken)
+                        .httpOnly(true).path("/api/auth").maxAge(ttl).build());
+
+        String json = new ObjectMapper().writeValueAsString(loginRequest);
 
         MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders
                 .post(API + "/sign-in")
@@ -112,20 +131,26 @@ public class UsuarioResourceRestTest {
         String oldRefreshToken = "old-refresh-token";
         String newRefreshToken = "new-refresh-token";
         String newAccessToken = "new-access-token";
+        java.time.Duration ttl = java.time.Duration.ofDays(7);
 
         Usuario usuario = Usuario.builder().uuid(UUID.randomUUID()).email("cleber@gmail.com").build();
         org.springframework.security.core.userdetails.UserDetails userDetails =
                 new org.springframework.security.core.userdetails.User(
                         usuario.getEmail(),
                         "",
-                        java.util.Collections.emptyList());
+                        emptyList());
 
-       
+        com.cleber.financas.service.token.RefreshTokenEmitido emitido =
+                new com.cleber.financas.service.token.RefreshTokenEmitido(newRefreshToken, ttl);
+
+        Mockito.when(refreshTokenService.rotacionar(Mockito.eq(oldRefreshToken), Mockito.anyString(), Mockito.any()))
+                .thenReturn(emitido);
+        Mockito.when(refreshTokenService.validar(newRefreshToken)).thenReturn(usuario);
         Mockito.when(userDetailsService.loadUserByUsername(usuario.getEmail())).thenReturn(userDetails);
         Mockito.when(jwtService.gerarToken(userDetails)).thenReturn(newAccessToken);
-        Mockito.when(cookieFactory.buildSet(newRefreshToken))
+        Mockito.when(cookieFactory.buildSet(newRefreshToken, ttl))
                 .thenReturn(org.springframework.http.ResponseCookie.from("refresh_token", newRefreshToken)
-                        .httpOnly(true).path("/api/auth").maxAge(604800).build());
+                        .httpOnly(true).path("/api/auth").maxAge(ttl).build());
 
         MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders
                 .post(API + "/refresh")

@@ -44,12 +44,12 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/Fp/lancamento")
 public class LancamentoResource {
-    
+
     private final LancamentoService lancamentoService;
     private final UsuarioService usuarioService;
     private final UsuarioConverter usuarioConverter;
     private final LancamentoConverter lancamentoConverter;
-    
+
     public LancamentoResource(
             LancamentoService lancamentoService,
             UsuarioService usuarioService,
@@ -61,10 +61,10 @@ public class LancamentoResource {
         this.usuarioConverter = usuarioConverter;
         this.lancamentoConverter = lancamentoConverter;
     }
-    
+
     final Logger logger = LoggerFactory.getLogger(LancamentoResource.class);
 
-    @PostMapping
+    @PostMapping("/reg/lancamento")
     public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto) {
         try {
             Lancamento converteEntidade = lancamentoConverter.dtoToEntity(dto);
@@ -74,7 +74,7 @@ public class LancamentoResource {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
+
     /* entity é o retorno do service quando é obtido por id */
     @PutMapping("{id}")
     public ResponseEntity atualizarLancamento(@PathVariable("id") UUID id, @RequestBody LancamentoDTO dto) {
@@ -101,9 +101,9 @@ public class LancamentoResource {
     }
 
     @PutMapping("{id}/atualizar-statusLancamento")
-    public ResponseEntity<?> atualizarStatus(@PathVariable("id") UUID id, @Valid @RequestBody AtualizarStatusDTO dto) {        
+    public ResponseEntity<?> atualizarStatus(@PathVariable("id") UUID id, @Valid @RequestBody AtualizarStatusDTO dto) {
     	return lancamentoService.obterLancamentoPorId(id).map(entity -> {
-    		
+
             logger.info("Se imprimir null, o problema é o mapeamento do JSON (ponto 1 e 2). " + dto.getStatusLancamento());
             StatusLancamento selecionarStatus = StatusLancamento.valueOf(dto.getStatusLancamento());
             try {
@@ -126,7 +126,7 @@ public class LancamentoResource {
     ) {
         try {
             /* Verifica se o ID do usuário foi passado */
-            
+
             if (idUsuario == null) {
                 return ResponseEntity.badRequest().body("O ID do usuário é obrigatório" + "[" + idUsuario + "].");
             }
@@ -140,20 +140,20 @@ public class LancamentoResource {
             Optional<Usuario> usuario = usuarioService.obterUsuarioPorId(idUsuario);
             if (!usuario.isPresent()) {
                 return ResponseEntity.badRequest()
-                        .body("Consulta não realizada, usuario não encontrado com o ID " + "[" + idUsuario + "]");
+                        .body("Consulta não realizada, usuario não encontrado!");
             } else {
                 lancamentoFiltro.setUsuario(usuario.get());
             }
             /* busca os lancamentos com base no filtro */
             List<Lancamento> lancamentos = lancamentoService.buscarLancamento(lancamentoFiltro);
             return ResponseEntity.ok(lancamentos);
-            
+
         } catch (DataAccessException bd) {
             /* Tratamento de erro ao acessar o banco de dados */
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(bd.getMessage());
         }
     }
-    
+
     @DeleteMapping("{id}")
     public ResponseEntity deletar(@PathVariable("id") UUID id) {
         return lancamentoService.obterLancamentoPorId(id)/* se tiver o id, invoca o map */.map(entity -> {
