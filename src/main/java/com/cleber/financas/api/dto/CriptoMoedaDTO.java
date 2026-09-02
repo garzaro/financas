@@ -24,34 +24,34 @@ public class CriptoMoedaDTO {
 
 	private UUID uuid;
 
-	@NotNull(message = "{data.obrigatoria}")
-	@FutureOrPresent(message = "{data.futura}")
+	@NotNull(message = "{criptomoeda.data.obrigatoria}")
+	@FutureOrPresent(message = "{criptomoeda.data.futura}")
 	private LocalDate dataEntrada;
 
-	@NotNull(message = "{mes.obrigatorio}")
+	@NotNull(message = "{criptomoeda.mes.obrigatorio}")
 	private Integer mes;
 
-	@NotBlank(message = "{corretora.obrigatoria}")
+	@NotBlank(message = "{criptomoeda.corretora.obrigatoria}")
 	private String corretora;
 
-	@NotBlank(message = "{ativo.obrigatorio}")
+	@NotBlank(message = "{criptomoeda.ativo.obrigatorio}")
 	private String ativo;
 
 	private String alavancagem;
 
-	@NotBlank(message = "{moeda.corrente.obrigatoria}")
+	@NotBlank(message = "{criptomoeda.moeda.corrente.obrigatoria}")
 	private String moedaCorrente;
 
-	@NotNull(message = "{valor.investido.obrigatorio}")
-	@PositiveOrZero(message = "{valor.acima.de.zero}")
+	@PositiveOrZero(message = "{criptomoeda.valor.acima.de.zero}")
+	@NotNull(message = "{criptomoeda.valor.investido.obrigatorio}")
 	private BigDecimal valorInvestido;
 
-	@NotNull(message = "{valor.atual.criptomoeda.obrigatorio}")
-	@PositiveOrZero(message = "{valor.atual.acima.de.zero}")
+	@PositiveOrZero(message = "{criptomoeda.valor.atual.acima.de.zero}")
+	@NotNull(message = "{criptomoeda.valor.atual.obrigatorio}")
 	private BigDecimal valorAtualAtivo;
 
-	@NotNull(message = "{fracao.ativo.obrigatorio}")
-	@PositiveOrZero(message = "{fracao.ativo.acima.de.zero}")
+	@PositiveOrZero(message = "{criptomoeda.fracao.ativo.acima.de.zero}")
+	@NotNull(message = "{criptomoeda.fracao.ativo.obrigatorio}")
 	private BigDecimal fracaoAtivo;
 
 	private LocalDate dataSaida;
@@ -60,13 +60,14 @@ public class CriptoMoedaDTO {
     @NotNull
     private UUID usuario;
 
-//	@NotNull(message = "{novoStatus.obrigatorio}")
+	@NotNull(message = "{criptomoeda.status.obrigatorio}")
 	private StatusTransacao statusTransacao;
 
+	@NotNull(message = "{criptomoeda.tipo.transacao.obrigatorio}")
 	private TipoTransacao tipoTransacao;
 
-	private LocalDateTime dataCadastro;
+	// private LocalDateTime dataCadastro;
 
-	private Instant dataAtualizacao;
+	// private Instant dataAtualizacao;
 
 }

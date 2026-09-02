@@ -30,6 +30,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * TODO-list
+ * [] verificar se o usuario pode inserir uma transacao com a mesma moeda
+ * [] verificar o tempo do acesse tken esta em 30 segundo
+ *
+ * **/
 
 @Audited
 @Entity
@@ -47,13 +53,13 @@ public class CriptoMoeda {
 	@Column(name = "uuid")
 	private UUID uuid;
 
-	@Column(name = "data_entrada")
+	@Column(name = "data_entrada", nullable = false)
 	private LocalDate dataEntrada;
 
 	@Column(name = "mes")
 	private Integer mes;
 
-	@Column(name = "corretora")
+	@Column(name = "corretora", nullable = false)
 	private String corretora;
 
 	@Column(name = "criptomoeda", nullable = false)
@@ -62,17 +68,17 @@ public class CriptoMoeda {
 	@Column(name = "alavancagem")
 	private String alavancagem;
 
-	@Column(name = "moeda_corrente")
+	@Column(name = "moeda_corrente", nullable = false)
 	private String moedaCorrente;
 
-	@Column(name = "valor_investido")
+	@Column(name = "valor_investido", nullable = false)
 	private BigDecimal valorInvestido;
 
-	@Column(name = "valor_atual")
+	@Column(name = "valor_atual", nullable = false)
 	private BigDecimal valorAtual;
 
-	@Column(name = "fracao")
-	private BigDecimal fracao;
+    @Column(name = "fracao", nullable = false)
+    private BigDecimal fracao;
 
 	@Column(name = "data_saida")
 	private LocalDate dataSaida;
@@ -81,19 +87,19 @@ public class CriptoMoeda {
     @JoinColumn(name = "usuario_uuid", referencedColumnName = "uuid", nullable = false)
     private Usuario usuario;
 
-	@CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private Instant dataCriacao;
-
-	@UpdateTimestamp
-    @Column(nullable = false)
-    private Instant dataAtualizacao;
-
-	@Column(name = "status_transacao")
+	@Column(name = "status_transacao", nullable = false)
 	@Enumerated(value = EnumType.STRING)
 	private StatusTransacao statusTransacao;
 
-	@Column(name = "tipo_transacao")
+	@Column(name = "tipo_transacao", nullable = false)
 	@Enumerated(value = EnumType.STRING)
 	private TipoTransacao tipoTransacao;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant dataCriacao;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private Instant dataAtualizacao;
 }

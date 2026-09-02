@@ -30,7 +30,7 @@ public class LancamentoConverter {
         Usuario receberUsuario = usuarioService.obterUsuarioPorId(dto.getUsuario())
                 /** buscarLancamento do usuario por id, ou lancar uma exception caso ele nao exista*/
                 .orElseThrow(() -> new RegraDeNegocioException(
-                        "Usuario não encontrado com o id " + "(" + dto.getUsuario() + ")"));
+                        "Você não pode salvar lançamento!")); //Usuario não encontrado
         lancamento.setUsuario(receberUsuario);
         /* fim usuario */
         if (dto.getTipoLancamento() != null) {

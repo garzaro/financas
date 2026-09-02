@@ -12,17 +12,17 @@ import com.cleber.financas.model.entity.Usuario;
 
 /**
  * TO-DO list
- * 
+ *
  * [] configurar o Mapper para apenas realizar o mapeamento se o valor de origem não for nulo. Isso é feito na anotação @Mapper
  *    para evitar NullPointerException em mapeamentos aninhados (como usuario.getId()).
  *    "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
- * []     
+ * []
  * **/
 
 @Component
 @Mapper(componentModel = "spring") // Permite injetar o mapper com @Autowired/@RequiredArgsConstructor
 public interface CriptoMoedaMapper {
-	
+
 	/**request - server**/
 	@Mapping(source = "ativo", target = "criptomoeda")
 	@Mapping(source = "valorAtualAtivo", target = "valorAtual")
@@ -33,8 +33,8 @@ public interface CriptoMoedaMapper {
 //	@Mapping(source = "statusTransacao", target = "statusTransacao", defaultValue = "ANALISAR")
 //	@Mapping(source = "id", target = "usuario")
 	CriptoMoeda dtoToEntity (CriptoMoedaDTO dto);
-	
-	/**toEntity - O MapStruct usará este método para converter o Long usuario em Usuario entidade**/
+
+	/**toEntity - O MapStruct usará este metodo para converter o Long usuario em Usuario entidade**/
 		default Usuario map(UUID id) {
 		    if (id == null) {
 		        return null;
@@ -42,9 +42,9 @@ public interface CriptoMoedaMapper {
 		    Usuario usuario = new Usuario();
 		    usuario.setUuid(id);
 		    return usuario;
-		}	
-	
-	/**response - frontend**/ 
+		}
+
+	/**response - frontend**/
 	@Mapping(source = "criptomoeda", target = "ativo")
 	@Mapping(source = "valorAtual", target = "valorAtualAtivo")
 	@Mapping(source = "fracao", target = "fracaoAtivo")
@@ -52,9 +52,9 @@ public interface CriptoMoedaMapper {
 	@Mapping(source = "statusTransacao", target = "statusTransacao", defaultValue = "ANALISAR")
 	@Mapping(source = "tipoTransacao", target = "tipoTransacao", defaultValue = "DECIDIR")
 //	@Mapping(source = "usuario", target = "id")
-	CriptoMoedaDTO entityToDto (CriptoMoeda criptoMoeda);	
-	
-	/**toDto - O MapStruct chamará este método para converter o objeto Usuario em Long**/ 
+	CriptoMoedaDTO entityToDto (CriptoMoeda criptoMoeda);
+
+	/**toDto - O MapStruct chamará este metodo para converter o objeto Usuario em Long**/
     default UUID map(Usuario usuario) {
         if (usuario == null) {
             return null;

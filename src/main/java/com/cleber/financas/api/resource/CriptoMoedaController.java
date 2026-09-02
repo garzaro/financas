@@ -16,19 +16,19 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/criptomoeda")
+@RequestMapping("/api/Fp/criptomoeda")
 public class CriptoMoedaController {
-	
+
 	private final CriptoMoedaService criptoMoedaService;
-	
-	@PostMapping
+
+	@PostMapping("reg/criptomoeda")
 	public ResponseEntity<Object> salvarCriptomoeda(@RequestBody @Valid CriptoMoedaDTO dto){
 		try {
 			CriptoMoedaDTO salvarCriptomoeda = criptoMoedaService.salvarCriptomoeda(dto);
 			return ResponseEntity.status(HttpStatus.CREATED).body(salvarCriptomoeda);
-			
+
 		} catch (RegraDeNegocioException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());		
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
-	}	
+	}
 }

@@ -89,7 +89,7 @@ public class LancamentoResource {
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
         }).orElseGet(() ->
-                new ResponseEntity("O lancamento com o ID " + "(" + id + ")" + " não foi encontrado",
+                new ResponseEntity("O lancamento com o ID informado não foi encontrado",
                 HttpStatus.BAD_REQUEST));
     }
 
@@ -104,7 +104,7 @@ public class LancamentoResource {
     public ResponseEntity<?> atualizarStatus(@PathVariable("id") UUID id, @Valid @RequestBody AtualizarStatusDTO dto) {
     	return lancamentoService.obterLancamentoPorId(id).map(entity -> {
 
-            logger.info("Se imprimir null, o problema é o mapeamento do JSON (ponto 1 e 2). " + dto.getStatusLancamento());
+//            logger.info("Se imprimir null, o problema é o mapeamento do JSON (ponto 1 e 2). " + dto.getStatusLancamento());
             StatusLancamento selecionarStatus = StatusLancamento.valueOf(dto.getStatusLancamento());
             try {
                 entity.setStatusLancamento(selecionarStatus);
@@ -128,7 +128,7 @@ public class LancamentoResource {
             /* Verifica se o ID do usuário foi passado */
 
             if (idUsuario == null) {
-                return ResponseEntity.badRequest().body("O ID do usuário é obrigatório" + "[" + idUsuario + "].");
+                return ResponseEntity.badRequest().body("Não existe o usuário com o ID informado!");
             }
             /* filtrando */
             Lancamento lancamentoFiltro = new Lancamento();
@@ -161,8 +161,8 @@ public class LancamentoResource {
             return new ResponseEntity("lancamento excluido com sucesso.", HttpStatus.NO_CONTENT);/*OK*/ /* e devolve o resultado */
         }).orElseGet(() ->
                 new ResponseEntity(
-                        "Lançamento com ID informado não foi encontrado." +
-                                " Verifique se o ID está correto e tente novamente.",
+                        "Lançamento informado não foi encontrado." +
+                                " Verifique as informações estão corretas e tente novamente.",
                         HttpStatus.BAD_REQUEST));
     }
 }

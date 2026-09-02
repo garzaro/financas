@@ -67,7 +67,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshTokenEmitido rotacionar(String tokenAntigo, String ip, String agenteUsuario) {
         String hash = hash(tokenAntigo);
         String chave = TOKEN_PREFIX + hash;
-        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().getAndDelete(chave); //.get()
+        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().get(chave); //.getAndDelete()
         if (dadosToken == null) {
             throw new InvalidRefreshTokenException("Refresh token não encontrado ou expirado");
         }

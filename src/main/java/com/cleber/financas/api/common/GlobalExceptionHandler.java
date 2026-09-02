@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Trata erros de validação de argumentos de método (@Valid)
+     * Trata erros de validação de argumentos de metodo (@Valid)
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroResposta<CampoErro>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {

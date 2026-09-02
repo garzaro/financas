@@ -60,11 +60,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
 
         if (!usuario.isPresent()) {
-            throw new ErroDeAutenticacao("Verifique seu email e tente novamente.");
+            throw new ErroDeAutenticacao("Verifique seu email e tente novamente!");
         }
         boolean senhaCorreta = passwordEncoder.matches(senha, usuario.get().getSenha());
         if (!senhaCorreta) {
-            throw new ErroDeAutenticacao("Credenciais inválidas.");
+            throw new ErroDeAutenticacao("Credenciais inválidas...");
         }
         return usuario.get();
     }
@@ -114,11 +114,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void validarEmailCpf(String email, String cpf) {
         Optional<Usuario> usuarioEmailExiste = usuarioRepository.findByEmail(email);
         if (usuarioEmailExiste.isPresent()) {
-            throw new RegraDeNegocioException("Esse email já está em uso");
+            throw new RegraDeNegocioException("Verifique este email e tente novamente"); //em uso
         }
         Optional<Usuario> usuarioCpfExiste = usuarioRepository.findByCpf(cpf);
         if (usuarioCpfExiste.isPresent()) {
-            throw new RegraDeNegocioException("Esse CPF já está em uso");
+            throw new RegraDeNegocioException("Verifique este CPF e tente novamente"); //já está em uso
         }
     }
 
