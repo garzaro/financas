@@ -18,4 +18,4 @@ export default {
   },
 }
 
-# npx wrangler deploy - comando deve ser rodado caso hoiver alguma alteração no wrangler
+ // npx wrangler deploy - comando deve ser rodado caso hoiver alguma alteração no wrangler
