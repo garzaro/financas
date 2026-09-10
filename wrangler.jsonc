@@ -10,7 +10,7 @@
       "id": "bda2f5a918d34ab485fa7ea02b761751"
     }
   ],
-   "observability": {
+  "observability": {
     "enabled": false,
     "head_sampling_rate": 1,
     "redact_query_string": false,
@@ -25,6 +25,5 @@
       "persist": true,
       "head_sampling_rate": 1
     }
-  }
   }
 }
