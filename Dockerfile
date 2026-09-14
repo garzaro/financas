@@ -40,7 +40,7 @@ COPY --from=build /workspace/target/*.jar /app/app.jar
 RUN chown -R spring:spring /app
 
 # Define o usuário não-root para executar a aplicação - spring
-USER financa
+USER spring
 
 # Define a variável de ambiente PORT e expõe a porta 8080 para acesso externo
 ENV PORT=8080
