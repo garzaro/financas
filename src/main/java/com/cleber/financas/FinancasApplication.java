@@ -16,6 +16,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * [] atulizando apagina logada retorna pra pagina de login
  * @EnableConfigurationProperties - se falhar a aplicação nem sobe,
  * melhor maneira de configurar propriedades do projeto
+ *
+ * Resumo da estrutura atual:
+ * Hospedagem da Aplicação: Render (rodando o container Docker com o seu Spring Boot).
+ *
+ * Banco de Dados Relacional: Neon (PostgreSQL externo).
+ *
+ * Cache / Sessão: Upstash (Redis externo).
 
  *
  * **/
