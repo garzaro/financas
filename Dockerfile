@@ -3,11 +3,11 @@
 # Dockerfile para construir e executar a aplicação Financas.
 # Este Dockerfile utiliza uma construção em múltiplos estágios
 # (*multi-stage build*) para criar uma imagem leve para a execução da aplicação.
-# O primeiro estágio utiliza o Maven para construir a aplicação, 
-# e o segundo estágio utiliza uma imagem JRE para executá-la. 
+# O primeiro estágio utiliza o Maven para construir a aplicação,
+# e o segundo estágio utiliza uma imagem JRE para executá-la.
 #
 # Uso:
-# docker build -t financas-app . 
+# docker build -t financas-app .
 # docker run -p 8080:8080 financas-app
 
 # O primeiro estágio utiliza uma imagem Maven para compilar a aplicação
@@ -35,7 +35,7 @@ RUN apt-get update \
     && useradd --system --gid spring --create-home --home-dir /home/spring spring \
     && rm -rf /var/lib/apt/lists/*
 
-# Copia o arquivo JAR gerado no estágio de build para o diretório /app    
+# Copia o arquivo JAR gerado no estágio de build para o diretório /app
 COPY --from=build /workspace/target/*.jar /app/app.jar
 RUN chown -R spring:spring /app
 
@@ -47,4 +47,5 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Define o ponto de entrada da aplicação, utilizando a variável de ambiente JAVA_OPTS para permitir a configuração de opções adicionais do Java
+#O parâmetro -Dserver.port=${PORT} garante que o Spring Boot vai escutar exatamente na porta que o Render injetar no container
 ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -Dserver.port=${PORT} -jar /app/app.jar"]

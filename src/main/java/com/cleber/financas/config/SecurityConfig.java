@@ -134,7 +134,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("mepoupepessoal.com")); //  http://localhost:3000 ajuste para o domínio real do front
+        configuration.setAllowedOrigins(List.of("mepoupepessoal.com", "http://localhost:3000")); //  http://localhost:3000 ajuste para o domínio real do front
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of(
