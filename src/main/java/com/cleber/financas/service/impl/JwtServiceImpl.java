@@ -112,23 +112,23 @@ public class JwtServiceImpl implements JwtService {
                     .getPayload();
     }
 
-	@Override
-	public Claims obterClaims(String token) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String gerarToken(Usuario usuario) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getUserLogin(String token) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	@Override
+//	public Claims obterClaims(String token) {
+//
+//		return null;
+//	}
+//
+//	@Override
+//	public String gerarToken(Usuario usuario) {
+//
+//		return null;
+//	}
+//
+//	@Override
+//	public String getUserLogin(String token) {
+//
+//		return null;
+//	}
 
 
 

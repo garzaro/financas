@@ -34,7 +34,7 @@ public interface JwtService {
      * Gera um accesstoken JWT enriquecido para um {@link Usuario}, incluindo claims extras:
      * {@code id}, {@code cpf}, {@code nome_usuario} e {@code nome}.
      */
-    String gerarToken(Usuario usuario);
+//    String gerarToken(Usuario usuario);
 
     /** Gera um accesstoken com claims extras adicionais ao payload. */
     String gerarTokenComClaims(Map<String, Object> extraClaims, UserDetails userDetails);
@@ -51,7 +51,7 @@ public interface JwtService {
      *
      * @throws RuntimeException se o accesstoken for inválido ou expirado
      */
-    String getUserLogin(String token);
+//    String getUserLogin(String token);
 
     /**
      * Retorna {@code true} se o accesstoken for válido, não expirado e pertencer ao
@@ -65,5 +65,5 @@ public interface JwtService {
      * @throws ExpiredJwtException se o accesstoken estiver expirado
      * @throws RuntimeException    com mensagem "Token JWT inválido — …" para demais erros
      */
-    Claims obterClaims(String token);
+//    Claims obterClaims(String token);
 }
