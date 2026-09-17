@@ -2,6 +2,7 @@ package com.cleber.financas.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -36,6 +37,9 @@ public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final UsuarioDetailsService usuarioDetailsService;
+
+    @Value("#{'${app.cors.allowed-origins}'.split(',')}")
+    private List<String> allowedOrigins;
 
 	public SecurityConfig(
 			JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -80,9 +84,7 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/api/auth/sign-in", "/api/auth/join/sign-up", "/api/auth/refresh").permitAll()
 						.requestMatchers("/api/auth/logout").authenticated()
-//						.requestMatchers(HttpMethod.POST, "/api/auth/join/sign-up").permitAll()
-
-						/** 👇 LIBERA AS ROTAS DO SWAGGER E OPENAPI 👇**/
+//						/** 👇 LIBERA AS ROTAS DO SWAGGER E OPENAPI 👇**/
 	                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 //	                    .requestMatchers("/actuator/**").hasRole("ADMIN")
 //	                    .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
@@ -108,10 +110,8 @@ public class SecurityConfig {
 				 *
 				 *  **/
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) //UNPAF carrega os dados do usuário e suas Authorities/permissões) e injeta no cofrinho.
-
 				/** pra uso do postman/Insomnia **/
 //	    		.httpBasic(Customizer.withDefaults())
-
 				.build();
 
 	}
@@ -134,10 +134,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "https://www.mepoupepessoal.com",
-                "http://localhost:3000",
-                "https://financas-api-8fcb.onrender.com")); //  http://localhost:3000 ajuste para o domínio real do front
+        configuration.setAllowedOrigins((allowedOrigins)); //"https://financas-api-8fcb.onrender.com"  http://localhost:3000 ajuste para o domínio real do front
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of(
