@@ -22,7 +22,9 @@ RUN chmod +x mvnw && ./mvnw -B -q dependency:go-offline
 
 # Copia o código-fonte da aplicação e compila o projeto
 COPY src ./src
-RUN ./mvnw -B -q clean package -DskipTests
+# Para garantir que os testes nem entrem na jogada do Maven, você pode usar
+RUN ./mvnw -B -q clean package -Dmaven.test.skip=true
+# RUN ./mvnw -B -q clean package -DskipTests
 
 # O segundo estágio utiliza uma imagem JRE para executar a aplicação
 FROM eclipse-temurin:21-jre-jammy
