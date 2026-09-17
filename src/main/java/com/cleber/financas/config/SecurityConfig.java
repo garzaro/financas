@@ -134,7 +134,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://www.mepoupepessoal.com")); //  http://localhost:3000 ajuste para o domínio real do front
+        configuration.setAllowedOrigins(List.of(
+                "https://www.mepoupepessoal.com",
+                "http://localhost:3000",
+                "https://financas-api-8fcb.onrender.com")); //  http://localhost:3000 ajuste para o domínio real do front
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of(
@@ -148,7 +151,7 @@ public class SecurityConfig {
             "Access-Control-Request-Headers"
         ));
         configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setMaxAge(3600L);
+        configuration.setMaxAge(36000L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
