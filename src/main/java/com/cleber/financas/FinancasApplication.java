@@ -18,12 +18,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * melhor maneira de configurar propriedades do projeto
  *
  * Resumo da estrutura atual:
- * Hospedagem da Aplicação: Render (rodando o container Docker com o seu Spring Boot).
+ *
+ * Hospedagem aplicaçao:
+ * Render - rodando o container Docker com o Spring Boot.
+ * Cloudflare - rodando o react.
  *
  * Banco de Dados Relacional: Neon (PostgreSQL externo).
  *
  * Cache / Sessão: Upstash (Redis externo).
-
  *
  * **/
 @EnableScheduling
