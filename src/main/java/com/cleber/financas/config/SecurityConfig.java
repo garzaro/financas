@@ -38,10 +38,7 @@ public class SecurityConfig {
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final UsuarioDetailsService usuarioDetailsService;
 
-//    @Value("${app.cors.allowed-origins}")
-//    private List<String> allowedOrigins;
-
-    @Value("${app.cors.allowed-origins:https://www.mepoupepessoal.com,http://localhost:3000}")
+    @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
 	public SecurityConfig(
