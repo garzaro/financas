@@ -24,11 +24,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.cleber.financas.security.JwtAuthenticationFilter;
 
-/**
- * TODO-list
- * [] Verificar 401 ao salvar lancamento
- * **/
-
 /** Contexto **/
 
 @Configuration
@@ -46,8 +41,8 @@ public class SecurityConfig {
 			UsuarioDetailsService usuarioDetailsService
 			) {
 			super();
-			this.usuarioDetailsService = usuarioDetailsService;
 			this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+			this.usuarioDetailsService = usuarioDetailsService;
 	}
 
     @Bean
@@ -67,6 +62,10 @@ public class SecurityConfig {
                 iterations
         );
     }
+    // @Bean
+    // public PasswordEncoder passwordEncoder() {
+    //     return new Argon2PasswordEncoder(16, 32, 1, 1 << 16, 3);
+    // }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -79,36 +78,22 @@ public class SecurityConfig {
 				/**Configura a política de sessão sem estado — nenhuma HttpSession criada. **/
 				.sessionManagement(session -> session
 						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-				/**regras de autorização de rotas - endpoint de login e cadastro **/
+                .authenticationProvider(authenticationProvider())
+                /**regras de autorização de rotas - endpoint de login e cadastro **/
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/api/auth/sign-in", "/api/auth/join/sign-up", "/api/auth/refresh").permitAll()
-						.requestMatchers("/api/auth/logout").authenticated()
-//						/** 👇 LIBERA AS ROTAS DO SWAGGER E OPENAPI 👇**/
-	                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-//	                    .requestMatchers("/actuator/**").hasRole("ADMIN")
-//	                    .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-	                    .requestMatchers("/**").hasRole("USER")
-	                    /**qualquer outra requisicao deve estar autenticado**/
-						.anyRequest().authenticated()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+						.requestMatchers(
+                            "/api/auth/sign-in",
+                            "/api/auth/join/sign-up",
+                            "/api/auth/refresh",
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html"
+                        ).permitAll()
+                    /**qualquer outra requisicao deve estar autenticado**/
+					.anyRequest().authenticated()
 				)
-				.authenticationProvider(authenticationProvider())
-
-
-				/**
-				 * Usuario não envia usuario e senha a cada requisião,
-				 *  apenas envia o accesstoken no cabeçalho de cada requisição.
-				 *  O spring security identifica quem esta fazendo a requisicap
-				 *  para decidir se tem ou nao autorizacao
-				 *  Por isso a importancia de adicionar o filtro do JWT ANTES do
-				 *  filtro padrão de autenticação por usuário/senha, então:
-				 *
-				 *  O filtro pega o accesstoken do cabeçalho.
-				 *  Valida se o accesstoken é legítimo e não expirou.
-				 *  Extrai o usuário e suas permissões.
-				 *  Autentica o usuário no contexto do Spring - SecurityContextHolder, o cofrinho
-				 *
-				 *  **/
+				
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) //UNPAF carrega os dados do usuário e suas Authorities/permissões) e injeta no cofrinho.
 				/** pra uso do postman/Insomnia **/
 //	    		.httpBasic(Customizer.withDefaults())
@@ -134,7 +119,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins((allowedOrigins)); //"https://financas-api-8fcb.onrender.com"  http://localhost:3000 ajuste para o domínio real do front
+        configuration.setAllowedOrigins((allowedOrigins));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of(
@@ -148,7 +133,8 @@ public class SecurityConfig {
             "Access-Control-Request-Headers"
         ));
         configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setMaxAge(36000L);
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -156,45 +142,3 @@ public class SecurityConfig {
     }
 }
 
-/**
- *
- * Para entender como a segurança do Spring funciona na prática, imagine um
- * banco físico.
- *
- * O SecurityConfig é a planta do prédio e o manual de regras (diz quais portas
- * estão trancadas
- * e quem gerencia a segurança).
- *
- * O AuthenticationManager é o chefe da segurança na recepção. Ele não conhece
- * os clientes
- * pessoalmente, mas sabe como validar se uma credencial é verdadeira.
- *
- * O UserDetailsService é o arquivo central do banco. Quando o chefe da
- * segurança precisa verificar um cliente, ele liga para esse setor para buscar
- * a ficha cadastral do usuário no banco de dados.
- *
- * ***************
- *
- * .csrf(csrf -> csrf.disable())
- *
- * httpSecurity - objeto reside dentro do contexto de seguranca do spring -
- * pré configurado usado para configurar a seguranca antes de chamar o build.
- *
- * existe varias confs que podem ser feitas -
- *
- * O sfltrc declarado aqui sobrepoe o padrao -
- * Exemplo: aquele que habilitou o formulario de login no browser e protegeu
- * nossa api.
- *
- * Para o formulario padrao do spring security com o
- * .formLogin(Customizer.withDefaults())
- *
- * Para receber autenticação via formulario de login ou postman
- * .httpBasic(Customizer.withDefaults())
- * ------------------------
- * @Bean
- *     public PasswordEncoder passwordEncoder() {
- *         return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
- *     }
- *
- ***/
