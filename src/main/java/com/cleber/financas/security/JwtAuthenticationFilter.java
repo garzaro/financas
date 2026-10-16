@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		//Inicio do filtro - final
 		String authHeader = request.getHeader("Authorization");
-        // Se o header Authorization não existir ou estiver vazio, pula este filtro e vai para o próximo    
+        // Se o header Authorization não existir ou estiver vazio, pula este filtro e vai para o próximo
         if (authHeader == null || authHeader.isBlank()) {
             filterChain.doFilter(request, response);
             return;
@@ -79,13 +79,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String pegaEmailDoUsuario;
 		try{
 			/**Extrai o username/email embutido no accesstoken JWT -jwt**/
-			pegaEmailDoUsuario = jwtService.extrairUsernameToken(jwt);
+			pegaEmailDoUsuario = jwtService.obterLoginUsuario(jwt);
 
             if (pegaEmailDoUsuario != null &&
                  SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(pegaEmailDoUsuario);
 
-                if (jwtService.isTokenValido(jwt, userDetails)) {
+                if (jwtService.isTokenValido(jwt)) {
                     UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                             userDetails,
@@ -118,6 +118,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
          filterChain.doFilter(request, response);
-    }		
+    }
 }
 
