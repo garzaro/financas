@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
-/**
+/**Formato do cookie
  * Não lê mais NENHUMA property de expiração — RefreshTokenEmitido já carrega
  * o ttl calculado pelo RefreshTokenServiceImpl a partir da property correta
  *
