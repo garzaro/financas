@@ -2,6 +2,7 @@ package com.cleber.financas.config;
 
 import java.util.List;
 
+import com.cleber.financas.service.impl.SecurityUserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,14 +32,14 @@ import com.cleber.financas.security.JwtAuthenticationFilter;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
-	private final UsuarioDetailsService usuarioDetailsService;
+	private final SecurityUserDetailsServiceImpl usuarioDetailsService;
 
     @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
 	public SecurityConfig(
 			JwtAuthenticationFilter jwtAuthenticationFilter,
-			UsuarioDetailsService usuarioDetailsService
+			SecurityUserDetailsServiceImpl usuarioDetailsService
 			) {
 			super();
 			this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -83,9 +84,12 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers(
+                            HttpMethod.POST,
                             "/api/auth/sign-in",
                             "/api/auth/join/sign-up",
-                            "/api/auth/refresh",
+                            "/api/auth/refresh"
+                        ).permitAll()
+                        .requestMatchers(
                             "/v3/api-docs/**",
                             "/swagger-ui/**",
                             "/swagger-ui.html"
@@ -93,8 +97,9 @@ public class SecurityConfig {
                     /**qualquer outra requisicao deve estar autenticado**/
 					.anyRequest().authenticated()
 				)
-				
-				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) //UNPAF carrega os dados do usuário e suas Authorities/permissões) e injeta no cofrinho.
+
+				.addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class) //UNPAF carrega os dados do usuário e suas Authorities/permissões) e injeta no cofrinho.
 				/** pra uso do postman/Insomnia **/
 //	    		.httpBasic(Customizer.withDefaults())
 				.build();
@@ -120,8 +125,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins((allowedOrigins));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedMethods(
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "OPTIONS",
+                        "PATCH"
+                ));
+//        configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of(
             "Authorization",
             "Cache-Control",
