@@ -4,21 +4,23 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class UsuarioAutenticado extends User {
 
-    private final Long id;
+    private final UUID usuarioUuid;
 
-    public UsuarioAutenticado(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UsuarioAutenticado(UUID usuarioUuid, String username, String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
-        this.id = id;
+        this.usuarioUuid = usuarioUuid;
     }
-    // public UsuarioAutenticado(Long id, String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
-    //     super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-    //     this.id = id;
-    // }
 
-    public Long getId() {
-        return id;
+    public UsuarioAutenticado(UUID usuarioUuid, String username, String password, boolean enabled, Collection<? extends GrantedAuthority> authorities) {
+        super(username, password, enabled, true, true, true, authorities);
+        this.usuarioUuid = usuarioUuid;
+    }
+
+    public UUID getUsuarioUuid() {
+        return usuarioUuid;
     }
 }
