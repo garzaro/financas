@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ import com.cleber.financas.model.entity.Lancamento;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.enums.StatusLancamento;
 import com.cleber.financas.model.enums.TipoLancamento;
+import com.cleber.financas.security.UsuarioAutenticado;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
 
@@ -65,9 +67,12 @@ public class LancamentoResource {
     final Logger logger = LoggerFactory.getLogger(LancamentoResource.class);
 
     @PostMapping("/reg/lancamento")
-    public ResponseEntity salvarLancamento(@RequestBody LancamentoDTO dto) {
+    public ResponseEntity salvarLancamento(
+            @Valid @RequestBody LancamentoDTO dto,
+            @AuthenticationPrincipal UsuarioAutenticado usuarioAutenticado) {
         try {
-            Lancamento converteEntidade = lancamentoConverter.dtoToEntity(dto);
+            /* o dono do lancamento e derivado do access token, nao do corpo da requisicao */
+            Lancamento converteEntidade = lancamentoConverter.dtoToEntity(dto, usuarioAutenticado.getUsuarioUuid());
             converteEntidade = lancamentoService.salvarLancamento(converteEntidade);
             return new ResponseEntity(converteEntidade, HttpStatus.CREATED);
         } catch (RegraDeNegocioException e) {
@@ -76,12 +81,16 @@ public class LancamentoResource {
     }
 
     /* entity é o retorno do service quando é obtido por id */
-    @PutMapping("{id}")
-    public ResponseEntity atualizarLancamento(@PathVariable("id") UUID id, @RequestBody LancamentoDTO dto) {
+    @PutMapping("{uuid}")
+    public ResponseEntity atualizarLancamento(
+            @PathVariable("uuid") UUID uuid,
+            @Valid @RequestBody LancamentoDTO dto,
+            @AuthenticationPrincipal UsuarioAutenticado usuarioAutenticado) {
         /* entity é resultado da busca pelo id */
-        return lancamentoService.obterLancamentoPorId(id).map(entity -> {
+        return lancamentoService.obterLancamentoPorId(uuid).map(entity -> {
             try {
-                Lancamento lancamento = lancamentoConverter.dtoToEntity(dto);
+                /* o dono do lancamento e derivado do access token, nao do corpo da requisicao */
+                Lancamento lancamento = lancamentoConverter.dtoToEntity(dto, usuarioAutenticado.getUsuarioUuid());
                 lancamento.setUuid(entity.getUuid()); //id
                 lancamentoService.atualizarLancamento(lancamento);
                 return ResponseEntity.ok(lancamento);
