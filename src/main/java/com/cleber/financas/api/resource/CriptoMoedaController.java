@@ -2,6 +2,7 @@ package com.cleber.financas.api.resource;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cleber.financas.api.dto.CriptoMoedaDTO;
 import com.cleber.financas.exception.RegraDeNegocioException;
+import com.cleber.financas.security.UsuarioAutenticado;
 import com.cleber.financas.service.CriptoMoedaService;
 
 import jakarta.validation.Valid;
@@ -22,9 +24,12 @@ public class CriptoMoedaController {
 	private final CriptoMoedaService criptoMoedaService;
 
 	@PostMapping("reg/criptomoeda")
-	public ResponseEntity<Object> salvarCriptomoeda(@RequestBody @Valid CriptoMoedaDTO dto){
+	public ResponseEntity<Object> salvarCriptomoeda(
+			@RequestBody @Valid CriptoMoedaDTO dto,
+			@AuthenticationPrincipal UsuarioAutenticado usuarioAutenticado){
 		try {
-			CriptoMoedaDTO salvarCriptomoeda = criptoMoedaService.salvarCriptomoeda(dto);
+			/* o dono da criptomoeda e derivado do access token, nao do corpo da requisicao */
+			CriptoMoedaDTO salvarCriptomoeda = criptoMoedaService.salvarCriptomoeda(dto, usuarioAutenticado.getUsuarioUuid());
 			return ResponseEntity.status(HttpStatus.CREATED).body(salvarCriptomoeda);
 
 		} catch (RegraDeNegocioException e) {
