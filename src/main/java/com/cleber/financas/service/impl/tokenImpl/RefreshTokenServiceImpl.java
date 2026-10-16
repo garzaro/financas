@@ -1,6 +1,7 @@
 package com.cleber.financas.service.impl.tokenImpl;
 
 import com.cleber.financas.exception.InvalidRefreshTokenException;
+import com.cleber.financas.exception.RefreshTokenReuseException;
 import com.cleber.financas.api.dto.RefreshDadosToken;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
@@ -67,21 +68,21 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshTokenEmitido rotacionar(String tokenAntigo, String ip, String agenteUsuario) {
         String hash = hash(tokenAntigo);
         String chave = TOKEN_PREFIX + hash;
-        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().get(chave); //.getAndDelete()
+        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().getAndDelete(chave); //.getAndDelete()
         if (dadosToken == null) {
             throw new InvalidRefreshTokenException("Refresh token não encontrado ou expirado");
         }
         if (dadosToken.status() == RefreshDadosToken.Status.ROTACIONADO){
             /** Reuse detectado: token já rotacionado sendo reapresentado -> sessão comprometida**/
             revogarFamiliaById(dadosToken.familiaId(), dadosToken.usuarioId());
-            throw new InvalidRefreshTokenException("Reuse de refresh token detectado - familia inteira revogada");
+            throw new RefreshTokenReuseException("Reuse de refresh token detectado - familia inteira revogada");
         }
         /** Marca o token atual como ROTATED com TTL curto (grace period), não deleta:
          * precisa continuar existindo pra detectar reuse se for reapresentado.
          * **/
         tokenTemplate.opsForValue().set(
             chave,
-            dadosToken.comStatus(RefreshDadosToken.Status.ROTACIONADO), 
+            dadosToken.comStatus(RefreshDadosToken.Status.ROTACIONADO),
             graceRotacionado
         );
         /**criar um token**/
@@ -106,7 +107,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new InvalidRefreshTokenException("Refresh token inválido");
         }
         return usuarioRepository.findById(dados.usuarioId())
-                .orElseThrow(() -> new InvalidRefreshTokenException("Usuário do token não encontrado"));
+                .orElseThrow(() ->
+                        new InvalidRefreshTokenException("Usuário do token não encontrado"));
     }
 
     @Override
@@ -132,12 +134,24 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     /**metodos auxiliares internos**/
 
-    private RefreshTokenEmitido emissao(UUID usuarioId, UUID familiaId, String ip, String agenteUsuario ){
+    private RefreshTokenEmitido emissao(
+            UUID usuarioId,
+            UUID familiaId,
+            String ip,
+            String agenteUsuario
+    ){
         String rawToken = tokenAleatorio();
         String hash = hash(rawToken);
 
         RefreshDadosToken dadosToken = new RefreshDadosToken(
-                usuarioId, familiaId, RefreshDadosToken.Status.ATIVO, ip, agenteUsuario, Instant.now());
+                usuarioId,
+                familiaId,
+                RefreshDadosToken.Status.ATIVO,
+                ip,
+                agenteUsuario,
+                Instant.now()
+        );
+
         tokenTemplate.opsForValue().set(TOKEN_PREFIX + hash, dadosToken, tokenTtl);
 
         String chaveFamilia = FAMILIA_PREFIX + familiaId;
