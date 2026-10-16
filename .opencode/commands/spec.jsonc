@@ -1,0 +1,5 @@
+{
+  "name": "spec",
+  "description": "Atualiza ou cria a especificação técnica do código atual",
+  "prompt": "Analise o código que acabamos de finalizar e verifique o estado funcional. Pergunte-me qual arquivo dentro de `.opencode/specs/` deve ser atualizado ou criado, e escreva a documentação técnica correspondente."
+}
