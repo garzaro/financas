@@ -14,7 +14,7 @@ import com.cleber.financas.model.entity.Usuario;
  * TO-DO list
  *
  * [] configurar o Mapper para apenas realizar o mapeamento se o valor de origem não for nulo. Isso é feito na anotação @Mapper
- *    para evitar NullPointerException em mapeamentos aninhados (como usuario.getId()).
+ *    para evitar NullPointerException em mapeamentos aninhados (como usuario.getUsuarioUuid()).
  *    "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
  * []
  * **/
@@ -35,12 +35,12 @@ public interface CriptoMoedaMapper {
 	CriptoMoeda dtoToEntity (CriptoMoedaDTO dto);
 
 	/**toEntity - O MapStruct usará este metodo para converter o Long usuario em Usuario entidade**/
-		default Usuario map(UUID id) {
-		    if (id == null) {
+		default Usuario map(UUID uuid) {
+		    if (uuid == null) {
 		        return null;
 		    }
 		    Usuario usuario = new Usuario();
-		    usuario.setUuid(id);
+		    usuario.setUuid(uuid);
 		    return usuario;
 		}
 
@@ -51,7 +51,7 @@ public interface CriptoMoedaMapper {
 	@Mapping(source = "alavancagem", target = "alavancagem", defaultValue = "")
 	@Mapping(source = "statusTransacao", target = "statusTransacao", defaultValue = "ANALISAR")
 	@Mapping(source = "tipoTransacao", target = "tipoTransacao", defaultValue = "DECIDIR")
-//	@Mapping(source = "usuario", target = "id")
+	@Mapping(source = "usuario", target = "usuarioUuid")
 	CriptoMoedaDTO entityToDto (CriptoMoeda criptoMoeda);
 
 	/**toDto - O MapStruct chamará este metodo para converter o objeto Usuario em Long**/

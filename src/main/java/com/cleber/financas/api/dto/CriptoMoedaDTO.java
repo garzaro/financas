@@ -24,6 +24,8 @@ public class CriptoMoedaDTO {
 
 	private UUID uuid;
 
+	private UUID usuarioUuid;
+
 	@NotNull(message = "{criptomoeda.data.obrigatoria}")
 	@FutureOrPresent(message = "{criptomoeda.data.futura}")
 	private LocalDate dataEntrada;
@@ -55,10 +57,6 @@ public class CriptoMoedaDTO {
 	private BigDecimal fracaoAtivo;
 
 	private LocalDate dataSaida;
-
-	/*passar só o id do usuario, nao como objeto*/
-    @NotNull
-    private UUID usuario;
 
 	@NotNull(message = "{criptomoeda.status.obrigatorio}")
 	private StatusTransacao statusTransacao;
