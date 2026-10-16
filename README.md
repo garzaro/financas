@@ -83,7 +83,7 @@ O projeto lê `.env` via `spring.config.import`. Configure no mínimo:
 
 ```env
 JWT_SECRET=<segredo_forte_para_assinatura_jwt>
-JWT_EXPIRATION=3600000
+JWT_EXPIRATION=3600
 FLYWAY_LOCATIONS=classpath:db/migration
 ```
 
