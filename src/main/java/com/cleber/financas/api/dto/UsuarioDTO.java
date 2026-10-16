@@ -8,8 +8,8 @@ import org.hibernate.validator.constraints.br.CPF;
 /**
  * Não usei @Builder, @Getter, @Setter
  * resolvi criar na mão o codigo
- * 
- * Implementar Bean Validatation 
+ *
+ * Implementar Bean Validatation
  * */
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,29 +21,29 @@ import jakarta.validation.constraints.Pattern;
  * **/
 
 public class UsuarioDTO {
-	
+
 	private UUID uuid;
-    
+
 	@NotBlank(message = "{usuario.nome.completo.obrigatorio}")
 	@Pattern(regexp = "^[a-zA-ZÀ-ÿ\\s]+$", message = "{usuario.nome.completo.invalido}")
 //	@JsonAlias({"nome_completo", "nomeCompleto"})
 	private String nomeCompleto;
-    
+
 	@NotBlank(message = "{usuario.cpf.obrigatorio}")
 	@CPF(message = "{usuario.cpf.invalido}")
 	private String cpf;
-    
+
 	@NotBlank(message = "{usuario.nome.usuario.obrigatorio}")
 //    @JsonAlias({"nome_usuario", "nomeUsuario"})
-    private String nomeUsuario;    
-    
+    private String nomeUsuario;
+
 	@NotBlank(message = "{usuario.email.obrigatorio}")
 	@Email(message = "{usuario.email.invalido}")
     private String email;
-    
+
 	@NotBlank(message = "{usuario.senha.obrigatoria}")
     private String senha;
-	
+
 	private LocalDateTime dataCadastro;
 
     public UsuarioDTO() {
@@ -97,7 +97,7 @@ public class UsuarioDTO {
         private String senha;
         private LocalDateTime dataCadastro;
 
-        public UsuarioBuilder setUuid(UUID id) {
+        public UsuarioBuilder setUuid(UUID uuid) {
             this.uuid = uuid;
             return this;
         }
