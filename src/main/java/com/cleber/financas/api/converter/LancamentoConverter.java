@@ -1,5 +1,7 @@
 package com.cleber.financas.api.converter;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +20,8 @@ public class LancamentoConverter {
     private UsuarioService usuarioService;
 
     /* converter o dto em uma entidade de lancamento */
-    public Lancamento dtoToEntity(LancamentoDTO dto) {
+    /* o dono do lancamento vem do access token (usuarioAutenticado), nao do corpo da requisicao */
+    public Lancamento dtoToEntity(LancamentoDTO dto, UUID usuarioAutenticado) {
         Lancamento lancamento = new Lancamento();
         lancamento.setUuid(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
         lancamento.setDescricao(dto.getDescricao());
@@ -26,11 +29,11 @@ public class LancamentoConverter {
         lancamento.setAno(dto.getAno());
         lancamento.setValor(dto.getValor());
         /* inicio usuario */
-        /* receber o id do usuario, conforme dto */
-        Usuario receberUsuario = usuarioService.obterUsuarioPorId(dto.getUsuario())
+        /* o id do usuario e resolvido a partir do token autenticado, ignorando o valor do dto */
+        Usuario receberUsuario = usuarioService.obterUsuarioPorId(usuarioAutenticado)
                 /** buscarLancamento do usuario por id, ou lancar uma exception caso ele nao exista*/
                 .orElseThrow(() -> new RegraDeNegocioException(
-                        "Você não pode salvar lançamento!")); //Usuario não encontrado
+                        "Usuário autenticado não encontrado!")); //Usuario nao encontrado
         lancamento.setUsuario(receberUsuario);
         /* fim usuario */
         if (dto.getTipoLancamento() != null) {
@@ -52,7 +55,7 @@ public class LancamentoConverter {
                 .ano(lancamento.getAno())
                 .statusLancamento((lancamento.getStatusLancamento().name())) //tranforma em string - name() - ENUM é string *
                 .tipoLancamento(String.valueOf(lancamento.getTipoLancamento())) // ou fazerum wrap com valueOf*
-                .usuario(lancamento.getUsuario().getUuid())
+//                .usuario(lancamento.getUsuario().getUuid())
                 .build();
     }
 }
