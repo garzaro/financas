@@ -20,9 +20,6 @@ public class LancamentoDTO {
     private Integer mes;
     private Integer ano;
 	private BigDecimal valor;
-    /*passar só o id do usuario, nao como objeto*/
-    @NotNull
-    private UUID usuario;
     private String tipoLancamento;
     private String statusLancamento;
 	private LocalDate dataCadastro;
@@ -58,12 +55,12 @@ public class LancamentoDTO {
 	public void setValor(BigDecimal valor) {
 		this.valor = valor;
 	}
-	public UUID getUsuario() {
-		return usuario;
-	}
-	public void setUsuario(@NotNull UUID usuario) {
-		this.usuario = usuario;
-	}
+//	public UUID getUsuario() {
+//		return usuario;
+//	}
+//	public void setUsuario(@NotNull UUID usuario) {
+//		this.usuario = usuario;
+//	}
 	public String getTipoLancamento() {
 		return tipoLancamento;
 	}
@@ -86,15 +83,15 @@ public class LancamentoDTO {
                 Objects.equals(mes, that.mes) &&
                 Objects.equals(ano, that.ano) &&
                 Objects.equals(valor, that.valor) &&
-                Objects.equals(usuario, that.usuario) &&
+//                Objects.equals(usuario, that.usuario) &&
                 Objects.equals(tipoLancamento, that.tipoLancamento) &&
                 Objects.equals(statusLancamento, that.statusLancamento) &&
                 Objects.equals(dataCadastro, that.dataCadastro);
     }
-
+//    usuario,
     @Override
     public int hashCode() {
-        return Objects.hash(id, descricao, mes, ano, valor, usuario, tipoLancamento, statusLancamento, dataCadastro);
+        return Objects.hash(id, descricao, mes, ano, valor, tipoLancamento, statusLancamento, dataCadastro);
     }
 
     @Override
@@ -105,7 +102,7 @@ public class LancamentoDTO {
                 ", mes=" + mes +
                 ", ano=" + ano +
                 ", valor=" + valor +
-                ", usuario=" + usuario +
+//                ", usuario=" + usuario +
                 ", tipoLancamento='" + tipoLancamento + '\'' +
                 ", statusLancamento='" + statusLancamento + '\'' +
                 ", dataCadastro=" + dataCadastro +
