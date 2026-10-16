@@ -5,11 +5,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.cleber.financas.api.common.RefreshTokenCookieFactory;
-
-import com.cleber.financas.service.token.RefreshTokenEmitido;
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -20,7 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import com.cleber.financas.api.common.RefreshTokenCookieFactory;
 import com.cleber.financas.api.converter.UsuarioConverter;
 import com.cleber.financas.api.dto.AuthLoginDTO;
 import com.cleber.financas.api.dto.UsuarioDTO;
@@ -36,10 +31,9 @@ import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.JwtService;
 import com.cleber.financas.service.LancamentoService;
 import com.cleber.financas.service.UsuarioService;
+import com.cleber.financas.service.token.RefreshTokenEmitido;
 import com.cleber.financas.service.token.RefreshTokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static java.util.Collections.emptyList;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -58,9 +52,6 @@ public class UsuarioResourceRestTest {
 
     @MockBean
     private JwtService jwtService;
-
-    @MockBean
-    private UserDetailsService userDetailsService;
 
     @MockBean
     private UsuarioService usuarioService;
@@ -89,20 +80,13 @@ public class UsuarioResourceRestTest {
         AuthLoginDTO loginRequest = new AuthLoginDTO(email, senha);
 
         Usuario usuario = Usuario.builder().uuid(UUID.randomUUID()).email(email).build();
-        org.springframework.security.core.userdetails.UserDetails userDetails =
-                new org.springframework.security.core.userdetails.User(
-                        email,
-                        senha,
-                        emptyList());
 
         Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(new UsernamePasswordAuthenticationToken(userDetails, null));
+                .thenReturn(new UsernamePasswordAuthenticationToken(email, null));
         Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(usuario));
-        Mockito.when(userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
-        Mockito.when(jwtService.gerarToken(userDetails)).thenReturn("jwt-accesstoken");
+        Mockito.when(jwtService.gerarToken(usuario)).thenReturn("jwt-accesstoken");
 
         RefreshTokenEmitido emitido = new RefreshTokenEmitido(rawToken, ttl);
-
         Mockito.when(refreshTokenService.gerar(Mockito.any(UUID.class), Mockito.anyString(), Mockito.any()))
                 .thenReturn(emitido);
 
@@ -131,23 +115,16 @@ public class UsuarioResourceRestTest {
         String oldRefreshToken = "old-refresh-token";
         String newRefreshToken = "new-refresh-token";
         String newAccessToken = "new-access-token";
-        java.time.Duration ttl = java.time.Duration.ofDays(7);
+        Duration ttl = Duration.ofDays(7);
 
         Usuario usuario = Usuario.builder().uuid(UUID.randomUUID()).email("cleber@gmail.com").build();
-        org.springframework.security.core.userdetails.UserDetails userDetails =
-                new org.springframework.security.core.userdetails.User(
-                        usuario.getEmail(),
-                        "",
-                        emptyList());
 
-        com.cleber.financas.service.token.RefreshTokenEmitido emitido =
-                new com.cleber.financas.service.token.RefreshTokenEmitido(newRefreshToken, ttl);
+        RefreshTokenEmitido emitido = new RefreshTokenEmitido(newRefreshToken, ttl);
 
         Mockito.when(refreshTokenService.rotacionar(Mockito.eq(oldRefreshToken), Mockito.anyString(), Mockito.any()))
                 .thenReturn(emitido);
         Mockito.when(refreshTokenService.validar(newRefreshToken)).thenReturn(usuario);
-        Mockito.when(userDetailsService.loadUserByUsername(usuario.getEmail())).thenReturn(userDetails);
-        Mockito.when(jwtService.gerarToken(userDetails)).thenReturn(newAccessToken);
+        Mockito.when(jwtService.gerarToken(usuario)).thenReturn(newAccessToken);
         Mockito.when(cookieFactory.buildSet(newRefreshToken, ttl))
                 .thenReturn(org.springframework.http.ResponseCookie.from("refresh_token", newRefreshToken)
                         .httpOnly(true).path("/api/auth").maxAge(ttl).build());

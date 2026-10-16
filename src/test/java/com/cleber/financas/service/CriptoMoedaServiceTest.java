@@ -38,7 +38,7 @@ import jakarta.persistence.EntityNotFoundException;
  * "PENSAR PRIMEIRO, IMPLEMENTAR DEPOIS". Clairton
  *
  */
-@SpringBootTest                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+@SpringBootTest
 @AutoConfigureTestEntityManager
 public class CriptoMoedaServiceTest {
 
@@ -46,7 +46,7 @@ public class CriptoMoedaServiceTest {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private CriptoMoedaService criptoMoedaService; // o spring cuida implementação - @Service                                                                                                                                                                                                                                                                                                                           
+    private CriptoMoedaService criptoMoedaService; // o spring cuida implementação - @Service
 
     @Autowired
     private CriptoMoedaRepository criptoMoedaRepository;
@@ -57,11 +57,9 @@ public class CriptoMoedaServiceTest {
     @BeforeEach
     public void setup() {
         /**
-         * O metodo criarUsuario agora salva o usuário, então não precisamos
-         * chamá-lo aqui a menos que queiramos um usuário disponível para todos
-         * os testes. Mas os testes já chamam criarCriptomoeda que por sua vez
-         * chama criarUsuario.
+         * Limpar dados anteriores para garantir isolamento entre testes.
          **/
+        criptoMoedaRepository.deleteAll();
     }
 
     @Test
@@ -80,10 +78,9 @@ public class CriptoMoedaServiceTest {
     /**Objetivo 1: salvar múltiplas entidades e verificar contagem total com findAll()**/
     @Test
     @DisplayName("deve retornar contagem correta ao salvar múltiplas entidades")
-    @Transactional
-    @Rollback(false)
     void deveRetornarContagemCorretaQuandoSalvarMultiplasMoedas() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO sol = criarCriptomoeda();
         sol.setAtivo("SOL");
         sol.setTipoTransacao(TipoTransacao.COMPRA);
@@ -98,9 +95,9 @@ public class CriptoMoedaServiceTest {
         xrp.setTipoTransacao(TipoTransacao.COMPRA);
 
         /**ação**/
-        criptoMoedaService.salvarCriptomoeda(sol);
-        criptoMoedaService.salvarCriptomoeda(bnb);
-        criptoMoedaService.salvarCriptomoeda(xrp);
+        criptoMoedaService.salvarCriptomoeda(sol, usuarioId);
+        criptoMoedaService.salvarCriptomoeda(bnb, usuarioId);
+        criptoMoedaService.salvarCriptomoeda(xrp, usuarioId);
 
         /**verificação**/
         List<CriptoMoeda> todas = criptoMoedaRepository.findAll();
@@ -111,14 +108,13 @@ public class CriptoMoedaServiceTest {
     /**Objetivo 2: salvar entidade válida e verificar geração de ID**/
     @Test
     @DisplayName("deve gerar ID automaticamente quando salvar entidade válida")
-    @Transactional
-    @Rollback(false)
     void deveGerarIdAoSalvarEntidadeValidaQuandoSalvar() {
         /**cenario**/
-        CriptoMoedaDTO dto = criarCriptomoeda(); // ja cria o usuario
+        UUID usuarioId = criarUsuarioEPersistir();
+        CriptoMoedaDTO dto = criarCriptomoeda();
 
         /**ação**/
-        CriptoMoedaDTO salvar = criptoMoedaService.salvarCriptomoeda(dto);
+        CriptoMoedaDTO salvar = criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
 
         /**verificação**/
         assertThat(salvar).isNotNull();
@@ -128,14 +124,13 @@ public class CriptoMoedaServiceTest {
     /**Objetivo 3: salvar umam criptomoeda e recuperar por ID com todos os campos corretos**/
     @Test
     @DisplayName("deve persistir uma criptomoeda e recuperar por ID com todos os campos corretos")
-    @Transactional
-    @Rollback(false)
     void devePersistirCriptomoedaERetornarPorIdQuandoSalvar() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO dto = criarCriptomoeda();
 
         /**ação**/
-        CriptoMoedaDTO salvar = criptoMoedaService.salvarCriptomoeda(dto);
+        CriptoMoedaDTO salvar = criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
 
         /**verificação**/
         CriptoMoeda moedaEncontrada = criptoMoedaRepository.findById(salvar.getUuid()).orElseThrow();
@@ -150,33 +145,33 @@ public class CriptoMoedaServiceTest {
     /**Objetivo 4: deve lancar uma excessao quando tentar salvar criptomoeda com valor nulo**/
     @Test
     @DisplayName("deve lançar exceção quando tentar salvar com criptomoeda nula")
-//    @Transactional
+    @Transactional
     void deveLancarExcecaoQuandoSalvarComCriptomoedaNula() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO dto = criarCriptomoeda();
         dto.setAtivo(null);
 
         /**ação**/ /**verificação**/
         assertThatThrownBy(() -> {
-            criptoMoedaService.salvarCriptomoeda(dto);
+            criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
             entityManager.flush();
-        }).isInstanceOf(RegraDeNegocioException.class);
+        }).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     }
 
-    /**Objetivo 5: deve lancar uma excessao quando tentar salvar usuario com valor nulo**/
+    /**Objetivo 5: deve lancar uma excessao quando tentar salvar com usuario nulo**/
     @Test
     @DisplayName("deve lançar exceção quando tentar salvar com id de usuário nulo")
     @Transactional
     void deveLancarExcecaoQuandoSalvarComUsuarioNulo() {
         /**cenario**/
         CriptoMoedaDTO dto = criarCriptomoeda();
-        dto.setUsuario(null);
 
         /**ação**/ /**verificação**/
         assertThatThrownBy(() -> {
-            criptoMoedaService.salvarCriptomoeda(dto);
+            criptoMoedaService.salvarCriptomoeda(dto, null);
             entityManager.flush();
-        }).isInstanceOf(RegraDeNegocioException.class);
+        }).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     }
 
     /**Objetivo 6: lançar exceção ao salvar com valorAtual nulo**/
@@ -185,26 +180,26 @@ public class CriptoMoedaServiceTest {
     @Transactional
     void deveLancarExcecaoQuandoSalvarComValorAtualNulo() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO dto = criarCriptomoeda();
         dto.setValorAtualAtivo(null);
 
         /**ação**/ /**verificação**/
         assertThatThrownBy(() -> {
-            criptoMoedaService.salvarCriptomoeda(dto);
+            criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
             entityManager.flush();
-        }).isInstanceOf(DataIntegrityViolationException.class);
+        }).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     }
 
     /**Objetivo 7: buscar por criptomoeda existente e retornar entidade correta**/
     @Test
     @DisplayName("deve retornar entidade correta ao buscar por criptomoeda existente")
-    @Transactional
-    @Rollback(false)
     void deveRetornarEntidadeAoBuscarPorCriptomoedaExistente() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO dto = criarCriptomoeda();
         dto.setAtivo("ETH");
-        CriptoMoedaDTO salvo = criptoMoedaService.salvarCriptomoeda(dto);
+        CriptoMoedaDTO salvo = criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
 
         /**ação**/
         var opt = criptoMoedaRepository.findByCriptomoeda("ETH");
@@ -233,8 +228,9 @@ public class CriptoMoedaServiceTest {
     @DisplayName("deve retornar entidade correta ao buscar por ID existente")
     void deveRetornarEntidadeAoBuscarPorIdExistente() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO dto = criarCriptomoeda();
-        CriptoMoedaDTO salva = criptoMoedaService.salvarCriptomoeda(dto);
+        CriptoMoedaDTO salva = criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
 
         /**ação**/
         var optional = criptoMoedaRepository.findById(salva.getUuid());
@@ -260,10 +256,9 @@ public class CriptoMoedaServiceTest {
     /**Objetivo 11: retornar todos ao objetos marcados com enums específicos**/
     @Test
     @DisplayName("deve retornar apenas objetos do StatusTransacao/TipoTransacao especificados")
-    @Transactional
-    @Rollback(false)
     void deveRetornarEntidadesPorEnumsQuandoBuscar() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO criptomoedaA = criarCriptomoeda();
         criptomoedaA.setAtivo("ETH");
         criptomoedaA.setStatusTransacao(StatusTransacao.ANALISAR);
@@ -272,8 +267,8 @@ public class CriptoMoedaServiceTest {
         criptomoedaB.setAtivo("SOL");
         criptomoedaB.setTipoTransacao(TipoTransacao.COMPRA);
 
-        criptoMoedaService.salvarCriptomoeda(criptomoedaA);
-        criptoMoedaService.salvarCriptomoeda(criptomoedaB);
+        criptoMoedaService.salvarCriptomoeda(criptomoedaA, usuarioId);
+        criptoMoedaService.salvarCriptomoeda(criptomoedaB, usuarioId);
 
         /**ação**/
         List<CriptoMoeda> analisar = criptoMoedaRepository.findByStatusTransacao(StatusTransacao.ANALISAR);
@@ -282,7 +277,7 @@ public class CriptoMoedaServiceTest {
         /**verificação**/
         assertThat(analisar).isNotNull();
         assertThat(analisar).anyMatch(criptoMoeda -> criptoMoeda.getCriptomoeda().equals("ETH"));
-        
+
         assertThat(compra).isNotNull();
         assertThat(compra).hasSize(1);
         assertThat(compra.get(0).getCriptomoeda()).isEqualTo("SOL");
@@ -293,9 +288,10 @@ public class CriptoMoedaServiceTest {
     @DisplayName("deve retornar true para criptomoeda existente usando findByCriptomoeda como verificação")
     void deveRetornarTrueQuandoCriptomoedaExistir() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO dto = criarCriptomoeda();
         dto.setAtivo("EXISTE");
-        criptoMoedaService.salvarCriptomoeda(dto);
+        criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
 
         /**ação**/
         boolean existe = criptoMoedaRepository.findByCriptomoeda("EXISTE").isPresent();
@@ -320,12 +316,11 @@ public class CriptoMoedaServiceTest {
     /**Objetivo 14: atualizar valor do objeto existente e persistir corretamente**/
     @Test
     @DisplayName("deve atualizar valor e persistir corretamente quando o objeto existe")
-    @Transactional
-    @Rollback(false)
     void deveAtualizarPrecoQuandoObjetoExistir() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO dto = criarCriptomoeda();
-        CriptoMoedaDTO salvar = criptoMoedaService.salvarCriptomoeda(dto);
+        CriptoMoedaDTO salvar = criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
 
         /**ação**/
         CriptoMoedaDTO dtoParaAtualizar = salvar;
@@ -340,12 +335,11 @@ public class CriptoMoedaServiceTest {
     /**Objetivo 15: atualizar tipoTransacao e verificar persistência**/
     @Test
     @DisplayName("deve atualizar tipoTransacao e persistir corretamente quando objeto existe")
-    @Transactional
-    @Rollback(false)
     void deveAtualizarTipoTransacaoQuandoObjetoExistir() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO dto = criarCriptomoeda();
-        CriptoMoedaDTO salvar = criptoMoedaService.salvarCriptomoeda(dto);
+        CriptoMoedaDTO salvar = criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
 
         /**ação**/
         CriptoMoedaDTO dtoParaAtualizar = salvar;
@@ -373,12 +367,11 @@ public class CriptoMoedaServiceTest {
     /**Objetivo 17: deletar por ID existente e verificar ausência no banco**/
     @Test
     @DisplayName("deve deletar por ID existente e verificar ausência")
-    @Transactional
-    @Rollback(false)
     void deveDeletarPorIdQuandoExistir() {
         /**cenario**/
+        UUID usuarioId = criarUsuarioEPersistir();
         CriptoMoedaDTO dto = criarCriptomoeda();
-        CriptoMoedaDTO salvo = criptoMoedaService.salvarCriptomoeda(dto);
+        CriptoMoedaDTO salvo = criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
 
         /**ação**/
         CriptoMoedaDTO dtoParaDeletar = salvo;
@@ -405,7 +398,6 @@ public class CriptoMoedaServiceTest {
 
     /** auxiliar exigido: retorna DTO válido pronto para salvar */
     public CriptoMoedaDTO criarCriptomoeda() {
-        Usuario usuario = persistirUsuario(); // agora persiste o usuario para ter um ID real
         return CriptoMoedaDTO.builder()
                 .dataEntrada(LocalDate.now())
                 .mes(LocalDate.now().getMonthValue())
@@ -417,10 +409,14 @@ public class CriptoMoedaServiceTest {
                 .valorAtualAtivo(BigDecimal.valueOf(1100))
                 .fracaoAtivo(BigDecimal.valueOf(0.5))
                 .dataSaida(null)
-                .usuario(usuario.getUuid())
                 .statusTransacao(null)
-                .tipoTransacao(null)                
+                .tipoTransacao(null)
                 .build();
+    }
+
+    /** retorna o UUID do usuário persistido, usado como segundo parâmetro de salvarCriptomoeda */
+    public UUID criarUsuarioEPersistir() {
+        return persistirUsuario().getUuid();
     }
 
     /**cria e persiste um Usuario mínimo para satisfazer FK **/

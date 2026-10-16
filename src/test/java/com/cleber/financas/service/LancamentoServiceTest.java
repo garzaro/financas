@@ -137,9 +137,9 @@ public class LancamentoServiceTest {
         Lancamento lancamento = LancamentoRepositoryTest.criarLancamento();
         lancamento.setUuid(id);
 
-        Mockito.when(lancamentoRepository.findById(UUID.randomUUID())).thenReturn(Optional.of(lancamento));
+        Mockito.when(lancamentoRepository.findById(id)).thenReturn(Optional.of(lancamento));
         /*ação*/
-        Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(UUID.randomUUID());
+        Optional<Lancamento> resultado = serviceImpl.obterLancamentoPorId(id);
         /*verificação*/
         Assertions.assertThat(resultado.isPresent()).isTrue();
     }
@@ -152,7 +152,7 @@ public class LancamentoServiceTest {
         lancamento.setDescricao(" ");
 
         Throwable erro = Assertions.catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida!");
     }
 
     @Test
@@ -160,51 +160,51 @@ public class LancamentoServiceTest {
         Lancamento lancamento = new Lancamento(); /*aqui a descrição está nula*/
 
         Throwable erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida!");
         lancamento.setDescricao(" ");
-
+        
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida!");
         lancamento.setDescricao("Lancamento de teste");
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido!");
         lancamento.setMes(0);
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido!");
         lancamento.setMes(13);
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido!");
         lancamento.setMes(1);
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido!");
         lancamento.setAno(204);
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido!");
         lancamento.setAno(2024);
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um Usuário.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um Usuário!");
         lancamento.setUsuario(new Usuario());
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um Usuário.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um Usuário!");
         lancamento.getUsuario().setUuid(UUID.randomUUID());
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real!");
         lancamento.setValor(BigDecimal.ZERO);
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real!");
         lancamento.setValor(BigDecimal.valueOf(1));
         
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
-        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um tipo de lancamento.");
+        assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um tipo de lancamento!");
         lancamento.setTipoLancamento(TipoLancamento.RECEITA);
     }
 

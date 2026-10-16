@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -17,6 +18,7 @@ import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.impl.UsuarioServiceImpl;
 
 @RunWith(SpringRunner.class)
+@SpringBootTest
 @ActiveProfiles("test")
 public class UsuarioServiceSpyTest {
     @SpyBean
@@ -45,7 +47,7 @@ public class UsuarioServiceSpyTest {
         Assertions.assertThat(usuarioSalvo)
                 .isNotNull();
         Assertions.assertThat(usuarioSalvo.getUuid())
-                .isEqualTo(1l);
+                .isEqualTo(usuario.getUuid());
         Assertions.assertThat(usuarioSalvo.getNomeCompleto())
                 .isEqualTo("Cleber Garzaro");
         Assertions.assertThat(usuarioSalvo.getEmail())
