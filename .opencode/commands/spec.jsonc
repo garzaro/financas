@@ -1,5 +1,17 @@
 {
   "name": "spec",
   "description": "Atualiza ou cria a especificação técnica do código atual",
-  "prompt": "Analise o código que acabamos de finalizar e verifique o estado funcional. Pergunte-me qual arquivo dentro de `.opencode/specs/` deve ser atualizado ou criado, e escreva a documentação técnica correspondente."
+  "prompt": "Analise o código que acabamos de finalizar e verifique o estado funcional. Pergunte-me qual arquivo dentro de `.opencode/specs/` deve ser atualizado ou criado, e escreva a documentação técnica correspondente.",
+  "files": [
+    ".opencode/specs/**/*.md"
+  ],
+  "hooks": [
+    {
+      "type": "write",
+      "pattern": ".opencode/specs/**/*.md",
+      "command": "npx @opencode-dev/spec-generator"
+    }
+  ]
+
+
 }
