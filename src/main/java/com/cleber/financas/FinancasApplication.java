@@ -8,8 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Todo-list
- * [] retono de badcredencial no frontend - credesnciais invlaidas no toater
- * [] verificar usuario ativo ao ser craido na base
+ * [x] verificar usuario ativo ao ser criado na base
  * [] criar endpoint de login no front, que vai retornar o accesstoken JWT
  * [x] testar no front com usuario e senha qualquer, não existe esse usuario na base
  * [x] ver se a porta do vite é a 3000
@@ -37,7 +36,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * Placar por critério
  * #	Critério de aceitação	Status	Resumo
  *
- * 1 []	Geração de tokens	⚠️	Access e refresh são gerados corretamente; há ressalvas de API/claims
+ * 1 [x]	Geração de tokens	⚠️	Access e refresh são gerados corretamente;
  *
  * 2 []	Expiração	❌	TTLs corretos, mas o access token não é validado em requisições
  *
@@ -58,14 +57,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  *
  * [x] ✅ Expiração calculada em localHouse.now().plusMinutes(exp); com JWT_EXPIRATION=30 (.env:29) → 30 min. Correto na prática.
  *
- * ⚠️ [] Usa API depreciada do jjwt 0.12 (SignatureAlgorithm.HS512 + signWith(alg, String)). Recomenda-se signWith(secretKey, Jwts.SIG.HS512).
+ * ⚠️ [x] Usa API depreciada do jjwt 0.12 (SignatureAlgorithm.HS512 + signWith(alg, String)). Recomenda-se signWith(secretKey, Jwts.SIG.HS512).
  *
  * ⚠️ [] O nome jwtExpiration é enganoso: o código trata o valor como minutos, mas o README documenta 3600000 (ms). Se alguém seguir o README, o
  * token passa a “expirar” em ~6,8 anos. Armadilha de configuração.
  *
  * ⚠️ [] Sem jti → impossibilita revogar o access individualmente (ver item 4).
  *
- * ⚠️ [] Payload contém CPF/email (PII) legível via Base64 (JWT não é cifrado).
+ * ⚠️ [x] Payload contém CPF/email (PII) legível via Base64 (JWT não é cifrado).
  *
  *
  * Refresh token — RefreshTokenServiceImpl (service/impl/tokenImpl/RefreshTokenServiceImpl.java):
