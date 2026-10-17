@@ -12,10 +12,6 @@ import com.cleber.financas.model.entity.Usuario;
 
 /**
  * TO-DO list
- *
- * [] configurar o Mapper para apenas realizar o mapeamento se o valor de origem não for nulo. Isso é feito na anotação @Mapper
- *    para evitar NullPointerException em mapeamentos aninhados (como usuario.getUsuarioUuid()).
- *    "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
  * []
  * **/
 
