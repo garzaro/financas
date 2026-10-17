@@ -22,6 +22,12 @@
     </properties>
 	<dependencies>
 
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>4.83.0</version>
+        </dependency>
+
     	<dependency>
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-actuator</artifactId>
@@ -81,16 +87,16 @@
 			<artifactId>bcprov-jdk18on</artifactId>
 			<version>1.78.1</version>
 		</dependency>
-		
+
 		<dependency>
 		    <groupId>com.password4j</groupId>
 		    <artifactId>password4j</artifactId>
-		    <version>1.6.3</version>		
+		    <version>1.6.3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
-			<artifactId>hibernate-validator</artifactId>			
+			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 
 		<!--CPF
@@ -105,7 +111,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency> -->
-		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -117,7 +123,7 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
@@ -141,19 +147,19 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 		</dependency>
-		
+
 		<!--<scope>compile</scope> Source: https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
 		<dependency>
 	        <groupId>org.mapstruct</groupId>
 		    <artifactId>mapstruct</artifactId>
-		    <version>1.6.3</version>		    
+		    <version>1.6.3</version>
 		</dependency>
-		
+
 		<dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter</artifactId>
     </dependency>
-		
+
 		<!-- Starter test configurado com suporte a JUnit 4 e JUnit 5 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -180,7 +186,7 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
-        
+
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
@@ -260,15 +266,15 @@
 			</plugin>
 		</plugins>
 	</build> -->
-	
+
 	<build>
     <plugins>
-    
+
     	<plugin>
     	<groupId>org.springframework.boot</groupId>
         	<artifactId>spring-boot-maven-plugin</artifactId>
     	</plugin>
-        <plugin>        	
+        <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
@@ -279,13 +285,13 @@
                         <artifactId>lombok</artifactId>
                         <version>${lombok.version}</version>
                     </path>
-                    
+
                     <path>
                         <groupId>org.projectlombok</groupId>
                         <artifactId>lombok-mapstruct-binding</artifactId>
                         <version>0.2.0</version>
                     </path>
-                    
+
                     <path>
                         <groupId>org.mapstruct</groupId>
                         <artifactId>mapstruct-processor</artifactId>
