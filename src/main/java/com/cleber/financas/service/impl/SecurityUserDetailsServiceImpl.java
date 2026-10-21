@@ -34,12 +34,15 @@ public class SecurityUserDetailsServiceImpl implements UserDetailsService {
     * e nao somente no bancode dados
     * **/
     @Override
-    public UserDetails loadUserByUsername(String email)
+    public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
         Usuario usuarioEncontrado = usuarioRepository
-                .findByEmail(email)
+                .findByEmail(username)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("usuário não encontrado!!!"));
+//        if (usuarioEncontrado == null) {
+//            throw new UsernameNotFoundException("username " + username + " is not found");
+//        }
         /**deve retornar aviso de usuario disable aqui - ver conta expira depois**/
         return new UsuarioAutenticado(
                 usuarioEncontrado.getUuid(),
