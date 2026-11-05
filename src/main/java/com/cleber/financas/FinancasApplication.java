@@ -8,11 +8,54 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Todo-list
+ * Criar
+ *
+ * [x] Chave secreta (ou par de chaves) e algoritmo de assinatura
+ * [x] Biblioteca JWT (jjwt)
+ * [x] Serviço gerador de token - ⚠️ Observação | Claim roles | ℹ️ Não aplicável | A entidade Usuario atual não possui atribuição de roles/perfis de permissão específicos no banco.
+ * [] Claims: subject, issuedAt, expiration e roles | | roles / authorities | ⚠️ Parcial / Arquitetural | Não está no payload do JWT.
+ * As permissões (ROLE_USER) são carregadas pelo SecurityUserDetailsServiceImpl após a validação do token.
+ *
+ * [] Tempo de expiração e chave configurados em properties
+ *
+ * Validar
+ *
+ * [] Mesma chave e algoritmo usados na criação
+ * [] Verificação de formato e assinatura
+ * [] Subject conferido com o usuário existente (UserDetailsService)
+ * [] Tratamento de token malformado ou com assinatura inválida
+ *
+ * Autorizar
+ *
+ * [] Roles/authorities nas claims convertidas em GrantedAuthority
+ * [] Authentication colocado no SecurityContext
+ * [] SecurityFilterChain com regras por rota e sessão stateless
+ * [] AuthenticationEntryPoint (401) e AccessDeniedHandler (403)
+ *
+ * Expirar
+ *
+ * [] Claim exp no token
+ * [] Verificação de expiração durante a validação
+ * [] Tratamento da exceção de token expirado, retornando 401
+ * [] Refresh token (se for usar renovação)
+ *
+ * Extrair
+ *
+ * [] Filtro (OncePerRequestFilter) registrado antes do filtro de autenticação padrão
+ * [] Leitura do header Authorization
+ * [] Remoção do prefixo “Bearer “
+ * [] Leitura das claims (username, roles)
+ *
+ * Capturar no login
+ *
+ * [] Endpoint de login público no SecurityFilterChain
+ * [] DTO de request (login e senha) e de response (token)
+ * [] AuthenticationManager com UserDetailsService e PasswordEncoder
+ * [] Após autenticar com sucesso, chamar o gerador de token e devolver na resposta
+ *
+ * *********************************
+ *
  * [x] verificar usuario ativo ao ser criado na base
- * [] criar endpoint de login no front, que vai retornar o accesstoken JWT
- * [x] testar no front com usuario e senha qualquer, não existe esse usuario na base
- * [x] ver se a porta do vite é a 3000
- * [] atulizando apagina logada retorna pra pagina de login
  * @EnableConfigurationProperties - se falhar a aplicação nem sobe,
  * melhor maneira de configurar propriedades do projeto
  *
@@ -39,6 +82,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * 1 [x]	Geração de tokens	⚠️	Access e refresh são gerados corretamente;
  *
  * 2 []	Expiração	❌	TTLs corretos, mas o access token não é validado em requisições
+ * 2.1 [x] Requisição com access token válido → deve autorizar
+ * 2.3 [x] Requisição com access token expirado → deve retornar 401 - unauthorized
+ * 2.4 [] Requisição sem token em rota protegida → deve retornar 401
+ * 2.5 [] Requisição em rota permitAll → deve passar sem token
  *
  * 3 []	Refresh após expirar o access	⚠️	Lógica existe e é permitAll, mas o token novo não serve (filtro)
  *
@@ -118,7 +165,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  *
  * ⚠️ [] POST /api/auth/logout exige autenticação (não está em shouldNotFilter). Como o filtro está desligado (B1), o logout retorna 403 sempre. Além disso, se o refresh já expirou, validar lança exceção (401) e o cookie não é limpo.
  *
- * ⚠️ [] O set refresh:user:{id} não tem TTL (linha 148) — pode crescer indefinidamente se o usuário nunca fizer logout.
+ * ⚠️ [] O set refresh:user:{uuid} não tem TTL (linha 148) — pode crescer indefinidamente se o usuário nunca fizer logout.
  *
  *
  * 5. Emissão ao cliente — ✅ (com ressalva)
@@ -162,7 +209,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  *
  * [] Sem rate limiting/lockout no login/cadastro.
  *
- * [] Artefatos mortos/duplicados: entidade RefreshToken, TokenStatus, RefreshTokenStatus, RefreshTokenReuseException, UsuarioAutenticado (id Long, incompatível com UUID).
+ * [] Artefatos mortos/duplicados: entidade RefreshToken, TokenStatus, RefreshTokenStatus, RefreshTokenReuseException, UsuarioAutenticado (uuid Long, incompatível com UUID).
  *
  * [] CORS com setAllowCredentials(true) duplicado (inofensivo).
  *

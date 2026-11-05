@@ -4,6 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import com.cleber.financas.model.entity.Usuario;
 import io.jsonwebtoken.security.Keys;
@@ -46,22 +48,31 @@ public class JwtServiceImpl implements JwtService {
         byte[] keyBytes = chaveAssinatura.getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < MIN_KEY_BYTES) {
             throw new IllegalStateException(
-                    "spring.app.jwtSecretKey deve ter ao menos " + MIN_KEY_BYTES + " bytes para o HS512");
+                    "Chave de assinatura fraca");
         }
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
     @Override
-    public String gerarToken(Usuario usuario) {
+    public String gerarToken(Usuario usuario, List<String> roles) {
         long minutos = Long.parseLong(expiracao);
         Date expiraEm = Date.from(
-                LocalDateTime.now().plusMinutes(minutos).atZone(ZoneId.systemDefault()).toInstant());
+                LocalDateTime
+                        .now()
+                        .plusMinutes(minutos)
+                        .atZone(ZoneId.systemDefault()).toInstant()
+        );
+        /**para identificar o token - serve para revogação reuso**/
+        String jti = UUID.randomUUID().toString();
 
         return Jwts.builder()
+                .id(jti)
                 .expiration(expiraEm)
                 .subject(usuario.getEmail())
                 .claim("uuid", usuario.getUuid())
+                .claim("roles", roles)
                 .issuer(ISSUER)
+                .issuedAt(new Date())
                 .signWith(secretKey, Jwts.SIG.HS512)
                 .compact();
     }
@@ -78,7 +89,9 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public boolean isTokenValido(String token) {
         try {
-            return obterClaims(token).getExpiration().after(new Date());
+            return obterClaims(token)
+                    .getExpiration()
+                    .after(new Date());
         } catch (ExpiredJwtException e) {
             return false;
         }
@@ -86,6 +99,7 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String obterLoginUsuario(String token) {
-        return obterClaims(token).getSubject();
+        return obterClaims(token)
+                .getSubject();
     }
 }

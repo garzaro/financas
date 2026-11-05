@@ -3,6 +3,7 @@ package com.cleber.financas.api.common;
 import com.cleber.financas.api.dto.CampoErro;
 import com.cleber.financas.api.dto.ErroResposta;
 import com.cleber.financas.exception.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -42,6 +43,14 @@ public class GlobalExceptionHandler {
     public final ResponseEntity<ErroResponse> handleRefreshTokenReuseException(RefreshTokenReuseException ex) {
         ErroResponse erro = new ErroResponse(ex.getMessage());
         return new ResponseEntity<>(erro, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public final ResponseEntity<ErroResponse> handleTooManyRequests(TooManyRequestsException ex) {
+        ErroResponse erro = new ErroResponse(ex.getMessage());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()));
+        return new ResponseEntity<>(erro, headers, HttpStatus.TOO_MANY_REQUESTS);
     }
 
     @ExceptionHandler(EmailJaCadastradoException.class)

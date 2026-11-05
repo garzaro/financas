@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LancamentoDTO {
-    private UUID id;
+    private UUID uuid;
     private String descricao;
     private Integer mes;
     private Integer ano;
@@ -25,11 +24,11 @@ public class LancamentoDTO {
 	private LocalDate dataCadastro;
 
 /**DEIXEI PRA CASO AS ANOTATION DE PROBLEMA MAS NAO PRECISA**/
-	public UUID getId() {
-		return id;
+	public UUID getUuid() {
+		return uuid;
 	}
-	public void setId(UUID id) {
-		this.id = id;
+	public void setUuid(UUID uuid) {
+		this.uuid = uuid;
 	}
 	public String getDescricao() {
 		return descricao;
@@ -78,7 +77,7 @@ public class LancamentoDTO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         LancamentoDTO that = (LancamentoDTO) o;
-        return Objects.equals(id, that.id) &&
+        return Objects.equals(uuid, that.uuid) &&
                 Objects.equals(descricao, that.descricao) &&
                 Objects.equals(mes, that.mes) &&
                 Objects.equals(ano, that.ano) &&
@@ -91,13 +90,13 @@ public class LancamentoDTO {
 //    usuario,
     @Override
     public int hashCode() {
-        return Objects.hash(id, descricao, mes, ano, valor, tipoLancamento, statusLancamento, dataCadastro);
+        return Objects.hash(uuid, descricao, mes, ano, valor, tipoLancamento, statusLancamento, dataCadastro);
     }
 
     @Override
     public String toString() {
         return "LancamentoDTO{" +
-                "id=" + id +
+                "uuid=" + uuid +
                 ", descricao='" + descricao + '\'' +
                 ", mes=" + mes +
                 ", ano=" + ano +

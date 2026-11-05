@@ -50,7 +50,7 @@ class JwtServiceTest {
     @Test
     @DisplayName("gera token com subject, uuid, issuer e expiração futura")
     void deveGerarTokenValido() {
-        String token = jwtService.gerarToken(usuario);
+        String token = jwtService.gerarToken(usuario, java.util.List.of("ROLE_USER"));
 
         assertThat(token).isNotBlank();
         assertThat(token.split("\\.")).hasSize(3);
@@ -77,7 +77,7 @@ class JwtServiceTest {
     @Test
     @DisplayName("rejeita token adulterado")
     void deveRejeitarTokenAdulterado() {
-        String token = jwtService.gerarToken(usuario);
+        String token = jwtService.gerarToken(usuario, java.util.List.of("ROLE_USER"));
         String adulterado = token.substring(0, token.length() - 3) + "XYZ";
 
         assertThatThrownBy(() -> jwtService.obterLoginUsuario(adulterado))
@@ -104,7 +104,7 @@ class JwtServiceTest {
     @Test
     @DisplayName("rejeita token com algoritmo none")
     void deveRejeitarTokenAlgNone() {
-        String payload = jwtService.gerarToken(usuario).split("\\.")[1];
+        String payload = jwtService.gerarToken(usuario, java.util.List.of("ROLE_USER")).split("\\.")[1];
         String headerNone = Base64.getUrlEncoder().withoutPadding()
                 .encodeToString("{\"alg\":\"none\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
 

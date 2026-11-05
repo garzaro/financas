@@ -7,6 +7,8 @@ import com.cleber.financas.model.entity.Usuario;
 
 import io.jsonwebtoken.ExpiredJwtException;
 
+import java.util.List;
+
 /**
  * Contrato do serviço JWT da aplicação.
  *
@@ -24,7 +26,7 @@ public interface JwtService {
      * Gera um accesstoken JWT com apenas o {@code username} do {@link UserDetails} como subject.
      * Usado internamente pelo filtro de autenticação e pelo endpoint de login.
      */
-    String gerarToken(Usuario usuario);
+    String gerarToken(Usuario usuario, List<String> roles);
 
     /**
      * Gera um accesstoken com claims extras adicionais ao payload.
@@ -53,7 +55,7 @@ public interface JwtService {
 
 /**
  * Gera um accesstoken JWT enriquecido para um {@link Usuario}, incluindo claims extras:
- * {@code id}, {@code cpf}, {@code nome_usuario} e {@code nome}.
+ * {@code uuid}, {@code cpf}, {@code nome_usuario} e {@code nome}.
  */
 //    String gerarToken(Usuario usuario);
 

@@ -23,15 +23,16 @@ public class LancamentoConverter {
     /* o dono do lancamento vem do access token (usuarioAutenticado), nao do corpo da requisicao */
     public Lancamento dtoToEntity(LancamentoDTO dto, UUID usuarioAutenticado) {
         Lancamento lancamento = new Lancamento();
-        lancamento.setUuid(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
+//        lancamento.setUuid(dto.getUuid()); /* caso precise atualizar, ele vem preenchido com o uuid */
         lancamento.setDescricao(dto.getDescricao());
         lancamento.setMes(dto.getMes());
         lancamento.setAno(dto.getAno());
         lancamento.setValor(dto.getValor());
+        lancamento.setDescricao(dto.getDescricao());
         /* inicio usuario */
-        /* o id do usuario e resolvido a partir do token autenticado, ignorando o valor do dto */
+        /* o uuid do usuario e resolvido a partir do token autenticado, ignorando o valor do dto */
         Usuario receberUsuario = usuarioService.obterUsuarioPorId(usuarioAutenticado)
-                /** buscarLancamento do usuario por id, ou lancar uma exception caso ele nao exista*/
+                /** buscarLancamento do usuario por uuid, ou lancar uma exception caso ele nao exista*/
                 .orElseThrow(() -> new RegraDeNegocioException(
                         "Usuário autenticado não encontrado!")); //Usuario nao encontrado
         lancamento.setUsuario(receberUsuario);
@@ -48,7 +49,7 @@ public class LancamentoConverter {
     /* converter uma entidade de lancamento para dto - PARA ATUALIZAÇÃO */
     public LancamentoDTO entityToDto(Lancamento lancamento) {
         return LancamentoDTO.builder()
-                .id(lancamento.getUuid())
+                .uuid(lancamento.getUuid())
                 .descricao(lancamento.getDescricao())
                 .valor(lancamento.getValor())
                 .mes(lancamento.getMes())
