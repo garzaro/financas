@@ -99,7 +99,7 @@ public class UsuarioRepositoryMelhoriasTest {
         return Usuario.builder()
                 .nomeCompleto("Madonna da Silva")
                 .nomeUsuario("cricri")
-                .cpf("123.456.789.00")
+                .cpf("12345678900")
                 .email("cricri@gmail.com")
                 .senha("123456")
                 .dataCadastro(LocalDateTime.now())

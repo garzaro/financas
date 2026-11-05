@@ -21,10 +21,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 
-import com.cleber.financas.api.common.RefreshTokenCookieFactory;
 import com.cleber.financas.api.converter.UsuarioConverter;
-import com.cleber.financas.api.dto.AuthLoginDTO;
+import com.cleber.financas.api.cookie.RefreshTokenCookieFactory;
+import com.cleber.financas.api.dto.AutenticacaoResultado;
+import com.cleber.financas.api.dto.RequestLoginDTO;
 import com.cleber.financas.api.dto.UsuarioDTO;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
@@ -36,8 +39,11 @@ import com.cleber.financas.service.token.RefreshTokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(SpringRunner.class)
+@WebMvcTest(controllers = UsuarioController.class, excludeAutoConfiguration = {
+        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+        org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
+})
 @AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(controllers = UsuarioController.class)
 @ActiveProfiles("test")
 public class UsuarioResourceRestTest {
 
@@ -71,28 +77,49 @@ public class UsuarioResourceRestTest {
     @MockBean
     private RefreshTokenCookieFactory cookieFactory;
 
+    @MockBean
+    private com.cleber.financas.security.SecurityUserDetailsService securityUserDetailsService;
+
+    @MockBean
+    private com.cleber.financas.security.ratelimit.LimiteTentativasService limiteTentativasService;
+
+    @MockBean
+    private com.cleber.financas.security.ratelimit.LoginLimiteTentativasFilter loginLimiteTentativasFilter;
+
+    @org.junit.Before
+    public void setUp() {
+        this.mvc = MockMvcBuilders.standaloneSetup(new UsuarioController(
+                jwtService,
+                usuarioService,
+                lancamentoService,
+                usuarioConverter,
+                refreshTokenService,
+                cookieFactory
+        ))
+        .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+        .setControllerAdvice(new com.cleber.financas.api.common.GlobalExceptionHandler())
+        .build();
+    }
+
     @Test
     public void deveAutenticarUmUsuario() throws Exception {
         String email = "cleber@gmail.com";
         String senha = "senha123";
-        String rawToken = "refresh-token";
+        RequestLoginDTO loginRequest = new RequestLoginDTO(email, senha);
+
         Duration ttl = Duration.ofDays(7);
-        AuthLoginDTO loginRequest = new AuthLoginDTO(email, senha);
-
-        Usuario usuario = Usuario.builder().uuid(UUID.randomUUID()).email(email).build();
-
-        Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(new UsernamePasswordAuthenticationToken(email, null));
-        Mockito.when(usuarioRepository.findByEmail(email)).thenReturn(Optional.of(usuario));
-        Mockito.when(jwtService.gerarToken(usuario)).thenReturn("jwt-accesstoken");
-
-        RefreshTokenEmitido emitido = new RefreshTokenEmitido(rawToken, ttl);
-        Mockito.when(refreshTokenService.gerar(Mockito.any(UUID.class), Mockito.anyString(), Mockito.any()))
-                .thenReturn(emitido);
-
-        Mockito.when(cookieFactory.buildSet(rawToken, ttl))
-                .thenReturn(org.springframework.http.ResponseCookie.from("refresh_token", rawToken)
-                        .httpOnly(true).path("/api/auth").maxAge(ttl).build());
+        Mockito.when(usuarioService.autenticar(
+                        Mockito.any(RequestLoginDTO.class), Mockito.anyString(), Mockito.any()))
+                .thenReturn(new AutenticacaoResultado(
+                        new com.cleber.financas.api.dto.TokenResponseDTO("jwt-accesstoken"),
+                        new RefreshTokenEmitido("refresh-token", ttl)));
+        Mockito.when(cookieFactory.buildSet("refresh-token", ttl))
+                .thenReturn(org.springframework.http.ResponseCookie
+                        .from("refresh_token", "refresh-token")
+                        .httpOnly(true)
+                        .path("/api/auth")
+                        .maxAge(ttl)
+                        .build());
 
         String json = new ObjectMapper().writeValueAsString(loginRequest);
 
@@ -124,7 +151,7 @@ public class UsuarioResourceRestTest {
         Mockito.when(refreshTokenService.rotacionar(Mockito.eq(oldRefreshToken), Mockito.anyString(), Mockito.any()))
                 .thenReturn(emitido);
         Mockito.when(refreshTokenService.validar(newRefreshToken)).thenReturn(usuario);
-        Mockito.when(jwtService.gerarToken(usuario)).thenReturn(newAccessToken);
+        Mockito.when(jwtService.gerarToken(Mockito.eq(usuario), Mockito.anyList())).thenReturn(newAccessToken);
         Mockito.when(cookieFactory.buildSet(newRefreshToken, ttl))
                 .thenReturn(org.springframework.http.ResponseCookie.from("refresh_token", newRefreshToken)
                         .httpOnly(true).path("/api/auth").maxAge(ttl).build());
@@ -213,5 +240,112 @@ public class UsuarioResourceRestTest {
 
         mvc.perform(requisicao)
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void deveTrocarSenhaComSucessoRetornando204() throws Exception {
+        UUID usuarioUuid = UUID.randomUUID();
+        com.cleber.financas.security.UsuarioAutenticado usuarioAutenticado =
+                new com.cleber.financas.security.UsuarioAutenticado(
+                        usuarioUuid,
+                        "cleber@gmail.com",
+                        "senhaAtual",
+                        java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+                );
+
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(usuarioAutenticado, null, usuarioAutenticado.getAuthorities())
+        );
+
+        try {
+            com.cleber.financas.api.dto.AlterarSenhaDTO dto =
+                    new com.cleber.financas.api.dto.AlterarSenhaDTO("senhaAtual123", "novaSenha123");
+
+            String json = new ObjectMapper().writeValueAsString(dto);
+
+            MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders
+                    .post(API + "/trocar-senha")
+                    .accept(JSON)
+                    .contentType(JSON)
+                    .content(json);
+
+            mvc.perform(requisicao)
+                    .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+            Mockito.verify(usuarioService).trocarSenha(usuarioUuid, "senhaAtual123", "novaSenha123");
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    public void deveRetornarBadRequestAoTrocarSenhaComSenhaAtualIncorreta() throws Exception {
+        UUID usuarioUuid = UUID.randomUUID();
+        com.cleber.financas.security.UsuarioAutenticado usuarioAutenticado =
+                new com.cleber.financas.security.UsuarioAutenticado(
+                        usuarioUuid,
+                        "cleber@gmail.com",
+                        "senhaAtual",
+                        java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+                );
+
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(usuarioAutenticado, null, usuarioAutenticado.getAuthorities())
+        );
+
+        try {
+            com.cleber.financas.api.dto.AlterarSenhaDTO dto =
+                    new com.cleber.financas.api.dto.AlterarSenhaDTO("senhaIncorreta", "novaSenha123");
+
+            Mockito.doThrow(new com.cleber.financas.exception.ErroValidacaoException("A senha atual informada está incorreta"))
+                    .when(usuarioService).trocarSenha(usuarioUuid, "senhaIncorreta", "novaSenha123");
+
+            String json = new ObjectMapper().writeValueAsString(dto);
+
+            MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders
+                    .post(API + "/trocar-senha")
+                    .accept(JSON)
+                    .contentType(JSON)
+                    .content(json);
+
+            mvc.perform(requisicao)
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    public void deveRetornarBadRequestQuandoDtoDeTrocaDeSenhaInvalido() throws Exception {
+        UUID usuarioUuid = UUID.randomUUID();
+        com.cleber.financas.security.UsuarioAutenticado usuarioAutenticado =
+                new com.cleber.financas.security.UsuarioAutenticado(
+                        usuarioUuid,
+                        "cleber@gmail.com",
+                        "senhaAtual",
+                        java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))
+                );
+
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(usuarioAutenticado, null, usuarioAutenticado.getAuthorities())
+        );
+
+        try {
+            com.cleber.financas.api.dto.AlterarSenhaDTO dto =
+                    new com.cleber.financas.api.dto.AlterarSenhaDTO("", "");
+
+            String json = new ObjectMapper().writeValueAsString(dto);
+
+            MockHttpServletRequestBuilder requisicao = MockMvcRequestBuilders
+                    .post(API + "/trocar-senha")
+                    .accept(JSON)
+                    .contentType(JSON)
+                    .content(json);
+
+            mvc.perform(requisicao)
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
     }
 }

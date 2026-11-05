@@ -6,10 +6,10 @@ import com.cleber.financas.api.dto.RefreshDadosToken;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
 import com.cleber.financas.service.token.RefreshTokenEmitido;
-import com.cleber.financas.service.token.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +18,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Set;
 import java.util.UUID;
@@ -31,7 +32,7 @@ import java.util.UUID;
  * O valor bruto do token NUNCA é armazenado — só o hash SHA-256.
  */
 @Service
-public class RefreshTokenServiceImpl implements RefreshTokenService {
+public class RefreshTokenServiceImpl implements com.cleber.financas.service.token.RefreshTokenService {
 
     private static final String TOKEN_PREFIX = "refresh:token:";
     private static final String FAMILIA_PREFIX = "refresh:family:";
@@ -43,62 +44,85 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final Duration tokenTtl;
     /**periodo de tolerancia**/
     private final Duration graceRotacionado;
+    private final RedisScript<Long> refreshRotationScript;
 
     public RefreshTokenServiceImpl(
             RedisTemplate<String, RefreshDadosToken> refreshTokenRedisTemplate,
             StringRedisTemplate stringRedisTemplate,
             UsuarioRepository usuarioRepository,
-            @Value("${spring.app.jwtRefreshExpirationMs}") long tokenTtlMs,
-            @Value("${spring.app.refreshRotatedGraceMs}") long graceRotacionadoMs
+            RedisScript<Long> refreshRotationScript,
+            @Value("${spring.app.jwtRefreshExpiration}") long tokenTtlMin,
+            @Value("${spring.app.refreshRotatedGrace}") long graceRotacionadoMin
     ) {
         this.tokenTemplate = refreshTokenRedisTemplate;
         this.setTemplate = stringRedisTemplate;
         this.usuarioRepository = usuarioRepository;
-        this.tokenTtl = Duration.ofMillis(tokenTtlMs);
-        this.graceRotacionado = Duration.ofMillis(graceRotacionadoMs);
+        this.refreshRotationScript = refreshRotationScript;
+        this.tokenTtl = Duration.ofMinutes(tokenTtlMin);
+        this.graceRotacionado = Duration.ofMillis(graceRotacionadoMin);
     }
 
     @Override
-    public RefreshTokenEmitido gerar(UUID usuarioId, String clienteIp, String agenteUsuario) {
+    public RefreshTokenEmitido gerar(UUID usuarioId, String ipDoUsuario, String agenteUsuario) {
         UUID familiaId = UUID.randomUUID();
-        return emissao(usuarioId, familiaId, clienteIp, agenteUsuario);
+        return emissao(usuarioId, familiaId, ipDoUsuario, agenteUsuario);
     }
 
     @Override
     public RefreshTokenEmitido rotacionar(String tokenAntigo, String ip, String agenteUsuario) {
-        String hash = hash(tokenAntigo);
-        String chave = TOKEN_PREFIX + hash;
-        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().getAndDelete(chave); //.getAndDelete()
-        if (dadosToken == null) {
+        String hashAntigo = hash(tokenAntigo);
+        String chaveAntiga = TOKEN_PREFIX + hashAntigo;
+
+        RefreshDadosToken dadosAntigos = tokenTemplate.opsForValue().get(chaveAntiga);
+        if (dadosAntigos == null) {
             throw new InvalidRefreshTokenException("Refresh token não encontrado ou expirado");
         }
-        if (dadosToken.status() == RefreshDadosToken.Status.ROTACIONADO){
-            /** Reuse detectado: token já rotacionado sendo reapresentado -> sessão comprometida**/
-            revogarFamiliaById(dadosToken.familiaId(), dadosToken.usuarioId());
+
+        String rawNovo = tokenAleatorio();
+        String hashNovo = hash(rawNovo);
+        String chaveNova = TOKEN_PREFIX + hashNovo;
+        String chaveFamilia = FAMILIA_PREFIX + dadosAntigos.familiaId();
+        String chaveUsuario = USUARIO_PREFIX + dadosAntigos.usuarioId();
+
+        RefreshDadosToken dadosNovo = new RefreshDadosToken(
+                dadosAntigos.usuarioId(),
+                dadosAntigos.familiaId(),
+                RefreshDadosToken.Status.ATIVO,
+                ip,
+                agenteUsuario,
+                Instant.now()
+        );
+
+        String novoTokenJson = tokenTemplate.getValueSerializer() != null
+                ? new String(((org.springframework.data.redis.serializer.RedisSerializer<RefreshDadosToken>) tokenTemplate.getValueSerializer())
+                .serialize(dadosNovo), java.nio.charset.StandardCharsets.UTF_8)
+                : null;
+        if (novoTokenJson == null) {
+            throw new IllegalStateException("não encontrado");
+        }
+
+        Long resultado = tokenTemplate.execute(
+                refreshRotationScript,
+                Arrays.asList(chaveAntiga, chaveFamilia, chaveUsuario, chaveNova),
+                String.valueOf(graceRotacionado.toMillis()),
+                String.valueOf(tokenTtl.toMillis()),
+                hashNovo,
+                novoTokenJson
+        );
+
+        if (resultado == null || resultado == 0) {
+            throw new InvalidRefreshTokenException("Refresh token não encontrado ou expirado");
+        }
+        if (resultado == 2) {
             throw new RefreshTokenReuseException("Reuse de refresh token detectado - familia inteira revogada");
         }
-        /** Marca o token atual como ROTATED com TTL curto (grace period), não deleta:
-         * precisa continuar existindo pra detectar reuse se for reapresentado.
-         * **/
-        tokenTemplate.opsForValue().set(
-            chave,
-            dadosToken.comStatus(RefreshDadosToken.Status.ROTACIONADO),
-            graceRotacionado
-        );
-        /**criar um token**/
-        return emissao(dadosToken.usuarioId(), dadosToken.familiaId(), ip, agenteUsuario);
+        if (resultado == 1) {
+            setTemplate.opsForSet().add(chaveUsuario, dadosAntigos.familiaId().toString());
+            return new RefreshTokenEmitido(rawNovo, tokenTtl);
+        }
+        throw new InvalidRefreshTokenException("Refresh token não encontrado ou expirado");
     }
 
-//    @Override
-//    public RefreshDadosToken validar(String rawToken) {
-//        String chave = TOKEN_PREFIX + hash(rawToken);
-//        RefreshDadosToken dadosToken = tokenTemplate.opsForValue().get(chave);
-//        if (dadosToken == null || dadosToken.status() != RefreshDadosToken.Status. ATIVO) {
-//            throw new InvalidRefreshTokenException("Refresh token inválido");
-//        }
-//
-//        return dadosToken;
-//    }
     @Override
     public Usuario validar(String rawToken) {
         String chave = TOKEN_PREFIX + hash(rawToken); //token bruto

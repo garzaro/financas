@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record AuthLoginDTO(
+public record RequestLoginDTO(
     @NotBlank(message = "{usuario.email.obrigatorio}")
     @Email(message = "{usuario.email.invalido}")
     String email,

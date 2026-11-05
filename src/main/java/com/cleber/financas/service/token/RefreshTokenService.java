@@ -7,7 +7,7 @@ import java.util.UUID;
 public interface RefreshTokenService {
 
     /** Emite o primeiro token de uma nova família (login). */
-    RefreshTokenEmitido gerar(UUID usuarioId, String clientIp, String agenteUsuario);
+    RefreshTokenEmitido gerar(UUID usuarioId, String ipDoUsuario, String agenteUsuario);
 
     /**
      * Rotaciona um token existente.

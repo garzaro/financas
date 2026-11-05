@@ -1,4 +1,4 @@
-package com.cleber.financas.service.impl;
+package com.cleber.financas.security;
 
 
 import java.util.List;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
-import com.cleber.financas.security.UsuarioAutenticado;
 
 /**
  * TODO-list
@@ -21,11 +20,11 @@ import com.cleber.financas.security.UsuarioAutenticado;
 
 
 @Service
-public class SecurityUserDetailsServiceImpl implements UserDetailsService {
+public class SecurityUserDetailsService implements UserDetailsService {
 
     private UsuarioRepository usuarioRepository;
 
-    public SecurityUserDetailsServiceImpl(UsuarioRepository usuarioRepository) {
+    public SecurityUserDetailsService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
     }
 
@@ -40,15 +39,15 @@ public class SecurityUserDetailsServiceImpl implements UserDetailsService {
                 .findByEmail(username)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("usuário não encontrado!!!"));
-//        if (usuarioEncontrado == null) {
-//            throw new UsernameNotFoundException("username " + username + " is not found");
-//        }
+        if (usuarioEncontrado == null) {
+            throw new UsernameNotFoundException("username " + username + " is not found");
+        }
         /**deve retornar aviso de usuario disable aqui - ver conta expira depois**/
         return new UsuarioAutenticado(
                 usuarioEncontrado.getUuid(),
                 usuarioEncontrado.getEmail(),
                 usuarioEncontrado.getSenha(),
                 Boolean.TRUE.equals(usuarioEncontrado.getIsAtivo()),
-                List.of(new SimpleGrantedAuthority("ROLE_USER")));
+                List.of(new SimpleGrantedAuthority("USER")));
     }
 }

@@ -3,6 +3,7 @@ package com.cleber.financas.api.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.cleber.financas.api.validation.SenhaConstraints;
 import org.hibernate.validator.constraints.br.CPF;
 
 /**
@@ -14,6 +15,7 @@ import org.hibernate.validator.constraints.br.CPF;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 /**
  * TODO-list
@@ -42,6 +44,7 @@ public class UsuarioDTO {
     private String email;
 
 	@NotBlank(message = "{usuario.senha.obrigatoria}")
+	@Size(min = SenhaConstraints.TAMANHO_MINIMO, message = "{usuario.senha.tamanho.minimo}")
     private String senha;
 
 	private LocalDateTime dataCadastro;

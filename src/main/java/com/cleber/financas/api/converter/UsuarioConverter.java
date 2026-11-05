@@ -12,7 +12,7 @@ public class UsuarioConverter {
     /* Um metodo para converter o dto em uma entidade de usuario */
     public Usuario dtoToEntity(UsuarioDTO dto) {
         Usuario usuario = new Usuario();
-        usuario.setUuid(dto.getId()); /* caso precise atualizar, ele vem preenchido com o id */
+        usuario.setUuid(dto.getId()); /* caso precise atualizar, ele vem preenchido com o uuid */
         usuario.setNomeCompleto(dto.getNomeCompleto());
         usuario.setCpf(dto.getCpf());
         usuario.setNomeUsuario(dto.getNomeUsuario());

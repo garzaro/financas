@@ -20,21 +20,21 @@ public class UsuarioRepositoryTest {
     /*Inicio teste com Dougllas Sousa (Udemy)*/
     @Autowired
     UsuarioRepository usuarioRepository;
-   
+
     @Test
     public void deveVerificarAExistenciaDeUmEmailNaBaseDeDados() {
         /*cenario*/
         Usuario usuarioDeTeste = criarUsuario();
         usuarioRepository.save(usuarioDeTeste);
-        
+
         /*execução/ação*/
        boolean verficarSeExisteEmail = usuarioRepository.existsByEmail("usuario@gmail.com");
-       
+
        /*verficação*/
        Assertions.assertThat(verficarSeExisteEmail).isTrue();
-       
+
     }
-    
+
     @Test
     public void deveRetornarFalsoQuandoNaoHouverUsuarioCadastradoComOEmail() {
        /*cenario, não deve existir email na base*/
@@ -44,18 +44,18 @@ public class UsuarioRepositoryTest {
         /*verificação*/
         Assertions.assertThat(verificarSeExisteUsuarioCadastradoComEmail).isFalse();
     }
-    
+
     @Test
     public void devePersistirUsuarioNaBaseDeDados(){
        /*cenario*/
         Usuario persistindoUsuario = criarUsuario();
         /*ação*/
         Usuario usuarioPersistido = usuarioRepository.save(persistindoUsuario);
-        
+
         /*verificação*/
         Assertions.assertThat(usuarioPersistido.getUuid()).isNotNull();
     }
-    
+
     @Test
     public void deveBuscarUmUsuarioPeloEmail(){
         /*cenario*/
@@ -68,7 +68,7 @@ public class UsuarioRepositoryTest {
         /*verificação*/
         Assertions.assertThat(pesquisarUsuarioPeloEmail.isPresent()).isTrue();
     }
-    
+
     @Test
     public void deveRetornarVazioAoBuscarUsuarioPorEmailQueNaoExisteNaBase() {
         /*cenario - nao presença de email*/
@@ -82,7 +82,7 @@ public class UsuarioRepositoryTest {
 
     public static Usuario criarUsuario(){
         return Usuario.builder()
-//                .id(UUID.randomUUID())
+//                .uuid(UUID.randomUUID())
                 .nomeCompleto("Cleber")
                 .cpf("12345678978")
                 .nomeUsuario("garzaro74")

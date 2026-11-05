@@ -2,11 +2,12 @@ package com.cleber.financas.config;
 
 import java.util.List;
 
-import com.cleber.financas.service.impl.SecurityUserDetailsServiceImpl;
+import com.cleber.financas.security.SecurityUserDetailsService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,12 +19,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.cleber.financas.security.JwtAuthenticationFilter;
+import com.cleber.financas.security.ratelimit.LoginLimiteTentativasFilter;
 
 /** Contexto **/
 
@@ -32,18 +35,21 @@ import com.cleber.financas.security.JwtAuthenticationFilter;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
-	private final SecurityUserDetailsServiceImpl usuarioDetailsService;
+	private final SecurityUserDetailsService usuarioDetailsService;
+	private final LoginLimiteTentativasFilter loginRateLimitFilter;
 
     @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
 	public SecurityConfig(
 			JwtAuthenticationFilter jwtAuthenticationFilter,
-			SecurityUserDetailsServiceImpl usuarioDetailsService
+			SecurityUserDetailsService usuarioDetailsService,
+			LoginLimiteTentativasFilter loginRateLimitFilter
 			) {
 			super();
 			this.jwtAuthenticationFilter = jwtAuthenticationFilter;
 			this.usuarioDetailsService = usuarioDetailsService;
+			this.loginRateLimitFilter = loginRateLimitFilter;
 	}
 
     @Bean
@@ -71,15 +77,19 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
-				/**Desabilita CSRF (APIs baseadas em Token) - method reference**/
-				.csrf(AbstractHttpConfigurer::disable)
-				/** Habilita as configurações de CORS **/
-				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+ 			/**Desabilita CSRF (APIs baseadas em Token) - method reference**/
+ 			.csrf(AbstractHttpConfigurer::disable)
+ 			/** Desabilita autenticação anônima - rotas protegidas não podem escapar **/
+ 			.anonymous(AbstractHttpConfigurer::disable)
+ 			/** Habilita as configurações de CORS **/
+ 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
 				/**Configura a política de sessão sem estado — nenhuma HttpSession criada. **/
 				.sessionManagement(session -> session
 						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 /**regras de autorização de rotas - endpoint de login e cadastro **/
 				.authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -98,6 +108,8 @@ public class SecurityConfig {
 					.anyRequest().authenticated()
 				)
 
+				.addFilterBefore(loginRateLimitFilter,
+                        UsernamePasswordAuthenticationFilter.class)
 				.addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class) //UNPAF carrega os dados do usuário e suas Authorities/permissões) e injeta no cofrinho.
 				/** pra uso do postman/Insomnia **/
