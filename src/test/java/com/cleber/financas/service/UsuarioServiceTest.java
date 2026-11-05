@@ -1,15 +1,22 @@
 package com.cleber.financas.service;
 
+import com.cleber.financas.api.dto.AutenticacaoResultado;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
+import com.cleber.financas.service.token.RefreshTokenEmitido;
+import com.cleber.financas.service.token.RefreshTokenService;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.Duration;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -21,6 +28,9 @@ public class UsuarioServiceTest {
 
     @Autowired
     UsuarioRepository usuarioRepository;
+
+    @MockBean
+    RefreshTokenService refreshTokenService;
 
     @Test(expected = Test.None.class)
     public void deveValidarEmail(){
@@ -58,11 +68,18 @@ public class UsuarioServiceTest {
         /*ação*/
         Usuario salvarUsuario = usuarioService.salvarUsuario(usuario);
 
-        // Verificar se o metodo autenticarUsuario retorna o usuário autenticado corretamente
-        Usuario usuarioAutenticado = usuarioService.autenticar(salvarUsuario.getEmail(), "senha123456");
+        Mockito.when(refreshTokenService.gerar(
+                        Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(new RefreshTokenEmitido("refresh-token", Duration.ofDays(7)));
+
+        // Verificar se o metodo autenticar retorna os dois tokens corretamente
+        AutenticacaoResultado resultado = usuarioService.autenticar(
+                new com.cleber.financas.api.dto.RequestLoginDTO(salvarUsuario.getEmail(), "senha123456"),
+                "127.0.0.1", "JUnit");
 
         /*verificação*/
-        Assertions.assertThat(usuarioAutenticado).isNotNull();
-        Assertions.assertThat(usuarioAutenticado.getEmail()).isEqualTo(salvarUsuario.getEmail());
+        Assertions.assertThat(resultado).isNotNull();
+        Assertions.assertThat(resultado.tokens().accessToken()).isNotBlank();
+        Assertions.assertThat(resultado.refresh().rawToken()).isEqualTo("refresh-token");
     }
 }

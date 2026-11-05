@@ -48,7 +48,7 @@ public class LancamentoServiceTest {
         Lancamento lancamentoASerSalvo = LancamentoRepositoryTest.criarLancamento();
         /*impedir a validação ao salvar o lancamento*/
         doNothing().when(serviceImpl).validarLancamento(lancamentoASerSalvo);
-        /*outro lancamento com o id definido, simulação do que vai ser salvo*/
+        /*outro lancamento com o uuid definido, simulação do que vai ser salvo*/
         Lancamento salvandoLancamento = LancamentoRepositoryTest.criarLancamento();
         salvandoLancamento.setUuid(UUID.randomUUID());
         //salvandoLancamento.setStatusLancamento(StatusLancamento.PENDENTE);
@@ -78,7 +78,7 @@ public class LancamentoServiceTest {
         /*verificação*/
         /*verifica que chamou pelo menos uma vez o metodo de salvar*/
         verify(lancamentoRepository, times(1)).save(lancamentoSalvo);
-        /*caso queira checar se os valores estão sendo retornados - id...*/
+        /*caso queira checar se os valores estão sendo retornados - uuid...*/
     }
 
     @Test
@@ -162,47 +162,47 @@ public class LancamentoServiceTest {
         Throwable erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida!");
         lancamento.setDescricao(" ");
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar uma descrição válida!");
         lancamento.setDescricao("Lancamento de teste");
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido!");
         lancamento.setMes(0);
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido!");
         lancamento.setMes(13);
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um mês válido!");
         lancamento.setMes(1);
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido!");
         lancamento.setAno(204);
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um ano válido!");
         lancamento.setAno(2024);
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um Usuário!");
         lancamento.setUsuario(new Usuario());
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um Usuário!");
         lancamento.getUsuario().setUuid(UUID.randomUUID());
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real!");
         lancamento.setValor(BigDecimal.ZERO);
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informe o valor acima de 1 real!");
         lancamento.setValor(BigDecimal.valueOf(1));
-        
+
         erro = catchThrowable(() -> serviceImpl.validarLancamento(lancamento));
         assertThat(erro).isInstanceOf(RegraDeNegocioException.class).hasMessage("Informar um tipo de lancamento!");
         lancamento.setTipoLancamento(TipoLancamento.RECEITA);
@@ -238,7 +238,7 @@ public class LancamentoServiceTest {
         /*verificação*/
         Assertions.assertThat(resultado.isPresent()).isFalse();
     }
-  
+
     @Test
     public void deveLancarErroAoTentarDeletarUmLancamentoNaoSalvo() {
         /*cenário*/
