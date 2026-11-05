@@ -31,13 +31,13 @@ public class LancamentoServiceImpl implements LancamentoService {
 	public LancamentoServiceImpl(LancamentoRepository lancamentoRepository) {
 		this.lancamentoRepository = lancamentoRepository;
 	}
-	
+
 	/*
 	 * spring abre transação com a base, roda o metodo, faz commit e, se error, then
 	 * rollback
 	 */
 	@Override
-	@Transactional 
+	@Transactional
 	public Lancamento salvarLancamento(Lancamento lancamento) {
 		/* chamando */
 		validarLancamento(lancamento);
@@ -51,10 +51,10 @@ public class LancamentoServiceImpl implements LancamentoService {
 	@Transactional
 	public Lancamento atualizarLancamento(Lancamento lancamento) {
 		/*
-		 * Checagem: se não existir um id de lancamento salvo ele persiste e lança um
-		 * novo id...
+		 * Checagem: se não existir um uuid de lancamento salvo ele persiste e lança um
+		 * novo uuid...
 		 */
-		Objects.requireNonNull(lancamento.getUuid()); /* ...garantindo que será passado o lancamento com id */
+		Objects.requireNonNull(lancamento.getUuid()); /* ...garantindo que será passado o lancamento com uuid */
 		validarLancamento(lancamento);
 		return lancamentoRepository.save(lancamento); /* ...se nao passar da nullPointerException */
 	}
@@ -65,7 +65,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 		/* so deleta se existir um lancamento salvo */
 		Objects.requireNonNull(lancamento.getUuid()); /*
 													 * Checagem: para garantir que esteja passando o lancamento salvo,
-													 * id nao pode ser nulo
+													 * uuid nao pode ser nulo
 													 */
 		lancamentoRepository.delete(lancamento);
 	}
@@ -103,10 +103,10 @@ public class LancamentoServiceImpl implements LancamentoService {
 		/**
 		 * se ambas forem nulas, define como zero
 		 **/
-		if (receita == null){ 
+		if (receita == null){
 			receita = BigDecimal.ZERO;
-			} 
-		if (despesa == null){ 
+			}
+		if (despesa == null){
 			despesa = BigDecimal.ZERO;
 			}
 		/* Operador ternario */

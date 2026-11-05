@@ -40,7 +40,7 @@ import jakarta.validation.Valid;
 
 /**
  * TODO-list
- * [] - Verificar o metodo atualizar lancamento - id e uuid
+ * [] - Verificar o metodo atualizar lancamento - uuid e uuid
  * **/
 
 @RestController
@@ -80,18 +80,18 @@ public class LancamentoResource {
         }
     }
 
-    /* entity é o retorno do service quando é obtido por id */
+    /* entity é o retorno do service quando é obtido por uuid */
     @PutMapping("{uuid}")
     public ResponseEntity atualizarLancamento(
             @PathVariable("uuid") UUID uuid,
             @Valid @RequestBody LancamentoDTO dto,
             @AuthenticationPrincipal UsuarioAutenticado usuarioAutenticado) {
-        /* entity é resultado da busca pelo id */
+        /* entity é resultado da busca pelo uuid */
         return lancamentoService.obterLancamentoPorId(uuid).map(entity -> {
             try {
                 /* o dono do lancamento e derivado do access token, nao do corpo da requisicao */
                 Lancamento lancamento = lancamentoConverter.dtoToEntity(dto, usuarioAutenticado.getUsuarioUuid());
-                lancamento.setUuid(entity.getUuid()); //id
+                lancamento.setUuid(entity.getUuid()); //uuid
                 lancamentoService.atualizarLancamento(lancamento);
                 return ResponseEntity.ok(lancamento);
             } catch (RegraDeNegocioException e) {
@@ -102,14 +102,14 @@ public class LancamentoResource {
                 HttpStatus.BAD_REQUEST));
     }
 
-    @GetMapping("{id}")
+    @GetMapping("{uuid}")
     public ResponseEntity obterLancamentoPorId(@PathVariable("id") UUID id){
         return lancamentoService.obterLancamentoPorId(id)
                 .map( lancamento -> new ResponseEntity(lancamentoConverter.entityToDto( lancamento), HttpStatus.OK) )
                 .orElseGet( () -> new ResponseEntity(HttpStatus.NOT_FOUND) );
     }
 
-    @PutMapping("{id}/atualizar-statusLancamento")
+    @PutMapping("{uuid}/atualizar-statusLancamento")
     public ResponseEntity<?> atualizarStatus(@PathVariable("id") UUID id, @Valid @RequestBody AtualizarStatusDTO dto) {
     	return lancamentoService.obterLancamentoPorId(id).map(entity -> {
 
@@ -163,9 +163,9 @@ public class LancamentoResource {
         }
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("{uuid}")
     public ResponseEntity deletar(@PathVariable("id") UUID id) {
-        return lancamentoService.obterLancamentoPorId(id)/* se tiver o id, invoca o map */.map(entity -> {
+        return lancamentoService.obterLancamentoPorId(id)/* se tiver o uuid, invoca o map */.map(entity -> {
             lancamentoService.deletarLancamento(entity); /* o map permite executar uma operação na entidade encontrada */
             return new ResponseEntity("lancamento excluido com sucesso.", HttpStatus.NO_CONTENT);/*OK*/ /* e devolve o resultado */
         }).orElseGet(() ->
@@ -183,6 +183,6 @@ public class LancamentoResource {
  * return new ResponseEntity.ok(converteEntidade
  * return new ResponseEntity(lancamento, HttpStatus.CREATED)
  * Spring Boot não permite null em parâmetros obrigatórios de métodos REST, como em @RequestParam - value required
- * @PathVariable("id") Long id: Extrai o valor do parâmetro id da URL.
- * {id} é um parâmetro de caminho.
+ * @PathVariable("id") Long uuid: Extrai o valor do parâmetro uuid da URL.
+ * {uuid} é um parâmetro de caminho.
  * **/
