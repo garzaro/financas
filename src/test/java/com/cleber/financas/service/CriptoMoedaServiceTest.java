@@ -155,13 +155,13 @@ public class CriptoMoedaServiceTest {
         /**ação**/ /**verificação**/
         assertThatThrownBy(() -> {
             criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
-            entityManager.flush();
+            criptoMoedaRepository.flush();
         }).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     }
 
     /**Objetivo 5: deve lancar uma excessao quando tentar salvar com usuario nulo**/
     @Test
-    @DisplayName("deve lançar exceção quando tentar salvar com id de usuário nulo")
+    @DisplayName("deve lançar exceção quando tentar salvar com uuid de usuário nulo")
     @Transactional
     void deveLancarExcecaoQuandoSalvarComUsuarioNulo() {
         /**cenario**/
@@ -171,7 +171,7 @@ public class CriptoMoedaServiceTest {
         assertThatThrownBy(() -> {
             criptoMoedaService.salvarCriptomoeda(dto, null);
             entityManager.flush();
-        }).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+        }).isInstanceOf(NullPointerException.class);
     }
 
     /**Objetivo 6: lançar exceção ao salvar com valorAtual nulo**/
@@ -187,7 +187,7 @@ public class CriptoMoedaServiceTest {
         /**ação**/ /**verificação**/
         assertThatThrownBy(() -> {
             criptoMoedaService.salvarCriptomoeda(dto, usuarioId);
-            entityManager.flush();
+            criptoMoedaRepository.flush();
         }).isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     }
 
@@ -434,7 +434,7 @@ public class CriptoMoedaServiceTest {
 
     public static Usuario criarUsuario() {
         return Usuario.builder()
-//                .id(1L)
+//                .uuid(1L)
                 .nomeCompleto("Usuário")
                 .cpf("12345678900")
                 .nomeUsuario("usuario")

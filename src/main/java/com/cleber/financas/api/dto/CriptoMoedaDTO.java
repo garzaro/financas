@@ -63,9 +63,4 @@ public class CriptoMoedaDTO {
 
 	@NotNull(message = "{criptomoeda.tipo.transacao.obrigatorio}")
 	private TipoTransacao tipoTransacao;
-
-	// private LocalDateTime dataCadastro;
-
-	// private Instant dataAtualizacao;
-
 }

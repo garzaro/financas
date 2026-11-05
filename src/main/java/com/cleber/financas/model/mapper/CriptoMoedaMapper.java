@@ -27,7 +27,7 @@ public interface CriptoMoedaMapper {
 	@Mapping(target = "tipoTransacao", expression = "java(dto.getTipoTransacao() == null ? TipoTransacao.DECIDIR : dto.getTipoTransacao())")
 	@Mapping(target = "statusTransacao", expression = "java(dto.getStatusTransacao() == null ? StatusTransacao.ANALISAR : dto.getStatusTransacao())")
 //	@Mapping(source = "statusTransacao", target = "statusTransacao", defaultValue = "ANALISAR")
-//	@Mapping(source = "id", target = "usuario")
+//	@Mapping(source = "uuid", target = "usuario")
 	CriptoMoeda dtoToEntity (CriptoMoedaDTO dto);
 
 	/**toEntity - O MapStruct usará este metodo para converter o Long usuario em Usuario entidade**/

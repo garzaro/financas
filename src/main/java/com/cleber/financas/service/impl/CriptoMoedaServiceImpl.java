@@ -33,6 +33,9 @@ public class CriptoMoedaServiceImpl implements CriptoMoedaService{
 	@Override
 	@Transactional
 	public CriptoMoedaDTO salvarCriptomoeda(CriptoMoedaDTO criptoMoedaDTO, UUID usuarioAutenticado) {
+		/* valida que o usuário autenticado não é null */
+		Objects.requireNonNull(usuarioAutenticado, "UUID do usuário autenticado não pode ser nulo!");
+
 		/* o dono da criptomoeda e derivado do access token, nao do corpo da requisicao */
 		CriptoMoeda entidadeConvertida = criptoMoedaMapper.dtoToEntity(criptoMoedaDTO);
 
