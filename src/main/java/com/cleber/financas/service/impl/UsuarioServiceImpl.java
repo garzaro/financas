@@ -1,31 +1,38 @@
 package com.cleber.financas.service.impl;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import com.cleber.financas.api.dto.AutenticacaoResultado;
+import com.cleber.financas.api.dto.RequestLoginDTO;
+import com.cleber.financas.api.dto.TokenResponseDTO;
+import com.cleber.financas.service.token.RefreshTokenEmitido;
 import com.cleber.financas.exception.ErroDeAutenticacao;
 import com.cleber.financas.exception.ErroValidacaoException;
 import com.cleber.financas.exception.RegraDeNegocioException;
+import com.cleber.financas.exception.TooManyRequestsException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.model.repository.UsuarioRepository;
+import com.cleber.financas.security.ratelimit.LimiteTentativasService;
+import com.cleber.financas.service.JwtService;
 import com.cleber.financas.service.UsuarioService;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 
-/**
- * TODO-List
- * [] - Não permitir usuario salvar senha com o proprio nome
- */
 @Service
 @Validated
 public class UsuarioServiceImpl implements UsuarioService {
@@ -35,57 +42,99 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final Validator validator;
+    private final LimiteTentativasService limiteTentativasService;
+    private final com.cleber.financas.service.token.RefreshTokenService refreshTokenService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final long loginFalhasMax;
+    private final long loginFalhasWindowSec;
+    private final long loginBloqueioFalhasSec;
 
+    @Autowired
     public UsuarioServiceImpl(
             UsuarioRepository usuarioRepository,
             PasswordEncoder passwordEncoder,
-            Validator validator) {
+            Validator validator,
+            LimiteTentativasService limiteTentativasService,
+            com.cleber.financas.service.token.RefreshTokenService refreshTokenService,
+            AuthenticationManager authenticationManager,
+            JwtService jwtService,
+            @Value("${app.ratelimit.login.fail.max}") long loginFalhasMax,
+            @Value("${app.ratelimit.login.fail.window.sec}") long loginFalhasWindowSec,
+            @Value("${app.ratelimit.login.fail.block.sec}") long loginBloqueioFalhasSec
+    ) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.validator = validator;
+        this.limiteTentativasService = limiteTentativasService;
+        this.refreshTokenService = refreshTokenService;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+        this.loginFalhasMax = loginFalhasMax;
+        this.loginFalhasWindowSec = loginFalhasWindowSec;
+        this.loginBloqueioFalhasSec = loginBloqueioFalhasSec;
     }
 
-    /**
-     * lista de emails permitidos
-     */
     private static final List<String> dominiosEmailPermitidos = List.of(
             "gmail.com", "edu.br", "gov.br"
     );
 
-    /**
-     * fluxo de login
-     */
     @Override
-    public Usuario autenticar(String email, String senha) {
-        Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
+    public AutenticacaoResultado autenticar(RequestLoginDTO request, String ip, String agenteUsuario) {
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
+        String chave = emailChave(email);
 
-        if (!usuario.isPresent()) {
-            throw new ErroDeAutenticacao("Verifique seu email e tente novamente!");
+        if (limiteTentativasService.isBloqueado(chave)) {
+            throw new TooManyRequestsException("Muitas tentativas",
+                    limiteTentativasService.obterRetryAfter(chave));
         }
-        boolean senhaCorreta = passwordEncoder.matches(senha, usuario.get().getSenha());
-        if (!senhaCorreta) {
-            throw new ErroDeAutenticacao("Credenciais inválidas...");
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            email, request.senha()
+                    ));
+        } catch (BadCredentialsException ex) {
+            limiteTentativasService.registrar(chave, loginFalhasMax,
+                    Duration.ofSeconds(loginFalhasWindowSec),
+                    Duration.ofSeconds(loginBloqueioFalhasSec));
+            throw ex;
         }
-        return usuario.get();
+        limiteTentativasService.limpar(chave);
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new
+                        ErroDeAutenticacao("Credenciais inválidas!"));
+
+        TokenResponseDTO tokens = new TokenResponseDTO(jwtService
+                .gerarToken(usuario, List.of("USER")));
+        RefreshTokenEmitido refresh = refreshTokenService
+                .gerar(usuario.getUuid(), ip, agenteUsuario);
+
+        return new AutenticacaoResultado(tokens, refresh);
     }
 
-    /**
-     * fluxo de registro
-     * **/
+    private String emailChave(String email) {
+        if (email == null) {
+            return "rl:login:fail:email:unknown";
+        }
+        return "rl:login:fail:email:" + email
+                .trim()
+                .toLowerCase(Locale.ROOT);
+    }
+
     @Override
     @Transactional
     public Usuario salvarUsuario(Usuario usuario) {
-        /* deve validar o email e o cpf, verificar se existe*/
+        if (usuario.getEmail() != null) {
+            usuario.setEmail(usuario.getEmail().trim().toLowerCase(Locale.ROOT));
+        }
         validarEmailCpf(usuario.getEmail(), usuario.getCpf());
         validarUsuario(usuario);
         usuario.setIsAtivo(true);
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha())); /* hash da senha */
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         return usuarioRepository.save(usuario);
     }
 
-    /**
-     * fluxo de atualização
-     * **/
     @Override
     public Usuario atualizarUsuario(Usuario usuario) {
         Objects.requireNonNull(usuario.getUuid());
@@ -93,32 +142,26 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    /**
-     * fluxo de validação — garante a integridade dos dados - campos vazio
-     */
     @Override
     public void validarUsuario(Usuario usuario) {
-        Set<ConstraintViolation<Usuario>> violacao = validator.validate(usuario);
-        if (!violacao.isEmpty()) {
-            String mensagemErro = violacao.stream()
+        Set<ConstraintViolation<Usuario>> violations = validator.validate(usuario);
+        if (!violations.isEmpty()) {
+            String mensagemErro = violations.stream()
                     .map(ConstraintViolation::getMessage)
-                    .collect(Collectors.joining(", "));
+                    .collect(Collectors.joining("; "));
             throw new ErroValidacaoException(mensagemErro);
         }
     }
 
-    /**
-     * validação de existencia (email + CPF)
-     */
     @Override
     public void validarEmailCpf(String email, String cpf) {
         Optional<Usuario> usuarioEmailExiste = usuarioRepository.findByEmail(email);
         if (usuarioEmailExiste.isPresent()) {
-            throw new RegraDeNegocioException("Verifique este email e tente novamente"); //em uso
+            throw new RegraDeNegocioException("Verifique este email e tente novamente");
         }
         Optional<Usuario> usuarioCpfExiste = usuarioRepository.findByCpf(cpf);
         if (usuarioCpfExiste.isPresent()) {
-            throw new RegraDeNegocioException("Verifique este CPF e tente novamente"); //já está em uso
+            throw new RegraDeNegocioException("Verifique este CPF e tente novamente");
         }
     }
 
@@ -131,61 +174,28 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Optional<Usuario> obterUsuarioPorCpf(String cpf) {
         return usuarioRepository.findByCpf(cpf);
     }
-}
 
+    @Override
+    @Transactional
+    public void trocarSenha(UUID usuarioId, String senhaAtual, String novaSenha) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ErroValidacaoException("Usuário não encontrado"));
 
-//-------------------------------------------------------------------------
-// Fluxo de registro JWT — POST /auth/register
-// -------------------------------------------------------------------------
-
-/**
- * Registra um novo usuário a partir do DTO simplificado (nome + email + senha).
- * Valida duplicidade de email antes de persistir; encodifica a senha com o
- * PasswordEncoder exposto pelo SecurityConfig (Argon2).
- * Não loga a senha em nenhum nível.
- */
-//@Override
-//@Transactional
-//public Usuario registrar(RegisterRequest request) {
-//    if (usuarioRepository.existsByEmail(request.email())) {
-//        throw new EmailJaCadastradoException("E-mail já cadastrado: " + request.email());
-//    }
-//
-//    Usuario novoUsuario = Usuario.builder()
-//            .nomeCompleto(request.nome())
-//            .email(request.email())
-//            .senha(passwordEncoder().encode(request.senha()))
-//            // cpf e nomeUsuario ficam nulos neste fluxo; podem ser completados depois
-//            .build();
-//
-//    Usuario salvo = usuarioRepository.save(novoUsuario);
-//    log.info("Novo usuário registrado com sucesso — email: {}", salvo.getEmail());
-//    return salvo;
-//}
-
-
- /*
-
-//@Override
-    public Usuario autenticar(String email, String senha) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new ErroDeAutenticacao("Credenciais inválidas."));
-        /**
-         * System.out.println("Hash do banco: " + usuario.getSenha());
-         *         System.out.println("Senha digitada: " + senha);
-         * *
-
-        boolean senhaCorreta = passwordEncoder.matches(senha, usuario.getSenha());
-        System.out.println("Resultado da comparação: " + senhaCorreta);
-
-        if (!senhaCorreta) {
-            throw new ErroDeAutenticacao("Credenciais inválidas.");
+        if (!passwordEncoder.matches(senhaAtual, usuario.getSenha())) {
+            throw new ErroValidacaoException("A senha atual informada está incorreta");
         }
-        return usuario;
-    }
-    public PasswordEncoder passwordEncoder() {
-        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+
+        alterarSenha(usuarioId, novaSenha);
     }
 
-  */
+    @Override
+    @Transactional
+    public void alterarSenha(UUID usuarioId, String novaSenha) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ErroValidacaoException("Usuário não encontrado"));
 
+        usuario.setSenha(passwordEncoder.encode(novaSenha));
+        usuarioRepository.save(usuario);
+        refreshTokenService.revogarAllByUser(usuarioId);
+    }
+}
