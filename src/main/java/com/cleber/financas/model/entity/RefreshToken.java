@@ -11,12 +11,23 @@ import com.cleber.financas.model.enums.TokenStatus;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Um refresh token emitido para um usuário. Apenas o hash SHA-256 do token é armazenado;
+ * portanto, um vazamento no banco de dados não expõe tokens que possam ser utilizados.
+ * Os tokens são de uso único: a operação de renovação revoga o token apresentado e emite um novo.
+ * **/
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "refresh_token", schema = "financeiro")
+@Table(
+        name = "refresh_token",
+        schema = "financeiro",
+        indexes = {@Index(
+                name = "idx_refresh_token_usuario", columnList = "id_usuario")}
+        )
 public class RefreshToken {
 
     @Id

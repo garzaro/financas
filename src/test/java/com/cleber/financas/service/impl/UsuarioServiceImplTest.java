@@ -22,6 +22,8 @@ public class UsuarioServiceImplTest {
     private Validator validator;
     private LimiteTentativasService limiteTentativasService;
     private com.cleber.financas.service.token.RefreshTokenService refreshTokenService;
+    private AuthenticationManager authenticationManager;
+    private JwtService jwtService;
 
     @Before
     public void setUp() {
@@ -30,11 +32,33 @@ public class UsuarioServiceImplTest {
         validator = Validation.buildDefaultValidatorFactory().getValidator();
         limiteTentativasService = Mockito.mock(LimiteTentativasService.class);
         refreshTokenService = Mockito.mock(com.cleber.financas.service.token.RefreshTokenService.class);
+        authenticationManager = Mockito.mock(AuthenticationManager.class);
+        jwtService = Mockito.mock(JwtService.class);
         Mockito.when(limiteTentativasService.isBloqueado(Mockito.anyString())).thenReturn(false);
         service = new UsuarioServiceImpl(repository, passwordEncoder, validator,
                 limiteTentativasService, refreshTokenService,
-                Mockito.mock(AuthenticationManager.class), Mockito.mock(JwtService.class),
+                authenticationManager, jwtService,
                 5, 2, 3);
+    }
+
+    @Test
+    public void deveRetornarNomeUsuarioNaRespostaDeAutenticacao() {
+        Usuario usuario = Usuario.builder()
+                .uuid(java.util.UUID.randomUUID())
+                .nomeUsuario("cleber")
+                .email("test@test.com")
+                .build();
+        Mockito.when(repository.findByEmail("test@test.com"))
+                .thenReturn(java.util.Optional.of(usuario));
+        Mockito.when(jwtService.gerarToken(usuario, java.util.List.of("USER")))
+                .thenReturn("access-token");
+
+        com.cleber.financas.api.dto.AutenticacaoResultado resultado = service.autenticar(
+                new com.cleber.financas.api.dto.RequestLoginDTO("test@test.com", "senha123"),
+                "127.0.0.1",
+                "test-agent");
+
+        Assertions.assertThat(resultado.tokens().nomeUsuario()).isEqualTo("cleber");
     }
 
     @Test

@@ -222,7 +222,7 @@ class RateLimitTest {
 
         UsuarioController controller = new UsuarioController(
                 null, mockUsuarioService, null, null, null, cookieFactory);
-        ResponseEntity<TokenResponseDTO> responseEntity = controller.login(requestDto, httpRequest);
+        ResponseEntity<?> responseEntity = controller.login(requestDto, httpRequest);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo(expectedResponse);

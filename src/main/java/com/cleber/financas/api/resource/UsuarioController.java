@@ -8,11 +8,8 @@ import java.util.UUID;
 import com.cleber.financas.api.common.GlobalExceptionHandler;
 import com.cleber.financas.api.cookie.RefreshTokenCookieFactory;
 import com.cleber.financas.api.converter.UsuarioConverter;
-import com.cleber.financas.api.dto.AlterarSenhaDTO;
-import com.cleber.financas.api.dto.AutenticacaoResultado;
-import com.cleber.financas.api.dto.RequestLoginDTO;
-import com.cleber.financas.api.dto.TokenResponseDTO;
-import com.cleber.financas.api.dto.UsuarioDTO;
+import com.cleber.financas.api.dto.*;
+import com.cleber.financas.exception.ErroDeAutenticacao;
 import com.cleber.financas.exception.RegraDeNegocioException;
 import com.cleber.financas.model.entity.Usuario;
 import com.cleber.financas.security.UsuarioAutenticado;
@@ -79,7 +76,7 @@ public class UsuarioController {
 
     /** Autentica o usuário e emite o par de tokens. Credenciais inválidas → 401. */
     @PostMapping("/sign-in")
-    public ResponseEntity<TokenResponseDTO> login(
+    public ResponseEntity<?> login(
             @RequestBody @Valid RequestLoginDTO request,
             HttpServletRequest httpRequest) {
 
@@ -87,6 +84,7 @@ public class UsuarioController {
                 request,
                 httpRequest.getRemoteAddr(),
                 httpRequest.getHeader("User-Agent")
+
         );
 
         ResponseCookie cookie = cookieFactory
@@ -97,6 +95,10 @@ public class UsuarioController {
                 .body(resultado.tokens());
     }
 
+
+//CONTINUAR COM A ULTIMA ANSLISE QUE ESTA NO CLAUDE, ESTAVA MONTANDO O PROMPT MAS ACABOU OS CREDITOS
+//            DEPOIS ANALISAR O QUE FOI CRIADO NA TROCA DE SENHA E AS OUTRAS CLASSES RECUPERDAS E OUTRAS QUE FORA CRIADAS
+//            EM FIM DAR UMA VISITADA NO PROJETO TODO
     /** Rotaciona o refresh token (cookie) e emite novo access token. */
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponseDTO> refresh(
@@ -112,14 +114,14 @@ public class UsuarioController {
                 refreshTokenAntigo, request.getRemoteAddr(), request.getHeader("User-Agent"));
 
         Usuario usuario = refreshTokenService.validar(emitido.rawToken());
-        String accessTokenNovo = jwtService.gerarToken(usuario, java.util.List.of("USER"));
+        String accessTokenNovo = jwtService.gerarToken(usuario, List.of("USER"));
 
         ResponseCookie cookie = cookieFactory
                 .buildSet(emitido.rawToken(), emitido.ttl());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new TokenResponseDTO(accessTokenNovo));
+                .body(new TokenResponseDTO(accessTokenNovo, "Bearer", usuario.getNomeUsuario()));
     }
 
     /** Revoga todas as sessões do usuário e limpa o cookie. */

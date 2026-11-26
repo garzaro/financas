@@ -72,7 +72,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * Fiz a leitura de toda a camada de segurança, do fluxo de tokens e dos testes. Segue a análise orientada à aceitação de pronto, com veredito por critério e os bloqueadores que impedem o aceite hoje.
  * Análise da camada de segurança — tokens
  * Escopo avaliado: geração, expiração, refresh após expiração do access, revogação e emissão ao cliente.
- * Método: análise estática do código em src/main/java, configuração (application.properties/.env) e testes.
+ * Metodo: análise estática do código em src/main/java, configuração (application.properties/.env) e testes.
  * Veredito geral
  * NÃO PRONTO para aceitação. O desenho é correto e maduro (rotação com detecção de reuso, hash no servidor, cookies HttpOnly), mas há 1 bloqueador funcional grave (o filtro JWT não autentica), falhas de correção no tratamento de erro/atomicidade e ausência total de testes executáveis. No caminho feliz o fluxo “parece” funcionar, mas não há evidência de aceite e partes centrais estão desligadas.
  *

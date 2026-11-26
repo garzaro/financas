@@ -105,8 +105,10 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new
                         ErroDeAutenticacao("Credenciais inválidas!"));
 
-        TokenResponseDTO tokens = new TokenResponseDTO(jwtService
-                .gerarToken(usuario, List.of("USER")));
+        TokenResponseDTO tokens = new TokenResponseDTO(
+                jwtService.gerarToken(usuario, List.of("USER")),
+                "Bearer",
+                usuario.getNomeUsuario());
         RefreshTokenEmitido refresh = refreshTokenService
                 .gerar(usuario.getUuid(), ip, agenteUsuario);
 

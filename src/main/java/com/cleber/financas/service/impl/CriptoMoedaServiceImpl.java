@@ -22,6 +22,13 @@ import com.cleber.financas.service.UsuarioService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * TODO-list
+ * [] Validar mes anterior, somente mes atual
+ *
+ * **/
+
+
 @Service
 @RequiredArgsConstructor
 public class CriptoMoedaServiceImpl implements CriptoMoedaService{

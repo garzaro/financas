@@ -21,6 +21,14 @@ import com.cleber.financas.model.enums.TipoLancamento;
 import com.cleber.financas.model.repository.LancamentoRepository;
 import com.cleber.financas.service.LancamentoService;
 
+/**
+ * TODO-list
+ * [] Validar mes anterior, somente mes atual
+ * [] Validar lancamento duplicado
+ * []
+ * []
+ * **/
+
 @Service
 public class LancamentoServiceImpl implements LancamentoService {
 

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
 
@@ -94,7 +95,7 @@ public class RefreshTokenServiceImpl implements com.cleber.financas.service.toke
         );
 
         String novoTokenJson = tokenTemplate.getValueSerializer() != null
-                ? new String(((org.springframework.data.redis.serializer.RedisSerializer<RefreshDadosToken>) tokenTemplate.getValueSerializer())
+                ? new String(((RedisSerializer<RefreshDadosToken>) tokenTemplate.getValueSerializer())
                 .serialize(dadosNovo), java.nio.charset.StandardCharsets.UTF_8)
                 : null;
         if (novoTokenJson == null) {
